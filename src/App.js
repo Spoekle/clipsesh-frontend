@@ -47,21 +47,21 @@ function App() {
                   className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
                   onClick={toggleNavbar}
                 >
-                  View Clips
+                  View Clips!
                 </Link>
                 <Link
                   to="/upload"
                   className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
                   onClick={toggleNavbar}
                 >
-                  Upload Clip
+                  Upload Clips!
                 </Link>
                 <Link
                   to="/login"
                   className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300"
                   onClick={toggleNavbar}
                 >
-                  Login
+                  Login!
                 </Link>
               </div>
             </div>
