@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import UploadClip from './components/UploadClip';
 import ClipViewer from './components/ClipViewer';
 import Login from './components/login/Login';
-import Register from './components/login/Register';
 import logo from './media/CC250.png';
 
 function App() {
@@ -12,13 +11,6 @@ function App() {
   const toggleNavbar = () => {
     setIsOpen(!isOpen);
   };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    alert('Logged out successfully');
-  };
-
-  const isAuthenticated = !!localStorage.getItem('token');
 
   return (
     <Router>
@@ -50,50 +42,27 @@ function App() {
               }`}
             >
               <div className="text-sm lg:flex-grow lg:flex lg:justify-end">
-                {isAuthenticated ? (
-                  <>
-                    <Link
-                      to="/view"
-                      className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
-                      onClick={toggleNavbar}
-                    >
-                      View Clips
-                    </Link>
-                    <Link
-                      to="/upload"
-                      className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
-                      onClick={toggleNavbar}
-                    >
-                      Upload Clips
-                    </Link>
-                    <button
-                      onClick={() => {
-                        logout();
-                        toggleNavbar();
-                      }}
-                      className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300"
-                    >
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to="/register"
-                      className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
-                      onClick={toggleNavbar}
-                    >
-                      Register
-                    </Link>
-                    <Link
-                      to="/login"
-                      className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300"
-                      onClick={toggleNavbar}
-                    >
-                      Login
-                    </Link>
-                  </>
-                )}
+                <Link
+                  to="/view"
+                  className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
+                  onClick={toggleNavbar}
+                >
+                  View Clips!
+                </Link>
+                <Link
+                  to="/upload"
+                  className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
+                  onClick={toggleNavbar}
+                >
+                  Upload Clips!
+                </Link>
+                <Link
+                  to="/login"
+                  className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300"
+                  onClick={toggleNavbar}
+                >
+                  Login!
+                </Link>
               </div>
             </div>
           </div>
@@ -103,7 +72,6 @@ function App() {
           <Route path="/upload" element={<UploadClip />} />
           <Route path="/view" element={<ClipViewer />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
         </Routes>
       </div>
     </Router>
