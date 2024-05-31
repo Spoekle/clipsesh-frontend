@@ -5,6 +5,8 @@ function UploadClip() {
   const [file, setFile] = useState(null);
   const [streamer, setStreamer] = useState('');
   const [clips, setClips] = useState([]);
+  
+  const token = localStorage.getItem('token');
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -21,9 +23,9 @@ function UploadClip() {
 
     try {
       const response = await axios.post('https://api.spoekle.com/api/clips/upload', formData, {
-        headers: {
+        headers: 
+          { Authorization: `Bearer ${token}` },
           'Content-Type': 'multipart/form-data',
-        },
       });
       console.log('Upload successful:', response.data);
       fetchClips();
@@ -43,7 +45,9 @@ function UploadClip() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://api.spoekle.com/api/clips/${id}`);
+      await axios.delete(`https://api.spoekle.com/api/clips/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       fetchClips();
     } catch (error) {
       console.error('Error deleting clip:', error);
@@ -52,7 +56,9 @@ function UploadClip() {
 
   const handleDeleteAllClips = async () => {
     try {
-      await axios.delete('https://api.spoekle.com/api/clips');
+      await axios.delete('https://api.spoekle.com/api/clips', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       fetchClips();
       console.log('All clips deleted successfully');
     } catch (error) {

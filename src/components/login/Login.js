@@ -1,11 +1,13 @@
+// Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
 
 function Login() {
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: ''
   });
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -19,10 +21,14 @@ function Login() {
     try {
       const response = await axios.post('https://api.spoekle.com/api/users/login', formData);
       localStorage.setItem('token', response.data.token);
-      alert('Login successful');
-      // Redirect to clips viewer
+      localStorage.setItem('username', response.data.username);
+      setLoginSuccess(true);
+      setTimeout(() => {
+        window.location.href = '/view';
+      }, 500);
     } catch (error) {
       console.error('Error during login:', error);
+      alert('Login failed. Please try again.');
     }
   };
 
@@ -32,12 +38,12 @@ function Login() {
         <h2 className="text-3xl font-bold mb-4">ClipSesh! Login</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-300">Email:</label>
+            <label htmlFor="username" className="block text-gray-300">Username:</label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
               onChange={handleChange}
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
               required
@@ -62,6 +68,11 @@ function Login() {
             Login
           </button>
         </form>
+        {loginSuccess && (
+          <div className="mt-4 text-green-500">
+            Login successful! Redirecting...
+          </div>
+        )}
       </div>
     </div>
   );

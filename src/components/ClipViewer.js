@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
 function ClipViewer() {
   const [clips, setClips] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
 
   useEffect(() => {
     fetchClips();
+    checkLoginStatus(); // Check login status when component mounts
   }, []);
 
   async function fetchClips() {
@@ -44,36 +47,51 @@ function ClipViewer() {
     }
   }
 
+  async function checkLoginStatus() {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token); // Update login status based on token presence
+  }
+
+  function calculatePercentage(upvotes, downvotes) {
+    const totalVotes = upvotes + downvotes;
+    if (totalVotes === 0) return 0;
+    return (upvotes / totalVotes) * 100;
+  }
+
   return (
     <div className="bg-gray-900 text-white p-4 min-h-screen">
       <h1 className="text-3xl font-bold mb-4">Clip Viewer</h1>
       <h1 className="text-2xl mb-4">Rate the clips!</h1>
       <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {clips.map((clip) => (
-          <div key={clip._id} className="p-4">
+          <div key={clip._id} className="p-4 relative">
             <div className="bg-gray-800 p-4 rounded-lg overflow-hidden relative">
               <video className="w-full max-w-md rounded-t-lg" src={`https://api.spoekle.com${clip.url}`} controls></video>
               <div className="flex justify-between items-center p-2 bg-blue-700 rounded-b-lg">
-                {[1, 2, 3, 4].map((rate) => (
-                  <button
-                    key={rate}
-                    className="bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-md transition duration-300 mr-2"
-                    onClick={() => rateClip(clip._id, rate)}
-                  >
-                    {rate}
-                  </button>
-                ))}
+                {isLoggedIn &&
+                  [1, 2, 3, 4].map((rate) => (
+                    <button
+                      key={rate}
+                      className="bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-md transition duration-300 mr-2"
+                      onClick={() => rateClip(clip._id, rate)}
+                    >
+                      {rate}
+                    </button>
+                  ))}
                 <button
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 mr-2"
+                  className="text-white font-bold py-2 px-4 rounded-md transition duration-300 relative"
                   onClick={() => upvoteClip(clip._id)}
                 >
-                  Upvote
+                  <FaArrowUp />
+                  <span className="hidden absolute top-0 left-0 mt-4 -ml-12 px-4 py-2 text-gray-900 bg-white rounded-md shadow-md">
+                    {clip.upvotes} Upvotes ({calculatePercentage(clip.upvotes, clip.downvotes).toFixed(2)}%)
+                  </span>
                 </button>
                 <button
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition duration-300"
+                  className="text-white font-bold py-2 px-4 rounded-md transition duration-300 relative"
                   onClick={() => downvoteClip(clip._id)}
                 >
-                  Downvote
+                  <FaArrowDown />
                 </button>
               </div>
             </div>

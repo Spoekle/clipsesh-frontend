@@ -1,12 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import axios from 'axios';
 import UploadClip from './components/UploadClip';
 import ClipViewer from './components/ClipViewer';
 import Login from './components/login/Login';
+import Register from './components/login/Register';
+import AdminDash from './components/AdminDash';
 import logo from './media/CC250.png';
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await axios.get('https://api.spoekle.com/api/users/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUser(response.data);
+        } catch (error) {
+          console.error('Error fetching user:', error);
+        }
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+  };
 
   const toggleNavbar = () => {
     setIsOpen(!isOpen);
@@ -18,8 +44,10 @@ function App() {
         <nav className="bg-gray-800 p-4 shadow-lg">
           <div className="container mx-auto flex items-center justify-between flex-wrap">
             <div className="flex items-center flex-shrink-0 text-white mr-6">
-              <img src={logo} alt="Logo" className="h-8 mr-2" />
-              <span className="font-semibold text-xl tracking-tight">ClipSesh!</span>
+              <a href='/'>
+                <img src={logo} alt="Logo" className="h-8 mr-2" />
+                <span className="font-semibold text-xl tracking-tight">ClipSesh!</span>
+              </a>  
             </div>
             <div className="block lg:hidden">
               <button
@@ -56,13 +84,38 @@ function App() {
                 >
                   Upload Clips!
                 </Link>
-                <Link
-                  to="/login"
-                  className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300"
-                  onClick={toggleNavbar}
-                >
-                  Login!
-                </Link>
+                {user ? (
+                  <>
+                    <span className="block mt-4 lg:inline-block lg:mt-0 text-white mr-4">
+                      Hello, {user.username}!
+                    </span>
+                    {user.isAdmin && (
+                      <Link
+                        to="/admin"
+                        className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
+                        onClick={toggleNavbar}
+                      >
+                        Admin Dashboard
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
+                      onClick={toggleNavbar}
+                    >
+                      Login!
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -72,6 +125,7 @@ function App() {
           <Route path="/upload" element={<UploadClip />} />
           <Route path="/view" element={<ClipViewer />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<AdminDash />} />
         </Routes>
       </div>
     </Router>

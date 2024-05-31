@@ -1,10 +1,10 @@
+// Register.js
 import React, { useState } from 'react';
 import axios from 'axios';
 
 function Register() {
   const [formData, setFormData] = useState({
     username: '',
-    email: '',
     password: ''
   });
 
@@ -19,11 +19,12 @@ function Register() {
     e.preventDefault();
     try {
       const response = await axios.post('https://api.spoekle.com/api/users/register', formData);
-      localStorage.setItem('token', response.data.token);
       alert('Registration successful');
-      // Redirect to clips viewer or login
+      // Redirect to login page
+      window.location.href = '/login';
     } catch (error) {
       console.error('Error during registration:', error);
+      alert('Registration failed. Please try again.');
     }
   };
 
@@ -39,18 +40,6 @@ function Register() {
               id="username"
               name="username"
               value={formData.username}
-              onChange={handleChange}
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-300">Email:</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
               onChange={handleChange}
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
               required
