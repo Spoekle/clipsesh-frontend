@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import axios from 'axios';
 import UploadClip from './components/UploadClip';
 import ClipViewer from './components/ClipViewer';
@@ -8,9 +9,13 @@ import Home from './components/Home';
 import AdminDash from './components/AdminDash';
 import logo from './media/CC250.png';
 
+
+
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
+
+  
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -38,6 +43,18 @@ function App() {
     setIsOpen(!isOpen);
   };
 
+  const requireAuth = (Component, isAdminRequired = false) => {
+    return user ? (
+      isAdminRequired && !user.isAdmin ? (
+        <Navigate to="/login" />
+      ) : (
+        <Component />
+      )
+    ) : (
+      <Navigate to="/login" />
+    );
+  };
+
   return (
     <Router>
       <div className="bg-gray-900 text-white min-h-screen">
@@ -46,9 +63,6 @@ function App() {
             <div className=" items-center text-white mr-6 inline">
               <Link to="/">
                 <img src={logo} alt="Logo" className="h-8 mr-2 block" />
-                <div className='inline flex-col'>
-                  <span className="font-semibold text-xl tracking-tight">ClipSesh!</span>
-                </div>
               </Link>
             </div>
             <div className="block lg:hidden">
@@ -78,13 +92,6 @@ function App() {
                   onClick={toggleNavbar}
                 >
                   View Clips!
-                </Link>
-                <Link
-                  to="/upload"
-                  className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
-                  onClick={toggleNavbar}
-                >
-                  Upload Clips!
                 </Link>
                 {user ? (
                   <>
@@ -134,10 +141,22 @@ function App() {
 
         <Routes>
           <Route exact path="/" element={<Home />} />
-          <Route path="/upload" element={<UploadClip />} />
-          <Route path="/view" element={<ClipViewer />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<AdminDash />} />
+          <Route
+            path="/upload"
+            element={requireAuth(UploadClip, true)} // Only admins can access
+          />
+          <Route
+            path="/view"
+            element={<ClipViewer />}
+          />
+          <Route
+            path="/login"
+            element={!user ? <Login /> : <Navigate to="/" />} // Redirect if already logged in
+          />
+          <Route
+            path="/admin"
+            element={requireAuth(AdminDash, true)} // Only admins can access
+          />
         </Routes>
       </div>
     </Router>

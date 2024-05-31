@@ -21,6 +21,7 @@ function AdminDash() {
     } catch (error) {
       console.error('Error fetching users:', error);
       if (error.response && error.response.status === 403) {
+        window.location.href = '/view';
         alert('You do not have permission to view this page.');
       }
     }

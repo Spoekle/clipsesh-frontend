@@ -1,15 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
 function ClipViewer() {
+  const token = localStorage.getItem('token');
   const [clips, setClips] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
+  const [expandedClip, setExpandedClip] = useState(null); // Track the expanded clip for rating counts
+  const ratingCountsRef = useRef(null);
 
   useEffect(() => {
     fetchClips();
     checkLoginStatus(); // Check login status when component mounts
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (ratingCountsRef.current && !ratingCountsRef.current.contains(event.target)) {
+        setExpandedClip(null);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ratingCountsRef]);
 
   async function fetchClips() {
     try {
@@ -20,30 +36,54 @@ function ClipViewer() {
     }
   }
 
-  async function rateClip(id, rating) {
-    try {
-      await axios.post(`https://api.spoekle.com/api/rate/${id}`, { rating });
-      fetchClips(); // Refresh clips after rating
-    } catch (error) {
-      console.error('Error rating clip:', error);
-    }
-  }
-
   async function upvoteClip(id) {
     try {
-      await axios.post(`https://api.spoekle.com/api/clips/${id}/upvote`);
-      fetchClips(); // Refresh clips after upvoting
+      const response = await axios.post(`https://api.spoekle.com/api/clips/${id}/upvote`);
+      if (response.status === 200) {
+        fetchClips(); // Refresh clips after upvoting
+      } else {
+        console.error('Error upvoting clip:', response.data);
+        alert(`${response.data}`);
+      }
     } catch (error) {
-      console.error('Error upvoting clip:', error);
+      if (error.response) {
+        console.error('Error upvoting clip:', error.response.data);
+        alert(`${error.response.data}`);
+      } else {
+        console.error('Error upvoting clip:', error.message);
+        alert(`${error.message}`);
+      }
     }
   }
 
   async function downvoteClip(id) {
     try {
-      await axios.post(`https://api.spoekle.com/api/clips/${id}/downvote`);
-      fetchClips(); // Refresh clips after downvoting
+      const response = await axios.post(`https://api.spoekle.com/api/clips/${id}/downvote`);
+      if (response.status === 200) {
+        fetchClips(); // Refresh clips after downvoting
+      } else {
+        console.error('Error downvoting clip:', response.data);
+        alert(`${response.data}`);
+      }
     } catch (error) {
-      console.error('Error downvoting clip:', error);
+      if (error.response) {
+        console.error('Error downvoting clip:', error.response.data);
+        alert(`${error.response.data}`);
+      } else {
+        console.error('Error downvoting clip:', error.message);
+        alert(`${error.message}`);
+      }
+    }
+  }
+
+  async function rateClip(id, rating) {
+    try {
+      await axios.post(`https://api.spoekle.com/api/rate/${id}`, { rating }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchClips(); // Refresh clips after rating
+    } catch (error) {
+      alert('Error rating clip:', error);
     }
   }
 
@@ -60,11 +100,11 @@ function ClipViewer() {
         {clips.map((clip) => (
           <div key={clip._id} className="p-4 relative">
             <div className="bg-gray-800 p-4 rounded-lg overflow-hidden relative">
-            <div className="overflow-hidden w-full mb-2">
-              <div className="text-lg font-bold mb-2">{clip.streamer}</div>
+              <div className="overflow-hidden w-full text-center">
+                <div className="text-lg font-bold mb-2 text-center">{clip.streamer}</div>
                 <video className="w-full rounded-t-lg" src={`https://api.spoekle.com${clip.url}`} controls></video>
               </div>
-              <div className="flex justify-between items-center p-2 bg-blue-700 rounded-b-lg">
+              <div ref={ratingCountsRef} className="flex justify-between items-center p-2 bg-blue-700 rounded-b-lg">
                 {isLoggedIn &&
                   [1, 2, 3, 4].map((rate) => (
                     <button
@@ -91,6 +131,24 @@ function ClipViewer() {
                     <span className="ml-1">{clip.downvotes}</span>
                   </button>
                 </div>
+              </div>
+              <div className="mt-2">
+                {expandedClip === clip._id ? (
+                  <div className="bg-gray-700 text-white p-4 rounded-lg">
+                    <p className="text-center font-bold">Ratings:</p>
+                    <p className="text-center">1: {clip.ratingCounts.rating1}</p>
+                    <p className="text-center">2: {clip.ratingCounts.rating2}</p>
+                    <p className="text-center">3: {clip.ratingCounts.rating3}</p>
+                    <p className="text-center">4: {clip.ratingCounts.rating4}</p>
+                  </div>
+                ) : (
+                  <button
+                    className="bg-gray-700 text-white py-2 px-4 rounded-md w-full"
+                    onClick={() => setExpandedClip(clip._id)}
+                  >
+                    Show Ratings
+                  </button>
+                )}
               </div>
             </div>
           </div>
