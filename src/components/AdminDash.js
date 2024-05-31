@@ -93,8 +93,8 @@ function AdminDash() {
   };
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen flex flex-col items-center">
-      <div className="max-w-md w-full bg-gray-800 p-8 rounded-md shadow-md my-4">
+    <div className="grid md:grid-cols-2 grid-cols-1 gap-4 bg-gray-900 text-white min-h-screen justify-items-center">
+      <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
         <h2 className="text-3xl font-bold mb-4">Admin Dashboard - Create User</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -140,7 +140,8 @@ function AdminDash() {
           </button>
         </form>
       </div>
-      <div className="max-w-md w-full bg-gray-800 p-8 rounded-md shadow-md my-4">
+
+      <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
         <h2 className="text-3xl font-bold mb-4">Manage Users</h2>
         {users
           .filter(user => user.username !== 'admin') // Exclude the hardcoded admin

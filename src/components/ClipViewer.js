@@ -60,7 +60,10 @@ function ClipViewer() {
         {clips.map((clip) => (
           <div key={clip._id} className="p-4 relative">
             <div className="bg-gray-800 p-4 rounded-lg overflow-hidden relative">
-              <video className="w-full max-w-md rounded-t-lg" src={`https://api.spoekle.com${clip.url}`} controls></video>
+            <div className="overflow-hidden w-full mb-2">
+              <div className="text-lg font-bold mb-2">{clip.streamer}</div>
+                <video className="w-full rounded-t-lg" src={`https://api.spoekle.com${clip.url}`} controls></video>
+              </div>
               <div className="flex justify-between items-center p-2 bg-blue-700 rounded-b-lg">
                 {isLoggedIn &&
                   [1, 2, 3, 4].map((rate) => (

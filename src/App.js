@@ -43,10 +43,12 @@ function App() {
       <div className="bg-gray-900 text-white min-h-screen">
         <nav className="bg-gray-800 p-4 shadow-lg">
           <div className="container mx-auto flex items-center justify-between flex-wrap">
-            <div className="flex items-center flex-shrink-0 text-white mr-6">
+            <div className=" items-center text-white mr-6 inline">
               <Link to="/">
-                <img src={logo} alt="Logo" className="h-8 mr-2" />
-                <span className="font-semibold text-xl tracking-tight">ClipSesh!</span>
+                <img src={logo} alt="Logo" className="h-8 mr-2 block" />
+                <div className='inline flex-col'>
+                  <span className="font-semibold text-xl tracking-tight">ClipSesh!</span>
+                </div>
               </Link>
             </div>
             <div className="block lg:hidden">
@@ -86,21 +88,21 @@ function App() {
                 </Link>
                 {user ? (
                   <>
-                    <span className="block mt-4 lg:inline-block lg:mt-0 text-white mr-4">
+                    <span className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white mr-4">
                       Hello, {user.username}!
                     </span>
                     {user.isAdmin && (
                       <>
                         <Link
                           to="/upload"
-                          className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
+                          className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
                           onClick={toggleNavbar}
                         >
                           Upload!
                         </Link>
                         <Link
                           to="/admin"
-                          className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
+                          className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
                           onClick={toggleNavbar}
                         >
                           Admin Dashboard
@@ -109,7 +111,7 @@ function App() {
                     )}
                     <button
                       onClick={handleLogout}
-                      className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300"
+                      className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300"
                     >
                       Logout
                     </button>
