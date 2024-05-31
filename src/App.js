@@ -4,7 +4,7 @@ import axios from 'axios';
 import UploadClip from './components/UploadClip';
 import ClipViewer from './components/ClipViewer';
 import Login from './components/login/Login';
-import Register from './components/login/Register';
+import Home from './components/Home';
 import AdminDash from './components/AdminDash';
 import logo from './media/CC250.png';
 
@@ -44,10 +44,10 @@ function App() {
         <nav className="bg-gray-800 p-4 shadow-lg">
           <div className="container mx-auto flex items-center justify-between flex-wrap">
             <div className="flex items-center flex-shrink-0 text-white mr-6">
-              <a href='/'>
+              <Link to="/">
                 <img src={logo} alt="Logo" className="h-8 mr-2" />
                 <span className="font-semibold text-xl tracking-tight">ClipSesh!</span>
-              </a>  
+              </Link>
             </div>
             <div className="block lg:hidden">
               <button
@@ -90,13 +90,22 @@ function App() {
                       Hello, {user.username}!
                     </span>
                     {user.isAdmin && (
-                      <Link
-                        to="/admin"
-                        className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
-                        onClick={toggleNavbar}
-                      >
-                        Admin Dashboard
-                      </Link>
+                      <>
+                        <Link
+                          to="/upload"
+                          className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
+                          onClick={toggleNavbar}
+                        >
+                          Upload!
+                        </Link>
+                        <Link
+                          to="/admin"
+                          className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 mr-4"
+                          onClick={toggleNavbar}
+                        >
+                          Admin Dashboard
+                        </Link>
+                      </>
                     )}
                     <button
                       onClick={handleLogout}
@@ -122,6 +131,7 @@ function App() {
         </nav>
 
         <Routes>
+          <Route exact path="/" element={<Home />} />
           <Route path="/upload" element={<UploadClip />} />
           <Route path="/view" element={<ClipViewer />} />
           <Route path="/login" element={<Login />} />

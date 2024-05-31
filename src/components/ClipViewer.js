@@ -52,12 +52,6 @@ function ClipViewer() {
     setIsLoggedIn(!!token); // Update login status based on token presence
   }
 
-  function calculatePercentage(upvotes, downvotes) {
-    const totalVotes = upvotes + downvotes;
-    if (totalVotes === 0) return 0;
-    return (upvotes / totalVotes) * 100;
-  }
-
   return (
     <div className="bg-gray-900 text-white p-4 min-h-screen">
       <h1 className="text-3xl font-bold mb-4">Clip Viewer</h1>
@@ -78,21 +72,22 @@ function ClipViewer() {
                       {rate}
                     </button>
                   ))}
-                <button
-                  className="text-white font-bold py-2 px-4 rounded-md transition duration-300 relative"
-                  onClick={() => upvoteClip(clip._id)}
-                >
-                  <FaArrowUp />
-                  <span className="hidden absolute top-0 left-0 mt-4 -ml-12 px-4 py-2 text-gray-900 bg-white rounded-md shadow-md">
-                    {clip.upvotes} Upvotes ({calculatePercentage(clip.upvotes, clip.downvotes).toFixed(2)}%)
-                  </span>
-                </button>
-                <button
-                  className="text-white font-bold py-2 px-4 rounded-md transition duration-300 relative"
-                  onClick={() => downvoteClip(clip._id)}
-                >
-                  <FaArrowDown />
-                </button>
+                <div className="flex">
+                  <button
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-l-md transition duration-300 relative flex items-center"
+                    onClick={() => upvoteClip(clip._id)}
+                  >
+                    <FaArrowUp />
+                    <span className="ml-1">{clip.upvotes}</span>
+                  </button>
+                  <button
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-r-md transition duration-300 relative flex items-center"
+                    onClick={() => downvoteClip(clip._id)}
+                  >
+                    <FaArrowDown />
+                    <span className="ml-1">{clip.downvotes}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
