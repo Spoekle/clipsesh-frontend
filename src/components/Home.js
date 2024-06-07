@@ -25,7 +25,7 @@ const HomePage = () => {
     }, []);
 
   return (
-    <div className="bg-gradient-to-r from-cc-blue to-cc-red min-h-screen flex flex-col justify-center items-center text-white">
+    <div className="bg-gradient-to-r from-cc-red to-cc-blue min-h-screen flex flex-col justify-center items-center text-white">
       <h1 className="text-5xl font-bold mb-8">Welcome to ClipSesh!</h1>
       <p className="text-xl mb-8">A new generation for Seasonal Highlights!</p>
       <p className="text-xl mb-8">Content Cubes come together to rate YOUR clips for the highlights!</p>
