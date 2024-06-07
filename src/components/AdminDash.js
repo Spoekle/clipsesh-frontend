@@ -1,4 +1,3 @@
-// AdminDash.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -8,8 +7,9 @@ function AdminDash() {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    isAdmin: false // Add isAdmin to formData
+    isAdmin: false
   });
+  const [config, setConfig] = useState({ denyThreshold: 5 });
 
   const fetchUsers = async () => {
     try {
@@ -27,8 +27,25 @@ function AdminDash() {
     }
   };
 
+  const fetchConfig = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('https://api.spoekle.com/api/admin/config', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Extract the first element from the array
+      if (response.data.length > 0) {
+        setConfig(response.data[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching config:', error);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchConfig();
   }, []);
 
   const handleChange = (e) => {
@@ -39,19 +56,41 @@ function AdminDash() {
     });
   };
 
+  const handleConfigChange = (e) => {
+    const { name, value } = e.target;
+    setConfig({
+      ...config,
+      [name]: Number(value)
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post('https://api.spoekle.com/api/users/register', formData, {
+      await axios.post('https://api.spoekle.com/api/admin/create-user', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('User created successfully');
       setFormData({ username: '', password: '', isAdmin: false });
-      fetchUsers(); // Refetch users to include the newly created user
+      fetchUsers();
     } catch (error) {
       console.error('Error creating user:', error);
       alert('Failed to create user. Please try again.');
+    }
+  };
+
+  const handleConfigSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put('https://api.spoekle.com/api/admin/config', config, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('Config updated successfully');
+    } catch (error) {
+      console.error('Error updating config:', error);
+      alert('Failed to update config. Please try again.');
     }
   };
 
@@ -72,7 +111,7 @@ function AdminDash() {
       });
       setEditUser(null);
       alert('User updated successfully');
-      fetchUsers(); // Refetch users to reflect the updates
+      fetchUsers();
     } catch (error) {
       console.error('Error updating user:', error);
       alert('Failed to update user. Please try again.');
@@ -145,7 +184,7 @@ function AdminDash() {
       <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
         <h2 className="text-3xl font-bold mb-4">Manage Users</h2>
         {users
-          .filter(user => user.username !== 'admin') // Exclude the hardcoded admin
+          .filter(user => user.username !== 'admin')
           .map(user => (
             <div key={user._id} className="mb-4">
               <div className="flex justify-between items-center">
@@ -170,54 +209,83 @@ function AdminDash() {
               </div>
             </div>
           ))}
+          {editUser && (
+            <div className="max-w-md w-full bg-gray-600 p-8 rounded-md shadow-md my-4">
+              <h2 className="text-3xl font-bold mb-4">Edit {editUser.username}</h2>
+              <form onSubmit={handleEditSubmit}>
+                <div className="mb-4">
+                  <label htmlFor="username" className="block text-gray-300">Username:</label>
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={editUser.username}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={editUser.password || ''}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="isAdmin" className="block text-gray-300">Admin:</label>
+                  <input
+                    type="checkbox"
+                    id="isAdmin"
+                    name="isAdmin"
+                    checked={editUser.isAdmin}
+                    onChange={handleEditChange}
+                    className="form-checkbox h-5 w-5 text-blue-600"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+                >
+                  Update User
+                </button>
+                <button
+                  onClick={() => setEditUser(null)}
+                  className="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md focus:outline-none focus:bg-gray-600 mt-2"
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          )}
       </div>
-      {editUser && (
-        <div className="max-w-md w-full bg-gray-800 p-8 rounded-md shadow-md my-4">
-          <h2 className="text-3xl font-bold mb-4">Edit User</h2>
-          <form onSubmit={handleEditSubmit}>
-            <div className="mb-4">
-              <label htmlFor="username" className="block text-gray-300">Username:</label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={editUser.username}
-                onChange={handleEditChange}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={editUser.password || ''}
-                onChange={handleEditChange}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="isAdmin" className="block text-gray-300">Admin:</label>
-              <input
-                type="checkbox"
-                id="isAdmin"
-                name="isAdmin"
-                checked={editUser.isAdmin}
-                onChange={handleEditChange}
-                className="form-checkbox h-5 w-5 text-blue-600"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
-            >
-              Update User
-            </button>
-          </form>
-        </div>
-      )}
+      <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+        <h2 className="text-3xl font-bold mb-4">Admin Config</h2>
+        <form onSubmit={handleConfigSubmit}>
+          <div className="mb-4">
+            <label htmlFor="denyThreshold" className="block text-gray-300">Deny Threshold:</label>
+            <input
+              type="number"
+              id="denyThreshold"
+              name="denyThreshold"
+              value={config.denyThreshold}
+              onChange={handleConfigChange}
+              className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+          >
+            Update Config
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
