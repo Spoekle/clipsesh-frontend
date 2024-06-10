@@ -55,6 +55,10 @@ function UploadClip() {
   };
 
   const handleDeleteAllClips = async () => {
+    if (!window.confirm("Are you sure you want to delete all clips?")) {
+      return;
+    }
+    
     try {
       await axios.delete('https://api.spoekle.com/api/clips', {
         headers: { Authorization: `Bearer ${token}` }
