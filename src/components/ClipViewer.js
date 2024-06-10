@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import axios from 'axios';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
@@ -15,6 +16,10 @@ function ClipViewer() {
     checkLoginStatus();
     fetchInitialData();
   }, []);
+
+  useEffect(() => {
+    sortClips(clips);
+  }, [sortOption]);
 
   const fetchInitialData = async () => {
     try {
@@ -150,6 +155,83 @@ function ClipViewer() {
     }
   };
 
+  const renderModal = () => {
+    if (expandedClip === null) return null;
+    const clip = clips.find((clip) => clip._id === expandedClip);
+
+    return ReactDOM.createPortal(
+      <div
+        className="modal-overlay fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50"
+        onClick={handleClickOutside}
+      >
+        <div className="modal-content bg-gray-800 p-4 rounded-lg relative">
+          <button
+            className="absolute top-0 right-0 m-4 text-white bg-red-700 rounded-md p-2"
+            onClick={() => setExpandedClip(null)}
+          >
+            Close
+          </button>
+          <h2 className="text-2xl text-white font-bold mb-4">{clip.streamer}</h2>
+          <div className="flex flex-col justify-center items-center">
+            {isLoggedIn &&
+              <div className="flex flex-col items-center mt-2">
+                <div className="bg-gray-700 text-white p-4 rounded-lg mb-2">
+                  <p className="text-center font-bold text-2xl mb-4">Ratings:</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {ratings[expandedClip] && ratings[expandedClip].ratingCounts ? (
+                      ratings[expandedClip].ratingCounts.map((rateData) => (
+                        <div
+                          key={rateData.rating}
+                          className={`bg-${rateData.rating === 'deny' ? 'red' : 'blue'}-800 text-white font-bold py-4 px-6 rounded-md text-center transition duration-300`}
+                        >
+                          <p className="text-xl">{rateData.rating === 'deny' ? 'Denied' : rateData.rating}</p>
+                          <p className="text-lg mt-2">Total: {rateData.count}</p>
+                          {rateData.users.length > 0 && (
+                            <div>
+                              <p className="text-sm mt-2">Users:</p>
+                              {rateData.users.map(user => (
+                                <p className="text-sm" key={user.userId}>{user.username}</p>
+                              ))}
+                            </div>
+                          )}
+                          {rateData.users.length === 0 && (
+                            <p className="text-sm mt-2">{rateData.rating === 'deny' ? 'No denies' : 'No users'}</p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p>Loading...</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-wrap justify-center w-full">
+                  {[1, 2, 3, 4].map((rate) => (
+                    <button
+                      key={rate}
+                      className="bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-md transition duration-300 m-2"
+                      onClick={() => rateOrDenyClip(clip._id, rate)}
+                    >
+                      {rate}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex justify-center w-full">
+                  <button
+                    className="bg-red-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded-md transition duration-300 mt-2 w-full md:w-auto"
+                    onClick={() => rateOrDenyClip(clip._id, null, true)}
+                  >
+                    Deny
+                  </button>
+                </div>
+              </div>
+            }
+          </div>  
+        </div>
+      </div>,
+      document.body
+    );
+  };
+
   return (
     <div className="bg-gray-900 text-white p-4 min-h-screen">
       <h1 className="text-3xl font-bold mb-4">Clip Viewer</h1>
@@ -169,12 +251,10 @@ function ClipViewer() {
       <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {clips
           .filter(clip => {
-            // Check if the user is logged in and if rating data exists for the clip
             if (isLoggedIn) {
               const ratingData = ratings[clip._id];
               return ratingData && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count < denyThreshold);
             } else {
-              // If not logged in, simply return true to include all clips
               return true;
             }
           })
@@ -186,8 +266,8 @@ function ClipViewer() {
                   {isLoggedIn &&
                     <div className="flex justify-center">
                       <button
-                      className="absolute top-0 right-0 m-2 text-white bg-gray-600 rounded-md p-2"
-                      onClick={() => setExpandedClip(clip._id)}
+                        className="absolute top-0 right-0 m-2 mr-4 text-white bg-gray-600 rounded-md p-2"
+                        onClick={() => setExpandedClip(clip._id)}
                       >
                         Rating!
                       </button>
@@ -212,114 +292,55 @@ function ClipViewer() {
                   >
                     <FaArrowDown className="mr-1" /> {clip.downvotes}
                   </button>
-                </div> 
-              </div>
-              {expandedClip && (
-                <div
-                  className="modal-overlay fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center"
-                  onClick={handleClickOutside}
-                >
-                  <div className="modal-content bg-gray-800 p-4 rounded-lg relative">
-                    <button
-                      className="absolute top-0 right-0 m-4 text-white bg-red-700 rounded-md p-2"
-                      onClick={() => setExpandedClip(null)}
-                    >
-                      Close
-                    </button>
-                    <h2 className="text-2xl font-bold mb-4">{clip.streamer}</h2>
-                    <div className="flex flex-col justify-center items-center">
-                      {isLoggedIn &&
-                        <div className="flex flex-col items-center mt-2">
-                          <div className="bg-gray-700 text-white p-4 rounded-lg mb-2">
-                            <p className="text-center font-bold text-2xl mb-4">Ratings:</p>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              {ratings[expandedClip] && ratings[expandedClip].ratingCounts ? (
-                                ratings[expandedClip].ratingCounts.map((rateData) => (
-                                  <div
-                                    key={rateData.rating}
-                                    className={`bg-${rateData.rating === 'deny' ? 'red' : 'blue'}-800 text-white font-bold py-4 px-6 rounded-md text-center transition duration-300`}
-                                  >
-                                    <p className="text-xl">{rateData.rating === 'deny' ? 'Denied' : rateData.rating}</p>
-                                    <p className="text-lg mt-2">Total: {rateData.count}</p>
-                                    {rateData.users.length > 0 && (
-                                      <div>
-                                        <p className="text-sm mt-2">Users:</p>
-                                        {rateData.users.map(user => (
-                                          <p className="text-sm" key={user.userId}>{user.username}</p>
-                                        ))}
-                                      </div>
-                                    )}
-                                    {rateData.users.length === 0 && (
-                                      <p className="text-sm mt-2">{rateData.rating === 'deny' ? 'No denies' : 'No users'}</p>
-                                    )}
-                                  </div>
-                                ))
-                              ) : (
-                                <p>Loading...</p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap justify-center w-full">
-                            {[1, 2, 3, 4].map((rate) => (
-                              <button
-                                key={rate}
-                                className="bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-md transition duration-300 m-2"
-                                onClick={() => rateOrDenyClip(clip._id, rate)}
-                              >
-                                {rate}
-                              </button>
-                            ))}
-                          </div>
-                          <div className="flex justify-center w-full">
-                            <button
-                              className="bg-red-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded-md transition duration-300 mt-2 w-full md:w-auto"
-                              onClick={() => rateOrDenyClip(clip._id, null, true)}
-                            >
-                              Deny
-                            </button>
-                          </div>
-                        </div>
-                      }
-                    </div>  
-                  </div>
                 </div>
-              )}
+              </div>
             </div>
           ))
         }
       </div>
-        {isLoggedIn &&
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Denied Clips</h2>
-            <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {clips
-                .filter(clip => {
-                  const ratingData = ratings[clip._id];
-                  return ratingData && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count >= denyThreshold);
-                })
-                .map((clip) => (
-                  <div key={clip._id} className="p-4 relative">
-                    <div className="bg-gray-800 p-4 rounded-lg overflow-hidden relative">
-                      <div className="overflow-hidden w-full text-center">
-                        <div className="text-lg font-bold mb-2 text-center">{clip.streamer}</div>
-                        <video
-                          className="w-full rounded-t-lg"
-                          src={`https://api.spoekle.com${clip.url}`}
-                          controls
-                        ></video>
-                      </div>
-                      <div className="flex flex-col justify-between items-center p-2 bg-red-700 rounded-b-lg">
-                        <div className="flex justify-center mb-2">
-                          <p>Clip has been denied.</p>
+      {isLoggedIn &&
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Denied Clips</h2>
+          <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {clips
+              .filter(clip => {
+                const ratingData = ratings[clip._id];
+                return ratingData && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count >= denyThreshold);
+              })
+              .map((clip) => (
+                <div key={clip._id} className="p-4 relative">
+                  <div className="bg-gray-800 p-4 rounded-lg overflow-hidden relative">
+                    <div className="overflow-hidden w-full text-center">
+                      <div className="text-lg font-bold mb-2 text-center">{clip.streamer}</div>
+                      {isLoggedIn &&
+                        <div className="flex justify-center">
+                          <button
+                            className="absolute top-0 right-0 m-2 mr-4 text-white bg-gray-600 rounded-md p-2"
+                            onClick={() => setExpandedClip(clip._id)}
+                          >
+                            Rating!
+                          </button>
                         </div>
+                      }
+                      <video
+                        className="w-full rounded-t-lg"
+                        src={`https://api.spoekle.com${clip.url}`}
+                        controls
+                      ></video>
+                    </div>
+                    <div className="flex flex-col justify-between items-center p-2 bg-red-700 rounded-b-lg">
+                      <div className="flex justify-center mb-2">
+                        <p>Clip has been denied.</p>
                       </div>
                     </div>
                   </div>
-                ))
-              }
-            </div>
+                </div>
+              ))
+            }
           </div>
-          }
+        </div>
+      }
+      {renderModal()}
     </div>
   );
 }
