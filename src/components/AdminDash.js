@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 function AdminDash() {
   const [users, setUsers] = useState([]);
@@ -10,6 +12,8 @@ function AdminDash() {
     isAdmin: false
   });
   const [config, setConfig] = useState({ denyThreshold: 5 });
+  const [clips, setClips] = useState([]);
+  const [ratings, setRatings] = useState({});
 
   const fetchUsers = async () => {
     try {
@@ -43,9 +47,33 @@ function AdminDash() {
     }
   };
 
+  const fetchClipsAndRatings = async () => {
+    try {
+      const clipResponse = await axios.get('https://api.spoekle.com/api/clips');
+      setClips(clipResponse.data);
+      const token = localStorage.getItem('token');
+      if (token) {
+        const ratingPromises = clipResponse.data.map(clip =>
+          axios.get(`https://api.spoekle.com/api/ratings/${clip._id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        );
+        const ratingResponses = await Promise.all(ratingPromises);
+        const ratingsData = ratingResponses.reduce((acc, res, index) => {
+          acc[clipResponse.data[index]._id] = res.data;
+          return acc;
+        }, {});
+        setRatings(ratingsData);
+      }
+    } catch (error) {
+      console.error('Error fetching clips and ratings:', error);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchConfig();
+    fetchClipsAndRatings();
   }, []);
 
   const handleChange = (e) => {
@@ -132,6 +160,54 @@ function AdminDash() {
     }
   };
 
+  const getCurrentDate = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const downloadClips = async () => {
+    if (!window.confirm("Are you sure you want to download the clips? This might take a while so please stay on this page.")) {
+      return;
+    }
+
+    const filteredClips = clips.filter((clip) => {
+      const ratingData = ratings[clip._id];
+      return (
+        ratingData &&
+        ratingData.ratingCounts.every(
+          (rateData) => rateData.rating !== 'deny' || rateData.count < config.denyThreshold
+        )
+      );
+    });
+
+    try {
+      const response = await axios.post('https://api.spoekle.com/download-clips-zip', {
+        clips: filteredClips.map(clip => {
+          const ratingData = ratings[clip._id];
+          const mostChosenRating = ratingData.ratingCounts.reduce((max, rateData) =>
+            rateData.count > max.count ? rateData : max, ratingData.ratingCounts[0]
+          );
+          return { ...clip, rating: mostChosenRating.rating };
+        }),
+      }, {
+        responseType: 'blob',
+      });
+  
+      if (response.status !== 200) {
+        throw new Error('Failed to download clips');
+      }
+  
+      const blob = new Blob([response.data], { type: 'application/zip' });
+      const currentDate = getCurrentDate();
+      saveAs(blob, `clips-${currentDate}.zip`);
+    } catch (error) {
+      console.error('Error downloading clips:', error);
+    }
+  };
+
   return (
     <div className="grid md:grid-cols-2 grid-cols-1 gap-4 bg-gray-900 text-white min-h-screen justify-items-center">
       <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
@@ -180,7 +256,6 @@ function AdminDash() {
           </button>
         </form>
       </div>
-
       <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
         <h2 className="text-3xl font-bold mb-4">Manage Users</h2>
         {users
@@ -209,59 +284,59 @@ function AdminDash() {
               </div>
             </div>
           ))}
-          {editUser && (
-            <div className="max-w-md w-full bg-gray-600 p-8 rounded-md shadow-md my-4">
-              <h2 className="text-3xl font-bold mb-4">Edit {editUser.username}</h2>
-              <form onSubmit={handleEditSubmit}>
-                <div className="mb-4">
-                  <label htmlFor="username" className="block text-gray-300">Username:</label>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    value={editUser.username}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={editUser.password || ''}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="isAdmin" className="block text-gray-300">Admin:</label>
-                  <input
-                    type="checkbox"
-                    id="isAdmin"
-                    name="isAdmin"
-                    checked={editUser.isAdmin}
-                    onChange={handleEditChange}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
-                >
-                  Update User
-                </button>
-                <button
-                  onClick={() => setEditUser(null)}
-                  className="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md focus:outline-none focus:bg-gray-600 mt-2"
-                >
-                  Cancel
-                </button>
-              </form>
-            </div>
-          )}
+        {editUser && (
+          <div className="max-w-md w-full bg-gray-600 p-8 rounded-md shadow-md my-4">
+            <h2 className="text-3xl font-bold mb-4">Edit {editUser.username}</h2>
+            <form onSubmit={handleEditSubmit}>
+              <div className="mb-4">
+                <label htmlFor="username" className="block text-gray-300">Username:</label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={editUser.username}
+                  onChange={handleEditChange}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={editUser.password || ''}
+                  onChange={handleEditChange}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="isAdmin" className="block text-gray-300">Admin:</label>
+                <input
+                  type="checkbox"
+                  id="isAdmin"
+                  name="isAdmin"
+                  checked={editUser.isAdmin}
+                  onChange={handleEditChange}
+                  className="form-checkbox h-5 w-5 text-blue-600"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+              >
+                Update User
+              </button>
+              <button
+                onClick={() => setEditUser(null)}
+                className="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md focus:outline-none focus:bg-gray-600 mt-2"
+              >
+                Cancel
+              </button>
+            </form>
+          </div>
+        )}
       </div>
       <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
         <h2 className="text-3xl font-bold mb-4">Admin Config</h2>
@@ -285,6 +360,15 @@ function AdminDash() {
             Update Config
           </button>
         </form>
+      </div>
+      <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+        <h2 className="text-3xl font-bold mb-4">Download Clips</h2>
+        <button
+          onClick={downloadClips}
+          className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-md focus:outline-none focus:bg-green-600"
+        >
+          Download All Clips
+        </button>
       </div>
     </div>
   );
