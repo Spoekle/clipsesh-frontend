@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import axios from 'axios';
-import logo from '../media/CC250.png';
+import logo from '../../media/CC250.png';
 
 function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -34,9 +34,9 @@ function Navbar() {
       };
 
     return (
-        <nav className="p-4 m-4 z-50 relative bg-opacity-20 bg-white rounded-md">
+        <nav className="p-4 m-4 z-50 relative bg-opacity-20 bg-white rounded-md backdrop-blur-sm">
             <div className="container mx-auto flex items-center justify-between flex-wrap">
-                <div className=" items-center text-white ml-6 mr-6 inline">
+                <div className=" items-center text-white ml-6 mr-6 inline hover:scale-110 transition duration-200">
                     <Link to="/">
                         <img src={logo} alt="Logo" className="h-10 mr-2 block" />
                     </Link>
@@ -47,7 +47,7 @@ function Navbar() {
                         className="flex items-center px-3 py-2 border rounded text-gray-200 border-gray-400 hover:text-white hover:border-white"
                     >
                         <svg
-                            className="fill-current h-3 w-3"
+                            className="fill-current h-6 w-6"
                             viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg"
                         >
@@ -63,7 +63,7 @@ function Navbar() {
                     <div className="text-lg lg:flex-grow lg:flex lg:justify-end">
                         <Link
                             to="/view"
-                            className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 rounded-md transition duration-200 py-2 px-3 mr-6"
+                            className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
                             onClick={toggleNavbar}
                         >
                             View Clips!
@@ -74,35 +74,32 @@ function Navbar() {
                                     <>
                                         <Link
                                             to="/upload"
-                                            className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 rounded-md transition duration-200 py-2 px-3 mr-6"
+                                            className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
                                             onClick={toggleNavbar}
                                         >
                                             Upload!
                                         </Link>
                                         <Link
                                             to="/admin"
-                                            className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 rounded-md transition duration-200 py-2 px-3 mr-6"
+                                            className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
                                             onClick={toggleNavbar}
                                         >
                                             Admin Dashboard
                                         </Link>
                                     </>
                                 )}
-                                <span className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white py-2 px-3 mr-4">
-                                    Hello, {user.username}!
-                                </span>
                                 <button
                                     onClick={handleLogout}
-                                    className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 rounded-md transition duration-200 py-2 px-3"
+                                    className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
                                 >
-                                    Logout
+                                    Hello, {user.username}! Logout
                                 </button>
                             </>
                         ) : (
                             <>
                                 <Link
                                     to="/login"
-                                    className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 rounded-md transition duration-200 py-2 px-3 mr-4"
+                                    className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
                                     onClick={toggleNavbar}
                                 >
                                     Login!
@@ -114,8 +111,6 @@ function Navbar() {
             </div>
         </nav>
     );
-
-
 }
 
 export default Navbar;

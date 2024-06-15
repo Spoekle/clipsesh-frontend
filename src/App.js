@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
 import axios from 'axios';
-import UploadClip from './components/UploadClip';
-import ClipViewer from './components/ClipViewer';
-import Login from './components/login/Login';
-import Home from './components/Home';
-import AdminDash from './components/AdminDash';
+import UploadClip from './pages/UploadClip';
+import ClipViewer from './pages/ClipViewer';
+import Login from './pages/Login';
+import Home from './pages/Home';
+import AdminDash from './pages/AdminDash';
+import PrivacyStatement from './pages/PrivacyStatement';
 
 
 
@@ -61,6 +62,10 @@ function App() {
           <Route
             path="/admin"
             element={requireAuth(AdminDash, true)}
+          />
+          <Route
+            path="/privacystatement"
+            element={<PrivacyStatement />}
           />
         </Routes>
     </Router>

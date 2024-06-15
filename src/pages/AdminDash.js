@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import Navbar from './components/Navbar';
+import { BiLoaderCircle } from 'react-icons/bi';
 
 function AdminDash() {
   const [users, setUsers] = useState([]);
@@ -195,11 +196,11 @@ function AdminDash() {
       }, {
         responseType: 'blob',
       });
-  
+
       if (response.status !== 200) {
         throw new Error('Failed to download clips');
       }
-  
+
       const blob = new Blob([response.data], { type: 'application/zip' });
       const currentDate = getCurrentDate();
       saveAs(blob, `clips-${currentDate}.zip`);
@@ -208,8 +209,28 @@ function AdminDash() {
     }
   };
 
+  const handleDeleteAllClips = async () => {
+    if (!window.confirm("Are you sure you want to delete all clips?")) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete('https://api.spoekle.com/api/clips', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchClipsAndRatings();
+      console.log('All clips deleted successfully');
+    } catch (error) {
+      console.error('Error deleting all clips:', error);
+    }
+  };
+
   return (
-    <div className="grid md:grid-cols-2 grid-cols-1 gap-4 bg-gray-900 text-white min-h-screen justify-items-center">
+    <div className="grid md:grid-cols-2 grid-cols-1 gap-4 pt-20 bg-gray-900 text-white min-h-screen justify-items-center">
+      <div className='absolute top-0 w-full'>
+        <Navbar />
+      </div>
       <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
         <h2 className="text-3xl font-bold mb-4">Admin Dashboard - Create User</h2>
         <form onSubmit={handleSubmit}>
@@ -258,8 +279,13 @@ function AdminDash() {
       </div>
       <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
         <h2 className="text-3xl font-bold mb-4">Manage Users</h2>
-        {users
-          .filter(user => user.username !== 'admin')
+        {!users.length ? (
+          <div className="flex justify-center items-center space-x-2">
+            <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
+            <span>Loading Users...</span>
+          </div>
+        ) : (
+        users.filter(user => user.username !== 'admin')
           .map(user => (
             <div key={user._id} className="mb-4">
               <div className="flex justify-between items-center">
@@ -283,7 +309,8 @@ function AdminDash() {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+        )}
         {editUser && (
           <div className="max-w-md w-full bg-gray-600 p-8 rounded-md shadow-md my-4">
             <h2 className="text-3xl font-bold mb-4">Edit {editUser.username}</h2>
@@ -368,6 +395,13 @@ function AdminDash() {
           className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-md focus:outline-none focus:bg-green-600"
         >
           Download All Clips
+        </button>
+        <h2 className="text-3xl font-bold my-4">Reset Database</h2>
+        <button
+          className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-md focus:outline-none focus:bg-red-600"
+          onClick={handleDeleteAllClips}
+        >
+          Reset Database
         </button>
       </div>
     </div>
