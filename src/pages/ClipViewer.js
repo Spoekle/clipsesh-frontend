@@ -4,7 +4,9 @@ import axios from 'axios';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import { BiLoaderCircle } from 'react-icons/bi';
 import LoadingBar from 'react-top-loading-bar';
+import Pagination from '@mui/material/Pagination';
 import background from '../media/background.jpg';
+import placeholder from '../media/placeholder.png';
 import Navbar from './components/Navbar';
 
 function ClipViewer() {
@@ -17,6 +19,8 @@ function ClipViewer() {
   const [denyThreshold, setDenyThreshold] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6);
 
   useEffect(() => {
     checkLoginStatus();
@@ -111,6 +115,7 @@ function ClipViewer() {
         break;
     }
     setClips(sortedClips);
+    setCurrentPage(1);
   };
 
   const handleClickOutside = (event) => {
@@ -173,6 +178,15 @@ function ClipViewer() {
     const ratingData = ratings[clip._id];
     return ratingData && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count >= denyThreshold);
   });
+
+  // Pagination and sorting
+  const indexOfLastClip = currentPage * itemsPerPage;
+  const indexOfFirstClip = indexOfLastClip - itemsPerPage;
+  const currentClips = clips.slice(indexOfFirstClip, indexOfLastClip);
+
+  const totalPages = Math.ceil(clips.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const renderModal = () => {
     if (expandedClip === null) return null;
@@ -260,8 +274,8 @@ function ClipViewer() {
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
         <Navbar />
       </div>
-      <div className="text-white">
-        <div className="text-center py-4 bg-cc-red justify-center items-center z-30">
+      <div className="grid justify-items-center text-white p-4 pt-8 bg-gradient-to-b from-cc-red to-cc-blue justify-center items-center">
+        <div className="text-center py-4 justify-center items-center z-30">
           <h1 className="text-4xl font-bold mb-4">Clip Viewer</h1>
           <h1 className="text-3xl mb-4">Rate the clips!</h1>
           <div className="pb-4 flex justify-center">
@@ -277,127 +291,184 @@ function ClipViewer() {
             </select>
           </div>
         </div>
-        <div className="pt-8 bg-gradient-to-b from-cc-red from-20% to-neutral-900">
-          {isLoading ? (
-            <div className="flex justify-center items-center space-x-2">
-              <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
-              <span>Loading...</span>
+        <div className="container mt-4 bg-black/30 rounded-md">
+          <h2 className="p-4 text-center bg-cc-blue/50 backdrop-blur-sm rounded-t-md text-2xl font-bold mb-4">Clips</h2>
+          <div className="flex justify-center">
+            <div className="items-center justify-center bg-white rounded-md py-6 px-4">
+              <Pagination
+                showFirstButton showLastButton
+                count={totalPages}
+                page={currentPage}
+                onChange={(e, page) => paginate(page)}
+                color="primary"
+                size="large"
+              />
             </div>
-          ) : (
-            <>
-              <h2 className="p-4 mx-4 text-center bg-cc-blue backdrop-blur-sm rounded-md text-2xl font-bold mb-4">Clips</h2>
-              <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {clips.length > 0 ? (
-                  clips
-                    .filter(clip => {
-                      if (isLoggedIn) {
-                        const ratingData = ratings[clip._id];
-                        return ratingData && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count < denyThreshold);
-                      } else {
-                        return true;
-                      }
-                    })
-                    .map(clip => (
-                      <div key={clip._id} className="p-4 relative animate-fade-up">
-                        <div className="bg-white/30 p-4 rounded-lg overflow-hidden relative">
-                          <div className="overflow-hidden w-full text-center">
-                            <div className="text-lg font-bold mb-2 bg-black/30 p-2 rounded-md text-center">{clip.streamer}</div>
-                            {isLoggedIn && (
-                              <div className="flex justify-center">
-                                <button
-                                  className="absolute top-0 right-0 p-2 m-4 mr-4 text-neutral-800 text-lg font-bold bg-white hover:bg-blue-600 hover:text-white transition duration-300 rounded-md"
-                                  onClick={() => setExpandedClip(clip._id)}
-                                >
-                                  Rating!
-                                </button>
-                              </div>
-                            )}
-                            <video
-                              className="w-full rounded-t-lg border-8 border-white"
-                              src={`https://api.spoekle.com${clip.url}`}
-                              controls
-                            ></video>
-                          </div>
-                          <div className="flex justify-center bg-white rounded-b-lg px-4 pt-2 pb-4">
-                            <button
-                              className="text-green-500 mr-4 flex items-center bg-neutral-100 hover:text-white hover:bg-green-500 transition duration-300 py-4 px-6 rounded-md"
-                              onClick={() => upvoteClip(clip._id)}
-                            >
-                              <FaArrowUp className="mr-1" /> {clip.upvotes}
-                            </button>
-                            <button
-                              className="text-red-500 ml-4 flex items-center bg-neutral-100 hover:text-white hover:bg-red-500 transition duration-300 py-4 px-6 rounded-md"
-                              onClick={() => downvoteClip(clip._id)}
-                            >
-                              <FaArrowDown className="mr-1" /> {clip.downvotes}
-                            </button>
-                          </div>
+          </div>
+          <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {isLoading ? (
+              Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="relative animate-fade-up">
+                  <div className="bg-white/30 p-4 rounded-lg overflow-hidden relative">
+                    <div className="overflow-hidden w-full text-center">
+                      <div className="text-lg font-bold mb-2 bg-black/30 p-2 rounded-md text-center">Cube Community</div>
+                      {isLoggedIn && (
+                        <div className="flex justify-center">
+                          <button
+                            className="absolute top-0 right-0 p-2 m-4 mr-4 text-neutral-800 text-lg font-bold bg-white hover:bg-blue-600 hover:text-white transition duration-300 rounded-md"
+                          >
+                            Rating!
+                          </button>
+                        </div>
+                      )}
+                      <img src={placeholder} alt="Logo" className="w-full rounded-t-lg border-8 border-white opacity-50" />
+                    </div>
+                    <div className="flex justify-center bg-white rounded-b-lg px-4 pt-2 pb-4">
+                      <button
+                        className="text-green-500 mr-4 flex items-center bg-neutral-100 hover:text-white hover:bg-green-500 transition duration-300 py-4 px-6 rounded-md"
+                      >
+                        <FaArrowUp className="mr-1" /> 420
+                      </button>
+                      <button
+                        className="text-red-500 ml-4 flex items-center bg-neutral-100 hover:text-white hover:bg-red-500 transition duration-300 py-4 px-6 rounded-md"
+                      >
+                        <FaArrowDown className="mr-1" /> 69
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              currentClips.length > 0 ? (
+                currentClips
+                  .filter(clip => {
+                    if (isLoggedIn) {
+                      const ratingData = ratings[clip._id];
+                      return ratingData && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count < denyThreshold);
+                    } else {
+                      return true;
+                    }
+                  })
+                  .map(clip => (
+                    <div key={clip._id} className="p-4 relative animate-fade">
+                      <div className="bg-white/30 p-4 rounded-lg overflow-hidden relative">
+                        <div className="overflow-hidden w-full text-center">
+                          <div className="text-lg font-bold mb-2 bg-black/30 p-2 rounded-md text-center">{clip.streamer}</div>
+                          {isLoggedIn && (
+                            <div className="flex justify-center">
+                              <button
+                                className="absolute top-0 right-0 p-2 m-4 mr-4 text-neutral-800 text-lg font-bold bg-white hover:bg-blue-600 hover:text-white transition duration-300 rounded-md"
+                                onClick={() => setExpandedClip(clip._id)}
+                              >
+                                Rating!
+                              </button>
+                            </div>
+                          )}
+                          <video
+                            className="w-full rounded-t-lg border-8 border-white"
+                            src={`https://api.spoekle.com${clip.url}`}
+                            controls
+                          ></video>
+                        </div>
+                        <div className="flex justify-center bg-white rounded-b-lg px-4 pt-2 pb-4">
+                          <button
+                            className="text-green-500 mr-4 flex items-center bg-neutral-100 hover:text-white hover:bg-green-500 transition duration-300 py-4 px-6 rounded-md"
+                            onClick={() => upvoteClip(clip._id)}
+                          >
+                            <FaArrowUp className="mr-1" /> {clip.upvotes}
+                          </button>
+                          <button
+                            className="text-red-500 ml-4 flex items-center bg-neutral-100 hover:text-white hover:bg-red-500 transition duration-300 py-4 px-6 rounded-md"
+                            onClick={() => downvoteClip(clip._id)}
+                          >
+                            <FaArrowDown className="mr-1" /> {clip.downvotes}
+                          </button>
                         </div>
                       </div>
-                    ))
-                ) : (
-                  <div className="mt-2 mx-4 text-center bg-black/30 p-4 rounded-md font-semibold text-xl text-white col-span-full">No clips available.</div>
-                )}
-              </div>
-            </>
-          )}
+                    </div>
+                  ))
+              ) : (
+                <div className="mt-2 mx-4 text-center bg-black/30 p-4 rounded-md font-semibold text-xl text-white col-span-full">No clips available.</div>
+              )
+            )}
+          </div>
         </div>
 
         {isLoggedIn && (
-          <div className="pt-8 bg-gradient-to-b from-neutral-900 via-cc-blue via-30% to-neutral-900">
-            {isLoading ? (
-              <div className="flex justify-center items-center space-x-2">
-                <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
-                <span>Loading...</span>
-              </div>
-            ) : (
-              <div>
-                <h2 className="p-4 mx-4 text-center bg-red-700 backdrop-blur-sm rounded-md text-2xl font-bold mb-4">Denied Clips</h2>
-                <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {deniedClips.length > 0 ? (
-                    deniedClips.map((clip) => (
-                      <div key={clip._id} className="p-4 relative animate-fade-in">
-                        <div className="bg-red-700/30 p-4 rounded-lg overflow-hidden relative">
-                          <div className="overflow-hidden w-full text-center">
-                            <div className="text-lg font-bold mb-2 bg-black/30 p-2 rounded-md text-center">{clip.streamer}</div>
-                            {isLoggedIn && (
-                              <div className="flex justify-center">
-                                <button
-                                  className="absolute top-0 right-0 p-2 m-4 mr-4 text-neutral-800 text-lg font-bold bg-white hover:bg-blue-600 hover:text-white transition duration-300 rounded-md"
-                                  onClick={() => setExpandedClip(clip._id)}
-                                >
-                                  Rating!
-                                </button>
-                              </div>
-                            )}
-                            <video
-                              className="w-full rounded-t-lg border-8 border-red-700"
-                              src={`https://api.spoekle.com${clip.url}`}
-                              controls
-                            ></video>
-                          </div>
-                          <div className="flex flex-col justify-between items-center p-2 bg-red-700 rounded-b-lg">
-                            <div className="flex justify-center mb-2">
-                              <p className='text-xl font-bold'>
-                                Clip has been denied.
-                              </p>
+          <div className="container mt-4 bg-black/30 rounded-md">
+            <h2 className="p-4 text-center bg-red-700/50 backdrop-blur-sm rounded-t-md text-2xl font-bold mb-4">Denied Clips</h2>
+            <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {isLoading ? (
+                Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="overflow-hidden w-full animate-pulse text-center bg-white/30 p-4 rounded-md">
+                    <div className="flex p-4 justify-center items-center mb-2">
+                      <input
+                        type="text"
+                        placeholder="Streamer"
+                        value="Steamer"
+                        className="px-2 py-1 rounded bg-neutral-200/30 text-neutral-800/30"
+                      />
+                      <div
+                        className="bg-green-500/30 hover:bg-green-600/30 text-white/30 px-2 py-1 ml-2 rounded"
+                      >
+                        Update
+                      </div>
+                    </div>
+                    <div className="w-full relative" style={{ paddingTop: '56.25%' }}>
+                      <div className="absolute top-0 left-0 w-full h-full rounded-t-md bg-black/30 justify-center items-center flex">
+                        <BiLoaderCircle className="animate-spin h-5 w-5 text-white/30 m-auto" />
+                      </div>
+                    </div>
+                    <div
+                      className="bg-red-500/30 hover:bg-red-600/30 text-white/30 px-4 py-2 w-full rounded-b-md"
+                    >
+                      Delete
+                    </div>
+                  </div>
+                ))
+              ) : (
+                deniedClips.length > 0 ? (
+                  deniedClips.map((clip) => (
+                    <div key={clip._id} className="p-4 relative animate-fade-in">
+                      <div className="bg-red-700/30 p-4 rounded-lg overflow-hidden relative">
+                        <div className="overflow-hidden w-full text-center">
+                          <div className="text-lg font-bold mb-2 bg-black/30 p-2 rounded-md text-center">{clip.streamer}</div>
+                          {isLoggedIn && (
+                            <div className="flex justify-center">
+                              <button
+                                className="absolute top-0 right-0 p-2 m-4 mr-4 text-neutral-800 text-lg font-bold bg-white hover:bg-blue-600 hover:text-white transition duration-300 rounded-md"
+                                onClick={() => setExpandedClip(clip._id)}
+                              >
+                                Rating!
+                              </button>
                             </div>
+                          )}
+                          <video
+                            className="w-full rounded-t-lg border-8 border-red-700"
+                            src={`https://api.spoekle.com${clip.url}`}
+                            controls
+                          ></video>
+                        </div>
+                        <div className="flex flex-col justify-between items-center p-2 bg-red-700 rounded-b-lg">
+                          <div className="flex justify-center mb-2">
+                            <p className='text-xl font-bold'>
+                              Clip has been denied.
+                            </p>
                           </div>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="mt-2 mx-4 text-center bg-black/30 p-4 rounded-md font-semibold text-xl text-white col-span-full">No denied clips available.</div>
-                  )}
-                </div>
-              </div>
-            )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="mt-2 mx-4 text-center bg-black/30 p-4 rounded-md font-semibold text-xl text-white col-span-full">No denied clips available.</div>
+                )
+              )}
+            </div>
           </div>
         )}
-
         {renderModal()}
       </div>
-    </div>
+    </div >
   );
 }
 

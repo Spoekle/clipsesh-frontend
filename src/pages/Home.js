@@ -50,7 +50,7 @@ const HomePage = () => {
                 </Link>
               </>
             )}
-            <Link to="/view">
+            <Link to="/clips">
               <button className="bg-white text-cc-blue hover:bg-cc-red hover:text-white font-bold py-3 px-6 mr-4 rounded-lg shadow-lg transition duration-300">
                 View Clips
               </button>

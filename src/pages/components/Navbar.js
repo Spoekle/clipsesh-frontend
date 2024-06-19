@@ -27,6 +27,7 @@ function Navbar() {
       const handleLogout = () => {
         localStorage.removeItem('token');
         setUser(null);
+        window.location.href = '/clips';
       };
     
       const toggleNavbar = () => {
@@ -62,7 +63,7 @@ function Navbar() {
                 >
                     <div className="text-lg lg:flex-grow lg:flex lg:justify-end">
                         <Link
-                            to="/view"
+                            to="/clips"
                             className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
                             onClick={toggleNavbar}
                         >

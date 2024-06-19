@@ -52,7 +52,7 @@ function App() {
             element={requireAuth(UploadClip, true)}
           />
           <Route
-            path="/view"
+            path="/clips"
             element={<ClipViewer />}
           />
           <Route

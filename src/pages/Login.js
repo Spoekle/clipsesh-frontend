@@ -23,7 +23,7 @@ function Login() {
       localStorage.setItem('username', response.data.username);
       setLoginSuccess(true);
       setTimeout(() => {
-        window.location.href = '/view';
+        window.location.href = '/clips';
       }, 500);
     } catch (error) {
       console.error('Error during login:', error);
