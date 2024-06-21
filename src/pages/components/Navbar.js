@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { FaSun, FaMoon } from 'react-icons/fa';
 import axios from 'axios';
 import logo from '../../media/CC250.png';
 
@@ -34,8 +35,27 @@ function Navbar() {
         setIsOpen(!isOpen);
       };
 
+      const [isDarkMode, setIsDarkMode] = useState(() => {
+        const savedTheme = localStorage.getItem('theme');
+        return savedTheme === 'dark' ? true : false;
+    });
+
+    useEffect(() => {
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    }, [isDarkMode]);
+
+    const toggleDarkMode = () => {
+        setIsDarkMode(!isDarkMode);
+    };
+
     return (
-        <nav className="p-4 m-4 z-50 relative bg-opacity-20 bg-white rounded-md backdrop-blur-sm">
+        <nav className="p-4 z-50 sticky text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200 rounded-b-lg backdrop-blur-sm">
             <div className="container mx-auto flex items-center justify-between flex-wrap">
                 <div className=" items-center text-white ml-6 mr-6 inline hover:scale-110 transition duration-200">
                     <Link to="/">
@@ -64,7 +84,7 @@ function Navbar() {
                     <div className="text-lg lg:flex-grow lg:flex lg:justify-end">
                         <Link
                             to="/clips"
-                            className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
+                            className="block mt-4 lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
                             onClick={toggleNavbar}
                         >
                             View Clips!
@@ -75,14 +95,14 @@ function Navbar() {
                                     <>
                                         <Link
                                             to="/upload"
-                                            className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
+                                            className="block mt-4 font-semibold lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
                                             onClick={toggleNavbar}
                                         >
                                             Upload!
                                         </Link>
                                         <Link
                                             to="/admin"
-                                            className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
+                                            className="block mt-4 font-semibold lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
                                             onClick={toggleNavbar}
                                         >
                                             Admin Dashboard
@@ -91,7 +111,7 @@ function Navbar() {
                                 )}
                                 <button
                                     onClick={handleLogout}
-                                    className="block mt-4 font-semibold lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
+                                    className="block mt-4 font-semibold lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
                                 >
                                     Hello, {user.username}! Logout
                                 </button>
@@ -100,13 +120,16 @@ function Navbar() {
                             <>
                                 <Link
                                     to="/login"
-                                    className="block mt-4 lg:inline-block lg:mt-0 text-white hover:text-gray-300 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
+                                    className="block mt-4 lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
                                     onClick={toggleNavbar}
                                 >
                                     Login!
                                 </Link>
                             </>
                         )}
+                        <button onClick={toggleDarkMode} className="py-2 px-3 mx-3 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200">
+                            {isDarkMode ? <FaSun className="transition duration-500" /> : <FaMoon className="transition duration-500" />}
+                        </button>
                     </div>
                 </div>
             </div>
