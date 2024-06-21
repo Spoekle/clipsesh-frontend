@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
-import { BiLoaderCircle } from 'react-icons/bi';
 import LoadingBar from 'react-top-loading-bar';
 import Pagination from '@mui/material/Pagination';
 import background from '../media/background.jpg';
@@ -14,13 +13,31 @@ function ClipViewer() {
   const [clips, setClips] = useState([]);
   const [ratings, setRatings] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
   const [expandedClip, setExpandedClip] = useState(null);
-  const [sortOption, setSortOption] = useState('highestUpvotes');
+  const [sortOption, setSortOption] = useState('newest');
   const [denyThreshold, setDenyThreshold] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await axios.get('https://api.spoekle.com/api/users/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUser(response.data);
+        } catch (error) {
+          console.error('Error fetching user:', error);
+        }
+      }
+    };
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     checkLoginStatus();
@@ -91,6 +108,12 @@ function ClipViewer() {
   const sortClips = (clipsToSort = clips) => {
     let sortedClips = [...clipsToSort];
     switch (sortOption) {
+      case 'newest':
+        sortedClips.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      case 'oldest':
+        sortedClips.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        break;
       case 'highestUpvotes':
         sortedClips.sort((a, b) => b.upvotes - a.upvotes);
         break;
@@ -266,24 +289,27 @@ function ClipViewer() {
   };
 
   return (
-    <div className="text-white min-h-screen relative bg-neutral-900">
-      <div className="relative h-64" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent from-20% to-cc-red filter backdrop-blur-md"></div>
-      </div>
-      <div className='absolute top-0 w-full z-50'>
+    <div className="min-h-screen text-white relative">
+      <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
         <Navbar />
       </div>
-      <div className="grid justify-items-center text-white p-4 pt-8 bg-gradient-to-b from-cc-red to-cc-blue justify-center items-center">
+      <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
+        <div className="flex flex-col justify-center items-center">
+          <h1 className="text-4xl font-bold mb-4 text-center">Clip Viewer</h1>
+          <h1 className="text-3xl mb-4 text-center">Rate the clips!</h1>
+        </div>
+      </div>
+      <div className="grid justify-items-center text-white p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center">
         <div className="text-center py-4 justify-center items-center z-30">
-          <h1 className="text-4xl font-bold mb-4">Clip Viewer</h1>
-          <h1 className="text-3xl mb-4">Rate the clips!</h1>
           <div className="pb-4 flex justify-center">
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
-              className="bg-white text-neutral-800 py-2 px-4 rounded-md"
+              className="bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 py-2 px-4 rounded-md border-2 border-neutral-800 dark:border-white"
             >
+              <option value="newest">Newest Clips</option>
+              <option value="oldest">Oldest Clips</option>
               <option value="highestUpvotes">Highest Upvotes</option>
               <option value="highestDownvotes">Highest Downvotes</option>
               <option value="highestRatio">Highest Upvote/Downvote Ratio</option>
@@ -291,50 +317,49 @@ function ClipViewer() {
             </select>
           </div>
         </div>
-        <div className="container mt-4 bg-black/30 rounded-md">
-          <h2 className="p-4 text-center bg-cc-blue/50 backdrop-blur-sm rounded-t-md text-2xl font-bold mb-4">Clips</h2>
+        <div className="container mt-4 bg-black/30 dark:bg-white/30 rounded-md">
+          <h2 className="p-4 text-center bg-neutral-800 dark:text-neutral-800 dark:bg-white text-white transition duration-200 backdrop-blur-sm rounded-t-md text-2xl font-bold mb-4">Clips</h2>
           <div className="flex justify-center">
-            <div className="items-center justify-center bg-white rounded-md py-6 px-4">
+            <div className="items-center justify-center bg-white text-neutral-900 rounded-md py-2 px-4">
               <Pagination
                 showFirstButton showLastButton
                 count={totalPages}
                 page={currentPage}
                 onChange={(e, page) => paginate(page)}
-                color="primary"
-                size="large"
+                color="standard"
               />
             </div>
           </div>
-          <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
             {isLoading ? (
               Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="relative animate-fade-up">
-                  <div className="bg-white/30 p-4 rounded-lg overflow-hidden relative">
-                    <div className="overflow-hidden w-full text-center">
-                      <div className="text-lg font-bold mb-2 bg-black/30 p-2 rounded-md text-center">Cube Community</div>
-                      {isLoggedIn && (
-                        <div className="flex justify-center">
-                          <button
-                            className="absolute top-0 right-0 p-2 m-4 mr-4 text-neutral-800 text-lg font-bold bg-white hover:bg-blue-600 hover:text-white transition duration-300 rounded-md"
-                          >
-                            Rating!
-                          </button>
-                        </div>
-                      )}
+                <div key={index} className="p-4 relative animate-pulse">
+                  <div className="overflow-hidden w-full text-center relative">
+                    {isLoggedIn && (
+                      <div className="flex justify-center">
+                        <button
+                          className="absolute top-0 right-0 p-2 z-40 text-neutral-800 text-lg font-bold bg-white hover:text-blue-500 transition duration-300 rounded-md"
+                        >
+                          Rating!
+                        </button>
+                      </div>
+                    )}
+                    <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">Cube Community</div>
+                    <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
                       <img src={placeholder} alt="Logo" className="w-full rounded-t-lg border-8 border-white opacity-50" />
                     </div>
-                    <div className="flex justify-center bg-white rounded-b-lg px-4 pt-2 pb-4">
-                      <button
-                        className="text-green-500 mr-4 flex items-center bg-neutral-100 hover:text-white hover:bg-green-500 transition duration-300 py-4 px-6 rounded-md"
-                      >
-                        <FaArrowUp className="mr-1" /> 420
-                      </button>
-                      <button
-                        className="text-red-500 ml-4 flex items-center bg-neutral-100 hover:text-white hover:bg-red-500 transition duration-300 py-4 px-6 rounded-md"
-                      >
-                        <FaArrowDown className="mr-1" /> 69
-                      </button>
-                    </div>
+                  </div>
+                  <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4">
+                    <button
+                      className="w-1/2 text-green-500 dark:text-green-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-green-500 dark:hover:bg-green-800 transition duration-300 py-2 px-6 rounded-l-md"
+                    >
+                      <FaArrowUp className="mr-1" /> 420
+                    </button>
+                    <button
+                      className="w-1/2 text-red-500 dark:text-red-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-red-500 dark:hover:bg-red-800 transition duration-300 py-2 px-6 rounded-r-md"
+                    >
+                      <FaArrowDown className="mr-1" /> 69
+                    </button>
                   </div>
                 </div>
               ))
@@ -344,55 +369,162 @@ function ClipViewer() {
                   .filter(clip => {
                     if (isLoggedIn) {
                       const ratingData = ratings[clip._id];
-                      return ratingData && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count < denyThreshold);
+                      return ratingData && !ratingData.ratingCounts.some(rateData => rateData.users.some(ratingUser => ratingUser.userId === user._id)) && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count < denyThreshold);
                     } else {
                       return true;
                     }
                   })
                   .map(clip => (
                     <div key={clip._id} className="p-4 relative animate-fade">
-                      <div className="bg-white/30 p-4 rounded-lg overflow-hidden relative">
-                        <div className="overflow-hidden w-full text-center">
-                          <div className="text-lg font-bold mb-2 bg-black/30 p-2 rounded-md text-center">{clip.streamer}</div>
+                      <div className="overflow-hidden w-full text-center relative">
+                        {isLoggedIn && (
+                          <div className="flex justify-center">
+                            <div className='absolute top-0 right-0 z-40 p-2 bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 rounded-md'>
+                              <button
+                                className="text-lg font-bold p-1 bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white transition duration-200 hover:text-blue-500 rounded-sm"
+                                onClick={() => setExpandedClip(clip._id)}
+                              >
+                                Rating!
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">{clip.streamer}</div>
+                        <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
+                          <video
+                            className="w-full rounded-lg border-white dark:border-neutral-800 transition duration-200"
+                            src={`https://api.spoekle.com${clip.url}`}
+                            controls
+                          >
+                          </video>
+                        </div>
+                      </div>
+                      <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4">
+                        <button
+                          className="w-1/2 text-green-500 dark:text-green-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-green-500 dark:hover:bg-green-800 transition duration-300 py-2 px-6 rounded-l-md"
+                          onClick={() => upvoteClip(clip._id)}
+                        >
+                          <FaArrowUp className="mr-1" /> {clip.upvotes}
+                        </button>
+                        <button
+                          className="w-1/2 text-red-500 dark:text-red-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-red-500 dark:hover:bg-red-800 transition duration-300 py-2 px-6 rounded-r-md"
+                          onClick={() => downvoteClip(clip._id)}
+                        >
+                          <FaArrowDown className="mr-1" /> {clip.downvotes}
+                        </button>
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <div className="my-2 mx-4 text-center bg-black/30 p-4 rounded-md font-semibold text-xl text-white col-span-full">No clips available.</div>
+              )
+            )}
+          </div>
+        </div>
+        {isLoggedIn && (
+          <div className="container mt-4 bg-black/30 dark:bg-white/30 rounded-md">
+            <h2 className="p-4 text-center bg-neutral-800 dark:text-neutral-800 dark:bg-white text-white transition duration-200 backdrop-blur-sm rounded-t-md text-2xl font-bold mb-4">You already rated these clips! Good job!</h2>
+            <div className="flex justify-center">
+              <div className="items-center justify-center bg-white text-neutral-900 rounded-md py-2 px-4">
+                <Pagination
+                  showFirstButton showLastButton
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={(e, page) => paginate(page)}
+                  color="standard"
+                />
+              </div>
+            </div>
+            <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {isLoading ? (
+                Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="p-4 relative animate-pulse">
+                    <div className="overflow-hidden w-full text-center relative">
+                      {isLoggedIn && (
+                        <div className="flex justify-center">
+                          <button
+                            className="absolute top-0 right-0 p-2 z-40 text-neutral-800 text-lg font-bold bg-white hover:text-blue-500 transition duration-300 rounded-md"
+                          >
+                            Rating!
+                          </button>
+                        </div>
+                      )}
+                      <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">Cube Community</div>
+                      <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
+                        <img src={placeholder} alt="Logo" className="w-full rounded-t-lg border-8 border-white opacity-50" />
+                      </div>
+                    </div>
+                    <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4">
+                      <button
+                        className="w-1/2 text-green-500 dark:text-green-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-green-500 dark:hover:bg-green-800 transition duration-300 py-2 px-6 rounded-l-md"
+                      >
+                        <FaArrowUp className="mr-1" /> 420
+                      </button>
+                      <button
+                        className="w-1/2 text-red-500 dark:text-red-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-red-500 dark:hover:bg-red-800 transition duration-300 py-2 px-6 rounded-r-md"
+                      >
+                        <FaArrowDown className="mr-1" /> 69
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                currentClips.length > 0 ? (
+                  currentClips
+                    .filter(clip => {
+                      if (isLoggedIn) {
+                        const ratingData = ratings[clip._id];
+                        return ratingData && ratingData.ratingCounts.some(rateData => rateData.users.some(ratingUser => ratingUser.userId === user._id)) && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count < denyThreshold);
+                      } else {
+                        return true;
+                      }
+                    })
+                    .map(clip => (
+                      <div key={clip._id} className="p-4 relative animate-fade">
+                        <div className="overflow-hidden w-full text-center relative">
                           {isLoggedIn && (
                             <div className="flex justify-center">
                               <button
-                                className="absolute top-0 right-0 p-2 m-4 mr-4 text-neutral-800 text-lg font-bold bg-white hover:bg-blue-600 hover:text-white transition duration-300 rounded-md"
+                                className="absolute top-0 right-0 p-2 z-40 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 hover:text-blue-500 rounded-md"
                                 onClick={() => setExpandedClip(clip._id)}
                               >
                                 Rating!
                               </button>
                             </div>
                           )}
-                          <video
-                            className="w-full rounded-t-lg border-8 border-white"
-                            src={`https://api.spoekle.com${clip.url}`}
-                            controls
-                          ></video>
+                          <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">{clip.streamer}</div>
+                          <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
+                            <video
+                              className="w-full rounded-lg border-white dark:border-neutral-800 transition duration-200"
+                              src={`https://api.spoekle.com${clip.url}`}
+                              controls
+                            >
+                            </video>
+                          </div>
                         </div>
-                        <div className="flex justify-center bg-white rounded-b-lg px-4 pt-2 pb-4">
+                        <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4">
                           <button
-                            className="text-green-500 mr-4 flex items-center bg-neutral-100 hover:text-white hover:bg-green-500 transition duration-300 py-4 px-6 rounded-md"
+                            className="w-1/2 text-green-500 dark:text-green-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-green-500 dark:hover:bg-green-800 transition duration-300 py-2 px-6 rounded-l-md"
                             onClick={() => upvoteClip(clip._id)}
                           >
                             <FaArrowUp className="mr-1" /> {clip.upvotes}
                           </button>
                           <button
-                            className="text-red-500 ml-4 flex items-center bg-neutral-100 hover:text-white hover:bg-red-500 transition duration-300 py-4 px-6 rounded-md"
+                            className="w-1/2 text-red-500 dark:text-red-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-red-500 dark:hover:bg-red-800 transition duration-300 py-2 px-6 rounded-r-md"
                             onClick={() => downvoteClip(clip._id)}
                           >
                             <FaArrowDown className="mr-1" /> {clip.downvotes}
                           </button>
                         </div>
                       </div>
-                    </div>
-                  ))
-              ) : (
-                <div className="mt-2 mx-4 text-center bg-black/30 p-4 rounded-md font-semibold text-xl text-white col-span-full">No clips available.</div>
-              )
-            )}
+                    ))
+                ) : (
+                  <div className="my-2 mx-4 text-center bg-black/30 p-4 rounded-md font-semibold text-xl text-white col-span-full">No rated clips available.</div>
+                )
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {isLoggedIn && (
           <div className="container mt-4 bg-black/30 rounded-md">
@@ -400,29 +532,28 @@ function ClipViewer() {
             <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="overflow-hidden w-full animate-pulse text-center bg-white/30 p-4 rounded-md">
-                    <div className="flex p-4 justify-center items-center mb-2">
-                      <input
-                        type="text"
-                        placeholder="Streamer"
-                        value="Steamer"
-                        className="px-2 py-1 rounded bg-neutral-200/30 text-neutral-800/30"
-                      />
-                      <div
-                        className="bg-green-500/30 hover:bg-green-600/30 text-white/30 px-2 py-1 ml-2 rounded"
-                      >
-                        Update
+                  <div key={index} className="p-4 relative animate-fade-in">
+                    <div className="bg-red-700/30 p-4 rounded-lg overflow-hidden relative">
+                      <div className="overflow-hidden w-full text-center relative">
+                        <div className="flex justify-center">
+                          <button
+                            className="absolute top-0 right-0 p-2 z-40 text-neutral-800 text-lg font-bold bg-white hover:text-blue-500 transition duration-300 rounded-md"
+                          >
+                            Rating!
+                          </button>
+                        </div>
+                        <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">Cube Community</div>
+                        <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
+                          <img src={placeholder} alt="Logo" className="w-full rounded-t-lg border-8 border-white opacity-50" />
+                        </div>
                       </div>
-                    </div>
-                    <div className="w-full relative" style={{ paddingTop: '56.25%' }}>
-                      <div className="absolute top-0 left-0 w-full h-full rounded-t-md bg-black/30 justify-center items-center flex">
-                        <BiLoaderCircle className="animate-spin h-5 w-5 text-white/30 m-auto" />
+                      <div className="flex flex-col justify-between items-center p-2 bg-red-700 rounded-b-lg">
+                        <div className="flex justify-center mb-2">
+                          <p className='text-xl font-bold'>
+                            Clip has been denied.
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div
-                      className="bg-red-500/30 hover:bg-red-600/30 text-white/30 px-4 py-2 w-full rounded-b-md"
-                    >
-                      Delete
                     </div>
                   </div>
                 ))
@@ -431,23 +562,24 @@ function ClipViewer() {
                   deniedClips.map((clip) => (
                     <div key={clip._id} className="p-4 relative animate-fade-in">
                       <div className="bg-red-700/30 p-4 rounded-lg overflow-hidden relative">
-                        <div className="overflow-hidden w-full text-center">
-                          <div className="text-lg font-bold mb-2 bg-black/30 p-2 rounded-md text-center">{clip.streamer}</div>
-                          {isLoggedIn && (
-                            <div className="flex justify-center">
-                              <button
-                                className="absolute top-0 right-0 p-2 m-4 mr-4 text-neutral-800 text-lg font-bold bg-white hover:bg-blue-600 hover:text-white transition duration-300 rounded-md"
-                                onClick={() => setExpandedClip(clip._id)}
-                              >
-                                Rating!
-                              </button>
-                            </div>
-                          )}
-                          <video
-                            className="w-full rounded-t-lg border-8 border-red-700"
-                            src={`https://api.spoekle.com${clip.url}`}
-                            controls
-                          ></video>
+                        <div className="overflow-hidden w-full text-center relative">
+                          <div className="flex justify-center">
+                            <button
+                              className="absolute top-0 right-0 p-2 z-40 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 hover:text-blue-500 rounded-md"
+                              onClick={() => setExpandedClip(clip._id)}
+                            >
+                              Rating!
+                            </button>
+                          </div>
+                          <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">{clip.streamer}</div>
+                          <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
+                            <video
+                              className="w-full rounded-lg border-white dark:border-neutral-800 transition duration-200"
+                              src={`https://api.spoekle.com${clip.url}`}
+                              controls
+                            >
+                            </video>
+                          </div>
                         </div>
                         <div className="flex flex-col justify-between items-center p-2 bg-red-700 rounded-b-lg">
                           <div className="flex justify-center mb-2">
@@ -460,7 +592,7 @@ function ClipViewer() {
                     </div>
                   ))
                 ) : (
-                  <div className="mt-2 mx-4 text-center bg-black/30 p-4 rounded-md font-semibold text-xl text-white col-span-full">No denied clips available.</div>
+                  <div className="my-2 mx-4 text-center bg-black/30 p-4 rounded-md font-semibold text-xl text-white col-span-full">No denied clips available.</div>
                 )
               )}
             </div>
