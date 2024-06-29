@@ -337,11 +337,13 @@ function ClipViewer() {
                   <div className="overflow-hidden w-full text-center relative">
                     {isLoggedIn && (
                       <div className="flex justify-center">
-                        <button
-                          className="absolute top-0 right-0 p-2 z-40 text-neutral-800 text-lg font-bold bg-white hover:text-blue-500 transition duration-300 rounded-md"
-                        >
-                          Rating!
-                        </button>
+                        <div className='absolute top-0 right-0 z-40 p-2 bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 rounded-md'>
+                          <button
+                            className="text-lg font-bold p-1 bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white transition duration-200 hover:text-blue-500 rounded-sm"
+                          >
+                            Rating!
+                          </button>
+                        </div>
                       </div>
                     )}
                     <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">Cube Community</div>
@@ -442,11 +444,13 @@ function ClipViewer() {
                     <div className="overflow-hidden w-full text-center relative">
                       {isLoggedIn && (
                         <div className="flex justify-center">
-                          <button
-                            className="absolute top-0 right-0 p-2 z-40 text-neutral-800 text-lg font-bold bg-white hover:text-blue-500 transition duration-300 rounded-md"
-                          >
-                            Rating!
-                          </button>
+                          <div className='absolute top-0 right-0 z-40 p-2 bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 rounded-md'>
+                            <button
+                              className="text-lg font-bold p-1 bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white transition duration-200 hover:text-blue-500 rounded-sm"
+                            >
+                              Rating!
+                            </button>
+                          </div>
                         </div>
                       )}
                       <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">Cube Community</div>
@@ -484,12 +488,14 @@ function ClipViewer() {
                         <div className="overflow-hidden w-full text-center relative">
                           {isLoggedIn && (
                             <div className="flex justify-center">
-                              <button
-                                className="absolute top-0 right-0 p-2 z-40 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 hover:text-blue-500 rounded-md"
-                                onClick={() => setExpandedClip(clip._id)}
-                              >
-                                Rating!
-                              </button>
+                              <div className='absolute top-0 right-0 z-40 p-2 bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 rounded-md'>
+                                <button
+                                  className="text-lg font-bold p-1 bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white transition duration-200 hover:text-blue-500 rounded-sm"
+                                  onClick={() => setExpandedClip(clip._id)}
+                                >
+                                  Rating!
+                                </button>
+                              </div>
                             </div>
                           )}
                           <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">{clip.streamer}</div>
@@ -536,11 +542,13 @@ function ClipViewer() {
                     <div className="bg-red-700/30 p-4 rounded-lg overflow-hidden relative">
                       <div className="overflow-hidden w-full text-center relative">
                         <div className="flex justify-center">
-                          <button
-                            className="absolute top-0 right-0 p-2 z-40 text-neutral-800 text-lg font-bold bg-white hover:text-blue-500 transition duration-300 rounded-md"
-                          >
-                            Rating!
-                          </button>
+                          <div className='absolute top-0 right-0 z-40 p-2 bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 rounded-md'>
+                            <button
+                              className="text-lg font-bold p-1 bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white transition duration-200 hover:text-blue-500 rounded-sm"
+                            >
+                              Rating!
+                            </button>
+                          </div>
                         </div>
                         <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">Cube Community</div>
                         <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
@@ -564,12 +572,14 @@ function ClipViewer() {
                       <div className="bg-red-700/30 p-4 rounded-lg overflow-hidden relative">
                         <div className="overflow-hidden w-full text-center relative">
                           <div className="flex justify-center">
-                            <button
-                              className="absolute top-0 right-0 p-2 z-40 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 hover:text-blue-500 rounded-md"
-                              onClick={() => setExpandedClip(clip._id)}
-                            >
-                              Rating!
-                            </button>
+                            <div className='absolute top-0 right-0 z-40 p-2 bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 rounded-md'>
+                              <button
+                                className="text-lg font-bold p-1 bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white transition duration-200 hover:text-blue-500 rounded-sm"
+                                onClick={() => setExpandedClip(clip._id)}
+                              >
+                                Rating!
+                              </button>
+                            </div>
                           </div>
                           <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">{clip.streamer}</div>
                           <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
