@@ -230,7 +230,10 @@ function ClipViewer() {
             >
               Close
             </button>
-            <h2 className="text-2xl text-white font-bold mb-4">{clip.streamer}</h2>
+            <h2 className="text-2xl text-white font-bold">{clip.streamer}
+              <span className="text-lg font-normal"> - {clip.title}</span>
+            </h2>
+            <h3 className="text-md text-neutral-200 mb-4">{clip.createdAt}</h3>
             <div className="flex flex-col justify-center items-center">
               {isLoggedIn && (
                 <div className="flex flex-col items-center mt-2">
