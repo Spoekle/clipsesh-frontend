@@ -9,12 +9,17 @@ const MessageComponent = ({ clipId }) => {
 
   useEffect(() => {
     const fetchMessages = async () => {
-      try {
-        const response = await fetch(`https://api.spoekle.com/api/messages?clipId=${clipId}`);
-        const data = await response.json();
-        setMessages(data);
-      } catch (error) {
-        console.error('Failed to fetch messages:', error);
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await fetch(`https://api.spoekle.com/api/messages?clipId=${clipId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await response.json();
+          setMessages(data);
+        } catch (error) {
+          console.error('Failed to fetch messages:', error);
+        }
       }
     };
 
@@ -43,11 +48,13 @@ const MessageComponent = ({ clipId }) => {
   }, []);
 
   const handleSendMessage = async () => {
+    const token = localStorage.getItem('token');
     try {
       const response = await fetch(`https://api.spoekle.com/api/messages`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ clipId, userId: user._id, user: user.username, message: newMessage })
       });
@@ -60,11 +67,13 @@ const MessageComponent = ({ clipId }) => {
   };
 
   const handleDeleteMessage = async (id) => {
+    const token = localStorage.getItem('token');
     try {
       const response = await fetch(`https://api.spoekle.com/api/messages/${id}`, {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ userId: user._id, isAdmin: user.isAdmin })
       });
