@@ -10,6 +10,7 @@ import Navbar from './components/Navbar';
 function UploadClip() {
   const [file, setFile] = useState(null);
   const [streamer, setStreamer] = useState('');
+  const [title, setTitle] = useState('');
   const [clips, setClips] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,6 +26,10 @@ function UploadClip() {
     setStreamer(e.target.value);
   };
 
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
+  };
+
   function handleEditStreamerChange(event, clipId) {
     const newClips = clips.map((clip) => {
       if (clip._id === clipId) {
@@ -37,10 +42,24 @@ function UploadClip() {
     setClips(newClips);
   }
 
+  function handleEditTitleChange(event, clipId) {
+    const newClips = clips.map((clip) => {
+      if (clip._id === clipId) {
+        return { ...clip, title: event.target.value };
+      } else {
+        return clip;
+      }
+    });
+
+    setClips(newClips);
+  }
+
+
   const handleUpload = async () => {
     const formData = new FormData();
     formData.append('clip', file);
     formData.append('streamer', streamer);
+    formData.append('title', title);
 
     try {
       const response = await axios.post(
@@ -106,6 +125,27 @@ function UploadClip() {
     }
   };
 
+  const handleTitleUpdate = async (id) => {
+    try {
+      const clipToUpdate = clips.find((clip) => clip._id === id);
+      const response = await axios.put(
+        `https://api.spoekle.com/api/clips/${id}`,
+        { title: clipToUpdate.title },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log('Update successful:', response.data);
+      alert('Title updated successfully');
+      fetchClips(currentPage);
+    } catch (error) {
+      console.error('Error updating title:', error);
+    }
+  };
+
   useEffect(() => {
     fetchClips();
   }, []);
@@ -142,6 +182,15 @@ function UploadClip() {
               value={streamer}
               onChange={handleStreamerChange}
               placeholder="Enter streamer name"
+              className="mb-2 px-2 py-1 w-1/2 rounded bg-white text-neutral-800"
+            />
+          </div>
+          <div>
+            <input
+              type="text"
+              value={title}
+              onChange={handleTitleChange}
+              placeholder="Enter title"
               className="mb-2 px-2 py-1 w-1/2 rounded bg-white text-neutral-800"
             />
           </div>
@@ -211,6 +260,21 @@ function UploadClip() {
                       <button
                         className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 ml-2 rounded"
                         onClick={() => handleStreamerUpdate(clip._id)}
+                      >
+                        Update
+                      </button>
+                    </div>
+                    <div className="flex justify-center items-center mb-2">
+                      <input
+                        type="text"
+                        placeholder={clip.title}
+                        value={clip.title}
+                        onChange={(event) => handleEditTitleChange(event, clip._id)}
+                        className="px-2 py-1 rounded bg-neutral-200 text-neutral-800"
+                      />
+                      <button
+                        className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 ml-2 rounded"
+                        onClick={() => handleTitleUpdate(clip._id)}
                       >
                         Update
                       </button>
