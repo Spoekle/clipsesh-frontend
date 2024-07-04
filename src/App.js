@@ -4,7 +4,6 @@ import { Navigate } from 'react-router-dom';
 import axios from 'axios';
 import UploadClip from './pages/UploadClip';
 import ClipViewer from './pages/ClipViewer';
-import Login from './pages/Login';
 import Home from './pages/Home';
 import AdminDash from './pages/AdminDash';
 import PrivacyStatement from './pages/PrivacyStatement';
@@ -31,16 +30,17 @@ function App() {
     fetchUser();
   }, []);
 
-  const requireAuth = (Component, isAdminRequired = false) => {
-    return user ? (
-      isAdminRequired && !user.isAdmin ? (
-        <Navigate to="/login" />
-      ) : (
-        <Component />
-      )
-    ) : (
-      <Navigate to="/login" />
-    );
+  const RequireAuth = ({ component: Component, isAdminRequired = false, ...props }) => {
+  
+    if (!user) {
+      return <Navigate to="/clips" replace state={{ alert: "You must be logged in to view this page." }} />;
+    }
+  
+    if (isAdminRequired && !user.isAdmin) {
+      return <Navigate to="/clips" replace state={{ alert: "You must have admin rights to do this!" }} />;
+    }
+  
+    return <Component {...props} />;
   };
 
   return (
@@ -49,19 +49,15 @@ function App() {
           <Route exact path="/" element={<Home />} />
           <Route
             path="/upload"
-            element={requireAuth(UploadClip, true)}
+            element={<RequireAuth component={UploadClip} isAdminRequired={true} />}
           />
           <Route
             path="/clips"
             element={<ClipViewer />}
           />
           <Route
-            path="/login"
-            element={!user ? <Login /> : <Navigate to="/" />}
-          />
-          <Route
             path="/admin"
-            element={requireAuth(AdminDash, true)}
+            element={<RequireAuth component={AdminDash} isAdminRequired={true} />}
           />
           <Route
             path="/privacystatement"
