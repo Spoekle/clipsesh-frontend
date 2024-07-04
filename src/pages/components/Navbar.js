@@ -55,7 +55,7 @@ function Navbar() {
     };
 
     return (
-        <nav className="p-4 z-50 sticky text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200 rounded-b-lg backdrop-blur-sm">
+        <nav className="p-2 z-50 sticky text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200">
             <div className="container mx-auto flex items-center justify-between flex-wrap">
                 <div className=" items-center text-white ml-6 mr-6 inline hover:scale-110 transition duration-200">
                     <Link to="/">
