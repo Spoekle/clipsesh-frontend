@@ -12,6 +12,7 @@ function AdminDash() {
     password: '',
     isAdmin: false
   });
+  const [pendingUsers, setPendingUsers] = useState([]);
   const [config, setConfig] = useState({ denyThreshold: 5 });
   const [clips, setClips] = useState([]);
   const [ratings, setRatings] = useState({});
@@ -23,13 +24,28 @@ function AdminDash() {
       const response = await axios.get('https://api.spoekle.com/api/users', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setUsers(response.data);
+      const allUsers = response.data;
+      setUsers(allUsers);
+      setPendingUsers(allUsers.filter(user => user.status === 'pending'));
     } catch (error) {
       console.error('Error fetching users:', error);
       if (error.response && error.response.status === 403) {
         window.location.href = '/view';
         alert('You do not have permission to view this page.');
       }
+    }
+  };
+
+  const handleApproveUser = async (userId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('https://api.spoekle.com/api/users/approve', { userId }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPendingUsers(pendingUsers.filter(user => user._id !== userId));
+      fetchUsers();
+    } catch (error) {
+      console.error('Error approving user:', error);
     }
   };
 
@@ -98,7 +114,7 @@ function AdminDash() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post('https://api.spoekle.com/api/admin/create-user', formData, {
+      await axios.post('https://api.spoekle.com/api/admin/create-user', { ...formData, status: 'pending' }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('User created successfully');
@@ -165,7 +181,7 @@ function AdminDash() {
   const getCurrentDate = () => {
     const date = new Date();
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
@@ -369,6 +385,34 @@ function AdminDash() {
               </button>
             </form>
           </div>
+        )}
+      </div>
+      <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+        <h2 className="text-3xl font-bold mb-4">Pending User Approvals</h2>
+        {!pendingUsers.length ? (
+          <p className="text-gray-300">No pending users.</p>
+        ) : (
+          pendingUsers.map(user => (
+            <div key={user._id} className="mb-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-gray-300">{user.username}</p>
+                </div>
+                <button
+                  onClick={() => handleApproveUser(user._id)}
+                  className="bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded-md"
+                >
+                  Approve
+                </button>
+                <button
+                  onClick={() => handleDelete(user._id)}
+                  className="bg-red-500 hover:red-600 text-white py-1 px-2 rounded-md"
+                >
+                  Deny
+                </button>
+              </div>
+            </div>
+          ))
         )}
       </div>
       <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
