@@ -15,6 +15,7 @@ function UploadClip() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
+  const [sortOption, setSortOption] = useState('newest');
 
   const token = localStorage.getItem('token');
 
@@ -29,6 +30,7 @@ function UploadClip() {
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
   };
+  
 
   function handleEditStreamerChange(event, clipId) {
     const newClips = clips.map((clip) => {
@@ -87,10 +89,26 @@ function UploadClip() {
   const fetchClips = async () => {
     try {
       const response = await axios.get('https://api.spoekle.com/api/clips');
-      setClips(response.data);
+      sortClips(response.data);
     } catch (error) {
       console.error('Error fetching clips:', error);
     }
+  };
+
+  const sortClips = (clipsToSort = clips) => {
+    let sortedClips = [...clipsToSort];
+    switch (sortOption) {
+      case 'newest':
+        sortedClips.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      case 'oldest':
+        sortedClips.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        break;
+      default:
+        break;
+    }
+    setClips(sortedClips);
+    setCurrentPage(1);
   };
 
   const handleDelete = async (id) => {
@@ -150,6 +168,10 @@ function UploadClip() {
     fetchClips();
   }, []);
 
+  useEffect(() => {
+    sortClips(clips);
+  }, [sortOption]);
+
   const indexOfLastClip = currentPage * itemsPerPage;
   const indexOfFirstClip = indexOfLastClip - itemsPerPage;
   const currentClips = clips.slice(indexOfFirstClip, indexOfLastClip);
@@ -207,6 +229,18 @@ function UploadClip() {
           </div>
         </div>
         <div className='container mt-4 bg-black/30 rounded-md'>
+          <div className="text-center py-4 justify-center items-center z-30">
+            <div className="pb-4 flex justify-center">
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 py-2 px-4 rounded-md border-2 border-neutral-800 dark:border-white"
+              >
+                <option value="newest">Newest Clips</option>
+                <option value="oldest">Oldest Clips</option>
+              </select>
+            </div>
+          </div>
           <h2 className="text-3xl font-bold p-4">Existing Clips</h2>
           <div className="flex justify-center">
             <div className="items-center justify-center bg-white rounded-md py-6 px-4">
@@ -222,30 +256,30 @@ function UploadClip() {
           </div>
           <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 mb-4">
             {!clips.length ? (
-                Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="overflow-hidden w-full animate-pulse text-center bg-white/30 p-4 rounded-md">
-                    <div className="flex p-4 justify-center items-center mb-2">
-                      <input
-                        type="text"
-                        placeholder="Streamer"
-                        value="Streamer"
-                        className="px-2 py-1 rounded bg-neutral-200/30 text-neutral-800/30"
-                      />
-                      <div className="bg-green-500/30 hover:bg-green-600/30 text-white/30 px-2 py-1 ml-2 rounded">
-                        Update
-                      </div>
-                    </div>
-                    <div className="w-full relative" style={{ paddingTop: '56.25%' }}>
-                      <div className="absolute top-0 left-0 w-full h-full rounded-t-md bg-black/30 justify-center items-center flex">
-                        <BiLoaderCircle className="animate-spin h-5 w-5 text-white/30 m-auto" />
-                      </div>
-                    </div>
-                    <div className="bg-red-500/30 hover:bg-red-600/30 text-white/30 px-4 py-2 w-full rounded-b-md">
-                      Delete
+              Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="overflow-hidden w-full animate-pulse text-center bg-white/30 p-4 rounded-md">
+                  <div className="flex p-4 justify-center items-center mb-2">
+                    <input
+                      type="text"
+                      placeholder="Streamer"
+                      value="Streamer"
+                      className="px-2 py-1 rounded bg-neutral-200/30 text-neutral-800/30"
+                    />
+                    <div className="bg-green-500/30 hover:bg-green-600/30 text-white/30 px-2 py-1 ml-2 rounded">
+                      Update
                     </div>
                   </div>
-                ))
-              ) : (
+                  <div className="w-full relative" style={{ paddingTop: '56.25%' }}>
+                    <div className="absolute top-0 left-0 w-full h-full rounded-t-md bg-black/30 justify-center items-center flex">
+                      <BiLoaderCircle className="animate-spin h-5 w-5 text-white/30 m-auto" />
+                    </div>
+                  </div>
+                  <div className="bg-red-500/30 hover:bg-red-600/30 text-white/30 px-4 py-2 w-full rounded-b-md">
+                    Delete
+                  </div>
+                </div>
+              ))
+            ) : (
               currentClips.length > 0 ? (
                 currentClips.map((clip) => (
                   <div key={clip._id} className="overflow-hidden w-full text-center bg-white/30 p-4 rounded-md">

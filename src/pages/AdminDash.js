@@ -15,6 +15,7 @@ function AdminDash() {
   const [config, setConfig] = useState({ denyThreshold: 5 });
   const [clips, setClips] = useState([]);
   const [ratings, setRatings] = useState({});
+  const [downloading, setDownloading] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -174,6 +175,8 @@ function AdminDash() {
       return;
     }
 
+    setDownloading(true);
+
     const filteredClips = clips.filter((clip) => {
       const ratingData = ratings[clip._id];
       return (
@@ -206,6 +209,9 @@ function AdminDash() {
       saveAs(blob, `clips-${currentDate}.zip`);
     } catch (error) {
       console.error('Error downloading clips:', error);
+    }
+    finally {
+      setDownloading(false);
     }
   };
 
@@ -390,6 +396,12 @@ function AdminDash() {
       </div>
       <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
         <h2 className="text-3xl font-bold mb-4">Download Clips</h2>
+        {downloading && (
+          <div className="flex justify-center items-center space-x-2">
+            <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
+            <span>Downloading Clips...</span>
+          </div>
+        )}
         <button
           onClick={downloadClips}
           className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-md focus:outline-none focus:bg-green-600"
