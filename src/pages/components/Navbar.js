@@ -3,39 +3,46 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { FaSun, FaMoon } from 'react-icons/fa';
 import axios from 'axios';
 import logo from '../../media/CC250.png';
+import LoginModal from '../components/LoginModal';
 
 function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [user, setUser] = useState(null);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+    const toggleLoginModal = () => {
+        setIsLoginModalOpen(!isLoginModalOpen);
+    };
+
+    const fetchUser = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const response = await axios.get('https://api.spoekle.com/api/users/me', {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setUser(response.data);
+            } catch (error) {
+                console.error('Error fetching user:', error);
+            }
+        }
+    };
 
     useEffect(() => {
-        const fetchUser = async () => {
-          const token = localStorage.getItem('token');
-          if (token) {
-            try {
-              const response = await axios.get('https://api.spoekle.com/api/users/me', {
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              setUser(response.data);
-            } catch (error) {
-              console.error('Error fetching user:', error);
-            }
-          }
-        };
         fetchUser();
-      }, []);
-    
-      const handleLogout = () => {
+    }, []);
+
+    const handleLogout = () => {
         localStorage.removeItem('token');
         setUser(null);
         window.location.href = '/clips';
-      };
-    
-      const toggleNavbar = () => {
-        setIsOpen(!isOpen);
-      };
+    };
 
-      const [isDarkMode, setIsDarkMode] = useState(() => {
+    const toggleNavbar = () => {
+        setIsOpen(!isOpen);
+    };
+
+    const [isDarkMode, setIsDarkMode] = useState(() => {
         const savedTheme = localStorage.getItem('theme');
         return savedTheme === 'dark' ? true : false;
     });
@@ -117,15 +124,12 @@ function Navbar() {
                                 </button>
                             </>
                         ) : (
-                            <>
-                                <Link
-                                    to="/login"
-                                    className="block mt-4 lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
-                                    onClick={toggleNavbar}
-                                >
-                                    Login!
-                                </Link>
-                            </>
+                            <button
+                                onClick={toggleLoginModal}
+                                className="block mt-4 font-semibold lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
+                            >
+                                Login!
+                            </button>
                         )}
                         <button onClick={toggleDarkMode} className="py-2 px-3 mx-3 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200">
                             {isDarkMode ? <FaSun className="transition duration-500" /> : <FaMoon className="transition duration-500" />}
@@ -133,6 +137,7 @@ function Navbar() {
                     </div>
                 </div>
             </div>
+            {isLoginModalOpen && <LoginModal isLoginModalOpen={isLoginModalOpen} setIsLoginModalOpen={setIsLoginModalOpen} fetchUser={fetchUser} />}
         </nav>
     );
 }
