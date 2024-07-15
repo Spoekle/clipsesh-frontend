@@ -58,49 +58,59 @@ function ProfilePage({ user, setUser }) {
   };
 
   return (
-    <div className="min-h-screen text-white relative">
+    <div className="min-h-screen text-white relative bg-neutral-200 dark:bg-neutral-900 transition duration-200">
       <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
         <div className="flex bg-white/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Profile Page</h1>
-            <h1 className="text-4xl font-bold mb-4 text-center">{user.username}</h1>
+            <h1 className="text-2xl font-semibold mb-4 text-center">{user.username}</h1>
           </div>
         </div>
-      </div> 
-       
-      {message && <p className="text-green-500">{message}</p>}
-      <form onSubmit={handleProfileUpdate}>
-        <div className="mb-4">
-          <label className="block text-gray-700">Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="mt-1 block w-full"
-          />
+      </div>
+      <div className="grid justify-items-center text-white p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center">
+        {message && <p className="my-4 px-4 py-3 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200">{message}</p>}
+        <div className="grid md:grid-cols-2 gap-4 items-center justify-center container">
+          <div className="flex-col items-center justify-center p-4 mt-2 rounded-md text-neutral-900 dark:text-white bg-neutral-300 dark:bg-neutral-800 transition duration-200">
+            <h1 className="text-2xl font-bold mb-4">Edit Profile</h1>
+            <form onSubmit={handleProfileUpdate}>
+              <div className="mb-4">
+                <label className="block text-neutral-800 dark:text-gray-200">New Username</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="mt-1 ml-2 block w-full text-neutral-900"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-neutral-800 dark:text-gray-200">New Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="mt-1 ml-2 block w-full text-neutral-900"
+                />
+              </div>
+              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+                Update
+              </button>
+            </form>
+          </div>
+          <div className="flex-col items-center justify-center p-4 mt-2 rounded-md text-neutral-900 dark:text-white bg-neutral-300 dark:bg-neutral-800 transition duration-200">
+            <h1 className="text-2xl font-bold mb-4">Edit Profile Picture</h1>
+            <img src={user.profilePicture} alt={user.username} className="h-32 w-32 rounded-full" />
+            <form onSubmit={handleProfilePictureUpload} className="mt-4">
+              <div className="mb-4">
+                <label className="block text-neutral-800 dark:text-gray-200">Profile Picture</label>
+                <input type="file" onChange={handleProfilePictureChange} accept="image/*" className="mt-1 block w-full" />
+              </div>
+              <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
+                Upload Profile Picture
+              </button>
+            </form>
+          </div>
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full"
-          />
-        </div>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          Update Profile
-        </button>
-      </form>
-      <form onSubmit={handleProfilePictureUpload} className="mt-4">
-        <div className="mb-4">
-          <label className="block text-gray-700">Profile Picture</label>
-          <input type="file" onChange={handleProfilePictureChange} accept="image/*" className="mt-1 block w-full" />
-        </div>
-        <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
-          Upload Profile Picture
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
