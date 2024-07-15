@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaSun, FaMoon } from 'react-icons/fa';
 import axios from 'axios';
@@ -8,6 +8,8 @@ import LoginModal from '../components/LoginModal';
 function Navbar({ setUser, user }) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     const toggleLoginModal = () => {
         setIsLoginModalOpen(!isLoginModalOpen);
@@ -41,6 +43,23 @@ function Navbar({ setUser, user }) {
         setIsOpen(!isOpen);
     };
 
+    const toggleDropdown = () => {
+        setIsDropdownOpen(!isDropdownOpen);
+    };
+
+    const closeDropdown = (e) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+            setIsDropdownOpen(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('mousedown', closeDropdown);
+        return () => {
+            document.removeEventListener('mousedown', closeDropdown);
+        };
+    }, []);
+
     const [isDarkMode, setIsDarkMode] = useState(() => {
         const savedTheme = localStorage.getItem('theme');
         return savedTheme === 'dark' ? true : false;
@@ -71,7 +90,7 @@ function Navbar({ setUser, user }) {
                 <div className="block lg:hidden">
                     <button
                         onClick={toggleNavbar}
-                        className="flex items-center px-3 py-2 border rounded text-gray-200 border-gray-400 hover:text-white hover:border-white"
+                        className="flex items-center px-3 py-2 hover:border rounded border-white hover: hover:border-white"
                     >
                         <svg
                             className="fill-current h-6 w-6"
@@ -87,7 +106,7 @@ function Navbar({ setUser, user }) {
                     className={`w-full block flex-grow lg:flex lg:items-center lg:w-auto ${isOpen ? 'block' : 'hidden'
                         }`}
                 >
-                    <div className="text-md lg:flex-grow lg:flex lg:justify-end">
+                    <div className="text-md items-center lg:flex-grow lg:flex lg:justify-end">
                         <NavLink
                             to="/clips"
                             className={({ isActive }) =>
@@ -121,14 +140,31 @@ function Navbar({ setUser, user }) {
                                         </NavLink>
                                     </>
                                 )}
-                                <button
-                                    onClick={handleLogout}
-                                    className={({ isActive }) =>
-                                        `block mt-4 lg:inline-block font-semibold lg:mt-0 ${isActive ? 'underline bg-black/20 scale-110' : 'bg-transparent hover:bg-black/20 hover:scale-110'} rounded-md py-2 px-3 mx-3 transition duration-200`
-                                    }
-                                >
-                                    Hello, {user.username}! Logout
-                                </button>
+                                <div className="relative" ref={dropdownRef}>
+                                    <button onClick={toggleDropdown} className="flex items-center mt-4 lg:mt-0 py-2 px-3 mx-3 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200">
+                                        <img src={user.profilePicture} alt={user.username} className="h-10 w-10 rounded-full mr-2" />
+                                        {user.username}
+                                    </button>
+                                    {isDropdownOpen && (
+                                        <div className="absolute right-0 mt-2 w-48 backdrop-blur-md bg-white/30 dark:bg-neutral-900/30 rounded-md shadow-lg py-2">
+                                            <NavLink
+                                                to="/profile"
+                                                className="block px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20 transition duration-200"
+                                                onClick={toggleDropdown}
+                                            >
+                                                Profile
+                                            </NavLink>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="block w-full text-left px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20 transition duration-200"
+                                            >
+                                                Logout
+                                            </button>
+                                        </div>
+
+                                    )}
+
+                                </div>
                             </>
                         ) : (
                             <button
@@ -140,7 +176,7 @@ function Navbar({ setUser, user }) {
                                 Login!
                             </button>
                         )}
-                        <button onClick={toggleDarkMode} className="py-2 px-3 mx-3 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200">
+                        <button onClick={toggleDarkMode} className="py-2 px-3 mt-4 mx-3 lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200">
                             {isDarkMode ? <FaSun className="transition duration-500" /> : <FaMoon className="transition duration-500" />}
                         </button>
                     </div>
