@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
-import Navbar from './components/Navbar';
 import { BiLoaderCircle } from 'react-icons/bi';
+import LoadingBar from 'react-top-loading-bar';
 
 function AdminDash() {
   const [users, setUsers] = useState([]);
@@ -17,6 +17,24 @@ function AdminDash() {
   const [clips, setClips] = useState([]);
   const [ratings, setRatings] = useState({});
   const [downloading, setDownloading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
+
+  const fetchInitialData = async () => {
+    try {
+      await fetchUsers();
+      setProgress(10);
+      await fetchConfig();
+      setProgress(50);
+      await fetchClipsAndRatings();
+      setProgress(100);
+    } catch (error) {
+      console.error('Error fetching initial data:', error);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -87,12 +105,6 @@ function AdminDash() {
       console.error('Error fetching clips and ratings:', error);
     }
   };
-
-  useEffect(() => {
-    fetchUsers();
-    fetchConfig();
-    fetchClipsAndRatings();
-  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -172,6 +184,7 @@ function AdminDash() {
       });
       setUsers(users.filter(user => user._id !== id));
       alert('User deleted successfully');
+      fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
       alert('Failed to delete user. Please try again.');
@@ -249,216 +262,218 @@ function AdminDash() {
   };
 
   return (
-    <div className="grid md:grid-cols-2 grid-cols-1 gap-4 pt-20 bg-gray-900 text-white min-h-screen justify-items-center">
-      <div className='absolute top-0 w-full'>
-        <Navbar />
+    <div>
+      <div className='w-full'>
+        <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
       </div>
-      <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
-        <h2 className="text-3xl font-bold mb-4">Admin Dashboard - Create User</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-300">Username:</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-gray-300">Password:</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="isAdmin" className="block text-gray-300">Admin:</label>
-            <input
-              type="checkbox"
-              id="isAdmin"
-              name="isAdmin"
-              checked={formData.isAdmin}
-              onChange={handleChange}
-              className="form-checkbox h-5 w-5 text-blue-600"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
-          >
-            Create User
-          </button>
-        </form>
-      </div>
-      <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
-        <h2 className="text-3xl font-bold mb-4">Manage Users</h2>
-        {!users.length ? (
-          <div className="flex justify-center items-center space-x-2">
-            <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
-            <span>Loading Users...</span>
-          </div>
-        ) : (
-        users.filter(user => user.username !== 'admin')
-          .map(user => (
-            <div key={user._id} className="mb-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-gray-300">{user.username}</p>
-                  <p className="text-gray-500">{user.isAdmin ? 'Admin' : 'User'}</p>
+      <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 pt-20 bg-gray-900 text-white min-h-screen justify-items-center">
+        <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+          <h2 className="text-3xl font-bold mb-4">Admin Dashboard - Create User</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="username" className="block text-gray-300">Username:</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="password" className="block text-gray-300">Password:</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="isAdmin" className="block text-gray-300">Admin:</label>
+              <input
+                type="checkbox"
+                id="isAdmin"
+                name="isAdmin"
+                checked={formData.isAdmin}
+                onChange={handleChange}
+                className="form-checkbox h-5 w-5 text-blue-600"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+            >
+              Create User
+            </button>
+          </form>
+        </div>
+        <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+          <h2 className="text-3xl font-bold mb-4">Manage Users</h2>
+          {!users.length ? (
+            <div className="flex justify-center items-center space-x-2">
+              <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
+              <span>Loading Users...</span>
+            </div>
+          ) : (
+            users.filter(user => user.username !== 'admin')
+              .map(user => (
+                <div key={user._id} className="mb-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-gray-300">{user.username}</p>
+                      <p className="text-gray-500">{user.isAdmin ? 'Admin' : 'User'}</p>
+                    </div>
+                    <div>
+                      <button
+                        onClick={() => setEditUser(user)}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-2 rounded-md mr-2"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user._id)}
+                        className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded-md"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div>
+              ))
+          )}
+          {editUser && (
+            <div className="max-w-md w-full bg-gray-600 p-8 rounded-md shadow-md my-4">
+              <h2 className="text-3xl font-bold mb-4">Edit {editUser.username}</h2>
+              <form onSubmit={handleEditSubmit}>
+                <div className="mb-4">
+                  <label htmlFor="username" className="block text-gray-300">Username:</label>
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={editUser.username}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={editUser.password || ''}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="isAdmin" className="block text-gray-300">Admin:</label>
+                  <input
+                    type="checkbox"
+                    id="isAdmin"
+                    name="isAdmin"
+                    checked={editUser.isAdmin}
+                    onChange={handleEditChange}
+                    className="form-checkbox h-5 w-5 text-blue-600"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+                >
+                  Update User
+                </button>
+                <button
+                  onClick={() => setEditUser(null)}
+                  className="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md focus:outline-none focus:bg-gray-600 mt-2"
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+        <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+          <h2 className="text-3xl font-bold mb-4">Pending User Approvals</h2>
+          {!pendingUsers.length ? (
+            <p className="text-gray-300">No pending users.</p>
+          ) : (
+            pendingUsers.map(user => (
+              <div key={user._id} className="mb-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-gray-300">{user.username}</p>
+                  </div>
                   <button
-                    onClick={() => setEditUser(user)}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-2 rounded-md mr-2"
+                    onClick={() => handleApproveUser(user._id)}
+                    className="bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded-md"
                   >
-                    Edit
+                    Approve
                   </button>
                   <button
                     onClick={() => handleDelete(user._id)}
-                    className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded-md"
+                    className="bg-red-500 hover:red-600 text-white py-1 px-2 rounded-md"
                   >
-                    Delete
+                    Deny
                   </button>
                 </div>
               </div>
+            ))
+          )}
+        </div>
+        <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+          <h2 className="text-3xl font-bold mb-4">Admin Config</h2>
+          <form onSubmit={handleConfigSubmit}>
+            <div className="mb-4">
+              <label htmlFor="denyThreshold" className="block text-gray-300">Deny Threshold:</label>
+              <input
+                type="number"
+                id="denyThreshold"
+                name="denyThreshold"
+                value={config.denyThreshold}
+                onChange={handleConfigChange}
+                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                required
+              />
             </div>
-          ))
-        )}
-        {editUser && (
-          <div className="max-w-md w-full bg-gray-600 p-8 rounded-md shadow-md my-4">
-            <h2 className="text-3xl font-bold mb-4">Edit {editUser.username}</h2>
-            <form onSubmit={handleEditSubmit}>
-              <div className="mb-4">
-                <label htmlFor="username" className="block text-gray-300">Username:</label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={editUser.username}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={editUser.password || ''}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="isAdmin" className="block text-gray-300">Admin:</label>
-                <input
-                  type="checkbox"
-                  id="isAdmin"
-                  name="isAdmin"
-                  checked={editUser.isAdmin}
-                  onChange={handleEditChange}
-                  className="form-checkbox h-5 w-5 text-blue-600"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
-              >
-                Update User
-              </button>
-              <button
-                onClick={() => setEditUser(null)}
-                className="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md focus:outline-none focus:bg-gray-600 mt-2"
-              >
-                Cancel
-              </button>
-            </form>
-          </div>
-        )}
-      </div>
-      <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
-        <h2 className="text-3xl font-bold mb-4">Pending User Approvals</h2>
-        {!pendingUsers.length ? (
-          <p className="text-gray-300">No pending users.</p>
-        ) : (
-          pendingUsers.map(user => (
-            <div key={user._id} className="mb-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-gray-300">{user.username}</p>
-                </div>
-                <button
-                  onClick={() => handleApproveUser(user._id)}
-                  className="bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded-md"
-                >
-                  Approve
-                </button>
-                <button
-                  onClick={() => handleDelete(user._id)}
-                  className="bg-red-500 hover:red-600 text-white py-1 px-2 rounded-md"
-                >
-                  Deny
-                </button>
-              </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+            >
+              Update Config
+            </button>
+          </form>
+        </div>
+        <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+          <h2 className="text-3xl font-bold mb-4">Download Clips</h2>
+          {downloading && (
+            <div className="flex justify-center items-center space-x-2">
+              <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
+              <span>Downloading Clips...</span>
             </div>
-          ))
-        )}
-      </div>
-      <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
-        <h2 className="text-3xl font-bold mb-4">Admin Config</h2>
-        <form onSubmit={handleConfigSubmit}>
-          <div className="mb-4">
-            <label htmlFor="denyThreshold" className="block text-gray-300">Deny Threshold:</label>
-            <input
-              type="number"
-              id="denyThreshold"
-              name="denyThreshold"
-              value={config.denyThreshold}
-              onChange={handleConfigChange}
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
-              required
-            />
-          </div>
+          )}
           <button
-            type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+            onClick={downloadClips}
+            className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-md focus:outline-none focus:bg-green-600"
           >
-            Update Config
+            Download All Clips
           </button>
-        </form>
-      </div>
-      <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
-        <h2 className="text-3xl font-bold mb-4">Download Clips</h2>
-        {downloading && (
-          <div className="flex justify-center items-center space-x-2">
-            <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
-            <span>Downloading Clips...</span>
-          </div>
-        )}
-        <button
-          onClick={downloadClips}
-          className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-md focus:outline-none focus:bg-green-600"
-        >
-          Download All Clips
-        </button>
-        <h2 className="text-3xl font-bold my-4">Reset Database</h2>
-        <button
-          className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-md focus:outline-none focus:bg-red-600"
-          onClick={handleDeleteAllClips}
-        >
-          Reset Database
-        </button>
+          <h2 className="text-3xl font-bold my-4">Reset Database</h2>
+          <button
+            className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-md focus:outline-none focus:bg-red-600"
+            onClick={handleDeleteAllClips}
+          >
+            Reset Database
+          </button>
+        </div>
       </div>
     </div>
   );
