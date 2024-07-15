@@ -1,6 +1,7 @@
+// src/ClipSesh.js
+
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from './pages/components/Navbar';
 import Footer from './pages/components/Footer';
@@ -9,8 +10,7 @@ import ClipViewer from './pages/ClipViewer';
 import Home from './pages/Home';
 import AdminDash from './pages/AdminDash';
 import PrivacyStatement from './pages/PrivacyStatement';
-
-
+import ProfilePage from './pages/ProfilePage';
 
 function ClipSesh() {
   const [user, setUser] = useState(null);
@@ -32,8 +32,7 @@ function ClipSesh() {
     fetchUser();
   }, []);
 
-  const RequireAuth = ({ component: Component, isAdminRequired = false, ...props }) => {
-
+  const RequireAuth = ({ children, isAdminRequired = false }) => {
     if (!user) {
       return <Navigate to="/clips" replace state={{ alert: "You must be logged in to view this page." }} />;
     }
@@ -42,33 +41,19 @@ function ClipSesh() {
       return <Navigate to="/clips" replace state={{ alert: "You must have admin rights to do this!" }} />;
     }
 
-    return <Component {...props} />;
+    return children;
   };
 
   return (
     <Router>
       <Navbar user={user} setUser={setUser} />
       <Routes>
-        <Route
-          exact path="/"
-          element={<Home />}
-        />
-        <Route
-          path="/upload"
-          element={<RequireAuth component={UploadClip} isAdminRequired={true} />}
-        />
-        <Route
-          path="/clips"
-          element={<ClipViewer />}
-        />
-        <Route
-          path="/admin"
-          element={<RequireAuth component={AdminDash} isAdminRequired={true} />}
-        />
-        <Route
-          path="/privacystatement"
-          element={<PrivacyStatement />}
-        />
+        <Route exact path="/" element={<Home />} />
+        <Route path="/upload" element={<RequireAuth isAdminRequired={true}><UploadClip /></RequireAuth>} />
+        <Route path="/clips" element={<ClipViewer />} />
+        <Route path="/admin" element={<RequireAuth isAdminRequired={true}><AdminDash /></RequireAuth>} />
+        <Route path="/profile" element={<RequireAuth><ProfilePage user={user} setUser={setUser} /></RequireAuth>} />
+        <Route path="/privacystatement" element={<PrivacyStatement />} />
       </Routes>
       <Footer />
     </Router>
