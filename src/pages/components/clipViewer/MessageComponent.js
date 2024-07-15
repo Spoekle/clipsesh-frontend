@@ -25,7 +25,7 @@ const MessageComponent = ({ clipId }) => {
 
     fetchMessages();
 
-    const intervalId = setInterval(fetchMessages, 10000); // Fetch every 10 seconds
+    const intervalId = setInterval(fetchMessages, 10000);
 
     return () => clearInterval(intervalId);
   }, [clipId]);
@@ -95,21 +95,43 @@ const MessageComponent = ({ clipId }) => {
   };
 
   return (
-    <div className="message-container bg-gray-200 p-4 rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Chat:</h2>
-      <div className="messages bg-gray-100 p-2 rounded-lg overflow-y-scroll h-64">
-        {messages.map((msg) => (
-          <div key={msg._id} className="message mb-2 flex justify-between items-center">
-            <p>
-              <strong>{msg.user}</strong>: {msg.message}
-            </p>
-            {user && (user.isAdmin || user._id === msg.userId) && (
-              <button onClick={() => handleDeleteMessage(msg._id)} className="text-red-500 ml-2">
-                <AiOutlineDelete size={20} />
-              </button>
-            )}
-          </div>
-        ))}
+    <div className="message-container w-96 bg-white/30 text-neutral-900 p-4 rounded-lg">
+      <p className="text-center font-bold text-2xl mb-4">Chat:</p>
+      <div className="messages bg-gray-100/40 p-2 rounded-lg overflow-y-scroll h-64">
+        {messages.map((msg) => {
+          const date = new Date(msg.timestamp);
+          const formattedDate = date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+          });
+          const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+          const readableDate = `${formattedDate} at ${formattedTime}`;
+          const isOwnMessage = user && msg.userId === user._id;
+
+          return (
+            <div
+              key={msg._id}
+              className={`mb-4 p-2 rounded-xl flex flex-col w-2/3 ${isOwnMessage ? 'bg-blue-500 ml-auto rounded-br-none text-white' : 'bg-white mr-auto rounded-bl-none text-gray-800'}`}
+            >
+              <p className="text-xs text-gray-600">{readableDate}</p>
+              <div className="flex justify-between items-center">
+                <p>
+                  <strong>{msg.user}:</strong>
+                </p>
+                {user && (user.isAdmin || user._id === msg.userId) && (
+                  <button onClick={() => handleDeleteMessage(msg._id)} className="text-red-500">
+                    <AiOutlineDelete size={20} />
+                  </button>
+                )}
+              </div>
+              <p>{msg.message}</p>
+            </div>
+          );
+        })}
       </div>
       <div className="send-message mt-4 flex">
         <input

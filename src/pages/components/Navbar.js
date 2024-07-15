@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { FaSun, FaMoon } from 'react-icons/fa';
 import axios from 'axios';
 import logo from '../../media/CC250.png';
 import LoginModal from '../components/LoginModal';
 
-function Navbar() {
+function Navbar({ setUser, user }) {
     const [isOpen, setIsOpen] = useState(false);
-    const [user, setUser] = useState(null);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
     const toggleLoginModal = () => {
@@ -64,10 +63,10 @@ function Navbar() {
     return (
         <nav className="p-2 z-50 sticky text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200">
             <div className="container mx-auto flex items-center justify-between flex-wrap">
-                <div className=" items-center text-white ml-6 mr-6 inline hover:scale-110 transition duration-200">
-                    <Link to="/">
+                <div className="items-center text-white ml-6 mr-6 inline hover:scale-110 transition duration-200">
+                    <NavLink to="/">
                         <img src={logo} alt="Logo" className="h-10 mr-2 block" />
-                    </Link>
+                    </NavLink>
                 </div>
                 <div className="block lg:hidden">
                     <button
@@ -88,37 +87,45 @@ function Navbar() {
                     className={`w-full block flex-grow lg:flex lg:items-center lg:w-auto ${isOpen ? 'block' : 'hidden'
                         }`}
                 >
-                    <div className="text-lg lg:flex-grow lg:flex lg:justify-end">
-                        <Link
+                    <div className="text-md lg:flex-grow lg:flex lg:justify-end">
+                        <NavLink
                             to="/clips"
-                            className="block mt-4 lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
+                            className={({ isActive }) =>
+                                `block mt-4 lg:inline-block lg:mt-0 ${isActive ? 'underline bg-black/20 scale-110' : 'bg-transparent hover:bg-black/20 hover:scale-110'} rounded-md py-2 px-3 mx-3 transition duration-200`
+                            }
                             onClick={toggleNavbar}
                         >
                             View Clips!
-                        </Link>
+                        </NavLink>
                         {user ? (
                             <>
                                 {user.isAdmin && (
                                     <>
-                                        <Link
+                                        <NavLink
                                             to="/upload"
-                                            className="block mt-4 font-semibold lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
+                                            className={({ isActive }) =>
+                                                `block mt-4 lg:inline-block font-semibold lg:mt-0 ${isActive ? 'underline bg-black/20 scale-110' : 'bg-transparent hover:bg-black/20 hover:scale-110'} rounded-md py-2 px-3 mx-3 transition duration-200`
+                                            }
                                             onClick={toggleNavbar}
                                         >
                                             Upload!
-                                        </Link>
-                                        <Link
+                                        </NavLink>
+                                        <NavLink
                                             to="/admin"
-                                            className="block mt-4 font-semibold lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
+                                            className={({ isActive }) =>
+                                                `block mt-4 lg:inline-block font-semibold lg:mt-0 ${isActive ? 'underline bg-black/20 scale-110' : 'bg-transparent hover:bg-black/20 hover:scale-110'} rounded-md py-2 px-3 mx-3 transition duration-200`
+                                            }
                                             onClick={toggleNavbar}
                                         >
                                             Admin Dashboard
-                                        </Link>
+                                        </NavLink>
                                     </>
                                 )}
                                 <button
                                     onClick={handleLogout}
-                                    className="block mt-4 font-semibold lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
+                                    className={({ isActive }) =>
+                                        `block mt-4 lg:inline-block font-semibold lg:mt-0 ${isActive ? 'underline bg-black/20 scale-110' : 'bg-transparent hover:bg-black/20 hover:scale-110'} rounded-md py-2 px-3 mx-3 transition duration-200`
+                                    }
                                 >
                                     Hello, {user.username}! Logout
                                 </button>
@@ -126,7 +133,9 @@ function Navbar() {
                         ) : (
                             <button
                                 onClick={toggleLoginModal}
-                                className="block mt-4 font-semibold lg:inline-block lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200 py-2 px-3 mx-3"
+                                className={({ isActive }) =>
+                                    `block mt-4 lg:inline-block font-semibold lg:mt-0 ${isActive ? 'underline bg-black/20 scale-110' : 'bg-transparent hover:bg-black/20 hover:scale-110'} rounded-md py-2 px-3 mx-3 transition duration-200`
+                                }
                             >
                                 Login!
                             </button>

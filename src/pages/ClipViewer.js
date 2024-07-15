@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
 import axios from 'axios';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import LoadingBar from 'react-top-loading-bar';
@@ -7,7 +6,6 @@ import Pagination from '@mui/material/Pagination';
 import background from '../media/background.jpg';
 import placeholder from '../media/placeholder.png';
 import banner1 from '../media/banner1.png';
-import Navbar from './components/Navbar';
 import RatingModal from './components/clipViewer/RatingModal';
 import DeniedClips from './components/clipViewer/DeniedClips';
 import RatedClips from './components/clipViewer/RatedClips';
@@ -27,24 +25,6 @@ function ClipViewer() {
   const [itemsPerPage] = useState(6);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await axios.get('https://api.spoekle.com/api/users/me', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setUser(response.data);
-        } catch (error) {
-          console.error('Error fetching user:', error);
-        }
-      }
-    };
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    checkLoginStatus();
     fetchInitialData();
   }, []);
 
@@ -54,14 +34,30 @@ function ClipViewer() {
 
   const fetchInitialData = async () => {
     try {
+      await fetchUser();
       setProgress(10);
-      await fetchClipsAndRatings();
+      await checkLoginStatus();
       setProgress(50);
+      await fetchClipsAndRatings();
       setProgress(100);
     } catch (error) {
       console.error('Error fetching initial data:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchUser = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const response = await axios.get('https://api.spoekle.com/api/users/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUser(response.data);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
     }
   };
 
@@ -213,7 +209,6 @@ function ClipViewer() {
     <div className="min-h-screen text-white relative">
       <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
-        <Navbar />
       </div>
       <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
         <div className="flex bg-white/20 backdrop-blur-lg justify-center items-center w-full h-full">
@@ -242,15 +237,14 @@ function ClipViewer() {
         </div>
         <div className="container mt-4 justify-center items-center rounded-md" style={{ backgroundImage: `url(${banner1})`, backgroundSize: 'cover' }}>
           <div className='h-full w-full bg-white/20 backdrop-blur-lg rounded-md'>
-            <h2 className="p-4 text-center bg-neutral-800 dark:text-neutral-800 dark:bg-white text-white transition duration-200 backdrop-blur-sm rounded-t-md text-2xl font-bold drop-shadow-md mb-4">Clips</h2>
+            <h2 className="p-4 text-center text-neutral-800 bg-white dark:bg-neutral-800 dark:text-white transition duration-200 backdrop-blur-sm rounded-t-md text-2xl font-bold drop-shadow-md mb-4">Clips</h2>
             <div className="flex justify-center">
-              <div className="items-center justify-center bg-white text-neutral-900 rounded-md py-2 px-4">
+              <div className="items-center bg-white justify-center rounded-md py-2 px-4">
                 <Pagination
                   showFirstButton showLastButton
                   count={totalPages}
                   page={currentPage}
                   onChange={(e, page) => paginate(page)}
-                  color="standard"
                 />
               </div>
             </div>

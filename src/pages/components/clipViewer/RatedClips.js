@@ -7,7 +7,7 @@ const RatedClips = ({ isLoggedIn, isLoading, setExpandedClip, currentClips, rati
     return (
         isLoggedIn && (
             <div className="mt-4">
-                <h2 className="p-4 text-center bg-neutral-800 dark:text-neutral-800 dark:bg-white text-white transition duration-200 backdrop-blur-sm text-2xl font-bold mb-4">You already rated these clips! Good job!</h2>
+                <h2 className="p-4 text-center text-neutral-800 bg-white dark:bg-neutral-800 dark:text-white transition duration-200 backdrop-blur-sm text-2xl font-bold mb-4">You already rated these clips! Good job!</h2>
                 <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     {isLoading ? (
                         Array.from({ length: 6 }).map((_, index) => (

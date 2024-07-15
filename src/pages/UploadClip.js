@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import background from '../media/background.jpg';
+import placeholder from '../media/placeholder.png';
+import banner1 from '../media/banner1.png';
 import { BiLoaderCircle } from 'react-icons/bi';
 import { LinearProgress } from '@mui/material';
 import Pagination from '@mui/material/Pagination';
-
-import Navbar from './components/Navbar';
 
 function UploadClip() {
   const [file, setFile] = useState(null);
@@ -30,7 +30,7 @@ function UploadClip() {
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
   };
-  
+
 
   function handleEditStreamerChange(event, clipId) {
     const newClips = clips.map((clip) => {
@@ -181,14 +181,16 @@ function UploadClip() {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className="text-white min-h-screen relative bg-cc-blue">
-      <div className="relative h-64" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-cc-red filter backdrop-blur-md"></div>
+    <div className="text-white min-h-screen relative">
+      <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
+        <div className="flex bg-white/20 backdrop-blur-lg justify-center items-center w-full h-full">
+          <div className="flex flex-col justify-center items-center">
+            <h1 className="text-4xl font-bold mb-4 text-center">Clip Uploads</h1>
+            <h1 className="text-3xl mb-4 text-center">Upload and alter clips!</h1>
+          </div>
+        </div>
       </div>
-      <div className='absolute top-0 w-full z-50'>
-        <Navbar />
-      </div>
-      <div className='grid justify-items-center text-white p-4 pt-8 bg-gradient-to-b from-cc-red to-cc-blue justify-center items-center'>
+      <div className='grid justify-items-center text-white bg-neutral-200 dark:bg-neutral-900 p-4 pt-8 justify-center items-center'>
         <div className="container mb-4 p-4 bg-black/30 rounded-md justify-center items-center">
           <h2 className="text-3xl font-bold mb-4">Upload Clip</h2>
           <div>
@@ -204,7 +206,7 @@ function UploadClip() {
               value={streamer}
               onChange={handleStreamerChange}
               placeholder="Enter streamer name"
-              className="mb-2 px-2 py-1 w-1/2 rounded bg-white text-neutral-800"
+              className="w-full mb-2 px-2 py-1 rounded bg-white text-neutral-800"
             />
           </div>
           <div>
@@ -213,7 +215,7 @@ function UploadClip() {
               value={title}
               onChange={handleTitleChange}
               placeholder="Enter title"
-              className="mb-2 px-2 py-1 w-1/2 rounded bg-white text-neutral-800"
+              className="w-full mb-2 px-2 py-1 rounded bg-white text-neutral-800"
             />
           </div>
           <button
@@ -228,72 +230,46 @@ function UploadClip() {
             )}
           </div>
         </div>
-        <div className='container mt-4 bg-black/30 rounded-md'>
-          <div className="text-center py-4 justify-center items-center z-30">
-            <div className="pb-4 flex justify-center">
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                className="bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 py-2 px-4 rounded-md border-2 border-neutral-800 dark:border-white"
-              >
-                <option value="newest">Newest Clips</option>
-                <option value="oldest">Oldest Clips</option>
-              </select>
-            </div>
+      </div>
+      <div className='grid justify-items-center text-white p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center'>
+        <div className="text-center py-4 justify-center items-center z-30">
+          <div className="pb-4 flex justify-center">
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 py-2 px-4 rounded-md border-2 border-neutral-800 dark:border-white"
+            >
+              <option value="newest">Newest Clips</option>
+              <option value="oldest">Oldest Clips</option>
+            </select>
           </div>
-          <h2 className="text-3xl font-bold p-4">Existing Clips</h2>
-          <div className="flex justify-center">
-            <div className="items-center justify-center bg-white rounded-md py-6 px-4">
-              <Pagination
-                showFirstButton showLastButton
-                count={totalPages}
-                page={currentPage}
-                onChange={(e, page) => paginate(page)}
-                color="primary"
-                size="large"
-              />
+        </div>
+        <div className="container mt-4 justify-center items-center rounded-md" style={{ backgroundImage: `url(${banner1})`, backgroundSize: 'cover' }}>
+          <div className='h-full w-full bg-white/20 backdrop-blur-lg rounded-md'>
+            <h2 className="p-4 text-center text-neutral-800 bg-white dark:bg-neutral-800 dark:text-white transition duration-200 backdrop-blur-sm rounded-t-md text-2xl font-bold drop-shadow-md mb-4">Existing Clips</h2>
+            <div className="flex justify-center">
+              <div className="items-center bg-white justify-center rounded-md py-2 px-4">
+                <Pagination
+                  showFirstButton showLastButton
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={(e, page) => paginate(page)}
+                />
+              </div>
             </div>
-          </div>
-          <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 mb-4">
-            {!clips.length ? (
-              Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="overflow-hidden w-full animate-pulse text-center bg-white/30 p-4 rounded-md">
-                  <div className="flex p-4 justify-center items-center mb-2">
-                    <input
-                      type="text"
-                      placeholder="Streamer"
-                      value="Streamer"
-                      className="px-2 py-1 rounded bg-neutral-200/30 text-neutral-800/30"
-                    />
-                    <div className="bg-green-500/30 hover:bg-green-600/30 text-white/30 px-2 py-1 ml-2 rounded">
-                      Update
-                    </div>
-                  </div>
-                  <div className="w-full relative" style={{ paddingTop: '56.25%' }}>
-                    <div className="absolute top-0 left-0 w-full h-full rounded-t-md bg-black/30 justify-center items-center flex">
-                      <BiLoaderCircle className="animate-spin h-5 w-5 text-white/30 m-auto" />
-                    </div>
-                  </div>
-                  <div className="bg-red-500/30 hover:bg-red-600/30 text-white/30 px-4 py-2 w-full rounded-b-md">
-                    Delete
-                  </div>
-                </div>
-              ))
-            ) : (
-              currentClips.length > 0 ? (
-                currentClips.map((clip) => (
-                  <div key={clip._id} className="overflow-hidden w-full text-center bg-white/30 p-4 rounded-md">
+            <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {!clips.length ? (
+                Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="p-4 relative animate-pulse drop-shadow-md">
                     <div className="flex justify-center items-center mb-2">
                       <input
                         type="text"
-                        placeholder={clip.streamer}
-                        value={clip.streamer}
-                        onChange={(event) => handleEditStreamerChange(event, clip._id)}
+                        placeholder={"Cube Community"}
+                        value={"Cube Community"}
                         className="px-2 py-1 rounded bg-neutral-200 text-neutral-800"
                       />
                       <button
                         className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 ml-2 rounded"
-                        onClick={() => handleStreamerUpdate(clip._id)}
                       >
                         Update
                       </button>
@@ -301,31 +277,74 @@ function UploadClip() {
                     <div className="flex justify-center items-center mb-2">
                       <input
                         type="text"
-                        placeholder={clip.title}
-                        value={clip.title}
-                        onChange={(event) => handleEditTitleChange(event, clip._id)}
+                        placeholder={"Cube Community"}
+                        value={"Cube Community"}
                         className="px-2 py-1 rounded bg-neutral-200 text-neutral-800"
                       />
                       <button
                         className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 ml-2 rounded"
-                        onClick={() => handleTitleUpdate(clip._id)}
                       >
                         Update
                       </button>
                     </div>
-                    <video className="w-full rounded-t-md" src={`https://api.spoekle.com${clip.url}`} controls />
-                    <button
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 w-full rounded-b-md"
-                      onClick={() => handleDelete(clip._id)}
-                    >
+                    <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
+                      <img src={placeholder} alt="Logo" className="w-full rounded-t-lg border-8 border-white opacity-50" />
+                    </div>
+                    <div className="bg-red-500/30 hover:bg-red-600/30 text-white/30 px-4 py-2 w-full rounded-b-md">
                       Delete
-                    </button>
+                    </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center text-lg">No clips found</div>
-              )
-            )}
+                currentClips.length > 0 ? (
+                  currentClips.map((clip) => (
+                    <div key={clip._id} className="p-4 relative animate-fade drop-shadow-md">
+                      <div className="overflow-hidden w-full text-center relative">
+                        <div className="flex justify-center items-center mb-2">
+                          <input
+                            type="text"
+                            placeholder={clip.streamer}
+                            value={clip.streamer}
+                            onChange={(event) => handleEditStreamerChange(event, clip._id)}
+                            className="px-2 py-1 rounded bg-neutral-200 text-neutral-800"
+                          />
+                          <button
+                            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 ml-2 rounded"
+                            onClick={() => handleStreamerUpdate(clip._id)}
+                          >
+                            Update
+                          </button>
+                        </div>
+                        <div className="flex justify-center items-center mb-2">
+                          <input
+                            type="text"
+                            placeholder={clip.title}
+                            value={clip.title}
+                            onChange={(event) => handleEditTitleChange(event, clip._id)}
+                            className="px-2 py-1 rounded bg-neutral-200 text-neutral-800"
+                          />
+                          <button
+                            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 ml-2 rounded"
+                            onClick={() => handleTitleUpdate(clip._id)}
+                          >
+                            Update
+                          </button>
+                        </div>
+                        <video className="w-full rounded-t-md" src={`https://api.spoekle.com${clip.url}`} controls />
+                        <button
+                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 w-full rounded-b-md"
+                          onClick={() => handleDelete(clip._id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center text-lg">No clips found</div>
+                )
+              )}
+            </div>
           </div>
         </div>
       </div>

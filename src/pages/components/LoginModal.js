@@ -3,7 +3,6 @@ import axios from 'axios';
 
 const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
   const [formData, setFormData] = useState({ username: '', password: '' });
-  const [loginSuccess, setLoginSuccess] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
 
   const handleChange = (e) => {
@@ -30,11 +29,8 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
       } else {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('username', response.data.username);
-        setLoginSuccess(true);
-        setTimeout(() => {
-          setIsLoginModalOpen(false);
-          fetchUser();
-        }, 100);
+        setIsLoginModalOpen(false);
+        fetchUser();
       }
     } catch (error) {
       console.error('Error during submission:', error);
@@ -52,6 +48,12 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
     }
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
   const handleFormToggle = () => {
     setIsRegister(!isRegister);
   };
@@ -65,30 +67,32 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
         >
           <div className="modal-content rounded-lg relative animate-jump-in animate-duration-300 flex">
             <div className="text-white flex items-center justify-center">
-              <div className="max-w-md w-full bg-white dark:bg-neutral-800 backdrop-blur-lg p-8 rounded-md shadow-md">
+              <div className="max-w-md w-full bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white backdrop-blur-lg p-8 rounded-md shadow-md">
                 <h2 className="text-3xl font-bold mb-4">{isRegister ? 'Register' : 'ClipSesh! Login'}</h2>
                 <form onSubmit={handleSubmit}>
                   <div className="mb-4">
-                    <label htmlFor="username" className="block text-gray-300">Username:</label>
+                    <label htmlFor="username" className="block text-neutral-900 dark:text-gray-300">Username:</label>
                     <input
                       type="text"
                       id="username"
                       name="username"
                       value={formData.username}
+                      onKeyDown={handleKeyDown}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-700"
+                      className="w-full px-3 py-2 bg-neutral-200 dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-300 dark:focus:bg-neutral-700"
                       required
                     />
                   </div>
                   <div className="mb-4">
-                    <label htmlFor="password" className="block text-gray-300">Password:</label>
+                    <label htmlFor="password" className="block text-neutral-900 dark:text-gray-300">Password:</label>
                     <input
                       type="password"
                       id="password"
                       name="password"
                       value={formData.password}
+                      onKeyDown={handleKeyDown}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-700"
+                      className="w-full px-3 py-2 bg-neutral-200 dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-300 dark:focus:bg-neutral-700"
                       required
                     />
                   </div>
@@ -107,11 +111,6 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
                     {isRegister ? 'Already have an account? Login' : 'Don’t have an account? Register'}
                   </button>
                 </div>
-                {loginSuccess && !isRegister && (
-                  <div className="mt-4 text-green-500">
-                    Login successful!
-                  </div>
-                )}
               </div>
             </div>
           </div>
