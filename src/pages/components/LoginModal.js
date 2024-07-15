@@ -31,6 +31,7 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
         localStorage.setItem('username', response.data.username);
         setIsLoginModalOpen(false);
         fetchUser();
+        window.location.reload();
       }
     } catch (error) {
       console.error('Error during submission:', error);
