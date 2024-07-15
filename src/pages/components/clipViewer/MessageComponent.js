@@ -115,10 +115,11 @@ const MessageComponent = ({ clipId }) => {
           return (
             <div
               key={msg._id}
-              className={`mb-4 p-2 rounded-xl flex flex-col w-2/3 ${isOwnMessage ? 'bg-blue-500 ml-auto rounded-br-none text-white' : 'bg-white mr-auto rounded-bl-none text-gray-800'}`}
+              className={`mb-4 p-2 rounded-xl flex flex-col w-4/5 ${isOwnMessage ? 'bg-blue-500 ml-auto rounded-br-none text-white' : 'bg-white mr-auto rounded-bl-none text-gray-800'}`}
             >
               <p className="text-xs text-gray-600">{readableDate}</p>
               <div className="flex justify-between items-center">
+                <img src={user.profilePicture} alt={user.username} className="h-8 w-8 rounded-full mr-2"></img>
                 <p>
                   <strong>{msg.user}:</strong>
                 </p>
