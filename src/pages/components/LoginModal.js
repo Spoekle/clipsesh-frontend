@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { FaDiscord } from "react-icons/fa";
 
 const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -14,7 +15,16 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
 
   const handleLoginClickOutside = (event) => {
     if (event.target.className.includes('login-modal-overlay')) {
+      const modalContent = document.querySelector('.modal-content');
+      const modalOverlay = document.querySelector('.login-modal-overlay');
+      modalContent.style.transition = 'transform 50ms';
+      modalContent.style.transform = 'scale(0)';
+      modalOverlay.style.transition = 'opacity 500ms';
+      modalOverlay.style.opacity = '0';
+
+      setTimeout(() => {
         setIsLoginModalOpen(false);
+      }, 200);
     }
   };
 
@@ -57,6 +67,10 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
 
   const handleFormToggle = () => {
     setIsRegister(!isRegister);
+  };
+
+  const handleDiscordLogin = () => {
+    window.location.href = `https://api.spoekle.com/api/auth/discord`;
   };
 
   return (
@@ -104,6 +118,16 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
                     {isRegister ? 'Register' : 'Login'}
                   </button>
                 </form>
+                {!isRegister && (
+                  <div className="mt-4 text-center">
+                    <button
+                      onClick={handleDiscordLogin}
+                      className="flex items-center justify-center w-full bg-blurple hover:bg-blurple-dark text-white py-2 rounded-md focus:outline-none focus:bg-blurple-dark transition duration-300"
+                    >
+                      <FaDiscord className="mr-1" /> Login with Discord
+                    </button>
+                  </div>
+                )}
                 <div className="mt-4 text-center">
                   <button
                     onClick={handleFormToggle}
