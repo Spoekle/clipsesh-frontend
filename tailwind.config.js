@@ -9,6 +9,8 @@ module.exports = {
       colors: {
         'cc-blue': '#00aeef',
         'cc-red': '#ee283b',
+        'blurple': '#5539cc',
+        'blurple-dark': '#38248e',
       },
     },
   },
