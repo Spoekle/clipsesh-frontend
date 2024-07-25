@@ -57,6 +57,22 @@ function ProfilePage({ user, setUser }) {
     }
   };
 
+  const linkDiscordAccount = () => {
+    window.location.href = `https://api.spoekle.com/api/auth/discord?siteUserId=${user._id}`;
+  };
+
+  const unlinkDiscordAccount = () => {
+    const response = axios.put(`https://api.spoekle.com/api/discord/users/${user._id}`, { discordId: "", discordUsername: "" }, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    if (response.data.message) {
+      setUser({ ...user, username });
+      setMessage('Discord account unlinked successfully');
+    }
+  };
+
   return (
     <div className="min-h-screen text-white relative bg-neutral-200 dark:bg-neutral-900 transition duration-200">
       <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
@@ -79,7 +95,7 @@ function ProfilePage({ user, setUser }) {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="mt-1 ml-2 block w-full text-neutral-900"
+                  className="mt-1 block w-full text-neutral-900"
                 />
               </div>
               <div className="mb-4">
@@ -88,7 +104,7 @@ function ProfilePage({ user, setUser }) {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1 ml-2 block w-full text-neutral-900"
+                  className="mt-1 block w-full text-neutral-900"
                 />
               </div>
               <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
@@ -108,6 +124,24 @@ function ProfilePage({ user, setUser }) {
                 Upload Profile Picture
               </button>
             </form>
+          </div>
+          <div className="items-center justify-center p-4 mt-2 rounded-md text-neutral-900 dark:text-white bg-neutral-300 dark:bg-neutral-800 transition duration-200">
+            <h1 className="text-2xl font-bold mb-4">Discord</h1>
+            {user.discordId ? (
+              <>
+                <p>Discord account linked</p>
+                <button onClick={unlinkDiscordAccount} className="flex items-center justify-center w-full bg-blurple hover:bg-blurple-dark text-white py-2 rounded-md focus:outline-none focus:bg-blurple-dark transition duration-300">
+                  Unlink?
+                </button>
+              </>
+            ) : (
+              <>
+                <p>Link your Discord account to access more features</p>
+                <button onClick={linkDiscordAccount} className="flex items-center justify-center w-full bg-blurple hover:bg-blurple-dark text-white py-2 rounded-md focus:outline-none focus:bg-blurple-dark transition duration-300">
+                  Link Discord Account
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
