@@ -9,6 +9,8 @@ import Pagination from '@mui/material/Pagination';
 
 function UploadClip() {
   const [file, setFile] = useState(null);
+  const [link, setLink] = useState('');
+  const [uploadType, setUploadType] = useState('file');
   const [streamer, setStreamer] = useState('');
   const [title, setTitle] = useState('');
   const [clips, setClips] = useState([]);
@@ -21,6 +23,10 @@ function UploadClip() {
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
+  };
+
+  const handleLinkChange = (e) => {
+    setLink(e.target.value);
   };
 
   const handleStreamerChange = (e) => {
@@ -59,9 +65,14 @@ function UploadClip() {
 
   const handleUpload = async () => {
     const formData = new FormData();
-    formData.append('clip', file);
     formData.append('streamer', streamer);
     formData.append('title', title);
+
+    if (uploadType === 'file') {
+      formData.append('clip', file);
+    } else {
+      formData.append('link', link);
+    }
 
     try {
       const response = await axios.post(
@@ -193,13 +204,39 @@ function UploadClip() {
       <div className='grid justify-items-center text-white bg-neutral-200 dark:bg-neutral-900 p-4 pt-8 justify-center items-center'>
         <div className="container mb-4 p-4 bg-black/30 rounded-md justify-center items-center">
           <h2 className="text-3xl font-bold mb-4">Upload Clip</h2>
-          <div>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              className="mb-2"
-            />
+          <div className="flex justify-center mb-4">
+            <button
+              className={`px-4 py-2 rounded-l ${uploadType === 'file' ? 'bg-blue-500' : 'bg-gray-500'}`}
+              onClick={() => setUploadType('file')}
+            >
+              Upload File
+            </button>
+            <button
+              className={`px-4 py-2 rounded-r ${uploadType === 'link' ? 'bg-blue-500' : 'bg-gray-500'}`}
+              onClick={() => setUploadType('link')}
+            >
+              Upload Link
+            </button>
           </div>
+          {uploadType === 'file' ? (
+            <div>
+              <input
+                type="file"
+                onChange={handleFileChange}
+                className="mb-2"
+              />
+            </div>
+          ) : (
+            <div>
+              <input
+                type="text"
+                value={link}
+                onChange={handleLinkChange}
+                placeholder="Enter clip URL"
+                className="w-full mb-2 px-2 py-1 rounded bg-white text-neutral-800"
+              />
+            </div>
+          )}
           <div>
             <input
               type="text"
@@ -330,7 +367,7 @@ function UploadClip() {
                             Update
                           </button>
                         </div>
-                        <video className="w-full rounded-t-md" src={`https://api.spoekle.com${clip.url}`} controls />
+                        <video className="w-full rounded-t-md" src={`${clip.url}`} controls />
                         <button
                           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 w-full rounded-b-md"
                           onClick={() => handleDelete(clip._id)}
