@@ -28,31 +28,31 @@ const RatingModal = ({ expandedClip, clips, setExpandedClip, isLoggedIn, ratings
 
     return ReactDOM.createPortal(
         <div
-            className="modal-overlay fixed inset-0 bg-black/20 backdrop-blur-sm flex justify-center items-center z-50 animate-fade-in duration-300"
+            className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 animate-fade-in duration-300"
             onClick={handleClickOutside}
         >
             <div className="modal-content relative max-h-screen max-w-screen rounded-lg overflow-hidden">
                 <video
-                    className="absolute top-0 left-0 w-full h-full object-cover z-0"
-                    src={`https://api.spoekle.com${clip.url}`}
+                    className="absolute top-0 left-0 w-full h-full object-cover z-0 hidden md:block"
+                    src={`${clip.url}`}
                     autoPlay
                     loop
                     muted
                 ></video>
-                <div className="relative z-10 flex flex-col max-h-screen max-w-screen bg-gradient-to-b from-transparent/40 from-40% to-black backdrop-blur-md rounded-lg drop-shadow-xl">
+                <div className="relative z-10 flex flex-col max-h-screen max-w-screen bg-gradient-to-b from-white/30 from-40% to-black backdrop-blur-md rounded-lg drop-shadow-xl">
                     <div className="clip-content flex-grow items-center justify-center">
-                        <div className='flex bg-white/30 backdrop-blur-lg w-full rounded-t-lg drop-shadow-md'>
+                        <div className='flex bg-black/20 rounded-t-lg drop-shadow-md w-full'>
                             <div className='flex justify-between w-full'>
                                 <div className='flex flex-col p-4'>
-                                    <h2 className="text-xl text-neutral-900 font-bold">
+                                    <h2 className="text-xl text-white font-bold">
                                         {clip.streamer}
                                     </h2>
-                                    <h3 className="text-neutral-800 text-sm">{clip.title}</h3>
-                                    <h3 className="text-sm text-neutral-800">Uploaded on: {readableDate}</h3>
+                                    <h3 className="text-gray-200 text-sm">{clip.title}</h3>
+                                    <h3 className="text-sm text-gray-200">Uploaded on: {readableDate}</h3>
                                 </div>
-                                <div className='flex justify-end'>
+                                <div className='flex justify-end m-4'>
                                     <button
-                                        className="text-white bg-red-500/60 hover:bg-red-600 transition duration-300 h-full w-24 p-2"
+                                        className="text-white bg-red-500/60 hover:bg-red-500/80 rounded-md transition duration-300 p-2"
                                         onClick={() => setExpandedClip(null)}
                                     >
                                         Close
@@ -63,7 +63,7 @@ const RatingModal = ({ expandedClip, clips, setExpandedClip, isLoggedIn, ratings
                         {isLoggedIn && (
                             <div className="flex p-4">
                                 <div className="flex flex-col w-96">
-                                    <div className="bg-white/30 text-neutral-900 p-4 rounded-lg mb-2 w-full">
+                                    <div className="bg-black/20 text-white p-4 drop-shadow-md rounded-lg mb-2 w-full">
                                         <p className="text-center font-bold text-2xl mb-4">Ratings:</p>
                                         <div className="flex flex-col w-full">
                                             {ratings[expandedClip] && ratings[expandedClip].ratingCounts ? (
@@ -107,7 +107,7 @@ const RatingModal = ({ expandedClip, clips, setExpandedClip, isLoggedIn, ratings
                                             )}
                                         </div>
                                     </div>
-                                    <div className="bg-white/30 text-neutral-900 p-4 rounded-lg mb-2">
+                                    <div className="bg-black/30 text-neutral-900 p-4 drop-shadow-md rounded-lg mb-2">
                                         <div className="flex justify-center w-full">
                                             {[1, 2, 3, 4].map((rate) => (
                                                 <button
@@ -129,7 +129,7 @@ const RatingModal = ({ expandedClip, clips, setExpandedClip, isLoggedIn, ratings
                                         </div>
                                     </div>
                                     <div className="flex md:hidden justify-center items-center">
-                                        <p className="text-center bg-white rounded-md p-4 font-bold text-lg mt-4">View this page on a computer to chat!</p>
+                                        <p className="text-center bg-white drop-shadow-md rounded-lg p-4 font-bold text-lg mt-4">View this page on a computer to chat!</p>
                                     </div>
                                 </div>
                                 <div className="flex flex-col max-w-96 items-center ml-4">
