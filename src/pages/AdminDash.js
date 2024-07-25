@@ -10,7 +10,7 @@ function AdminDash() {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    isAdmin: false
+    role: 'user'
   });
   const [pendingUsers, setPendingUsers] = useState([]);
   const [config, setConfig] = useState({ denyThreshold: 5 });
@@ -43,12 +43,12 @@ function AdminDash() {
         headers: { Authorization: `Bearer ${token}` }
       });
       const allUsers = response.data;
-      setUsers(allUsers);
+      setUsers(allUsers.filter(user => user.status === 'approved'));
       setPendingUsers(allUsers.filter(user => user.status === 'pending'));
     } catch (error) {
       console.error('Error fetching users:', error);
       if (error.response && error.response.status === 403) {
-        window.location.href = '/view';
+        window.location.href = '/clips';
         alert('You do not have permission to view this page.');
       }
     }
@@ -126,11 +126,11 @@ function AdminDash() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post('https://api.spoekle.com/api/admin/create-user', { ...formData, status: 'pending' }, {
+      await axios.post('https://api.spoekle.com/api/admin/create-user', { ...formData, status: 'approved' }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('User created successfully');
-      setFormData({ username: '', password: '', isAdmin: false });
+      setFormData({ username: '', password: '', role: 'user' });
       fetchUsers();
     } catch (error) {
       console.error('Error creating user:', error);
@@ -164,7 +164,14 @@ function AdminDash() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`https://api.spoekle.com/api/users/${editUser._id}`, editUser, {
+      const dataToSubmit = { ...editUser };
+
+      // Remove password if it is empty
+      if (!dataToSubmit.password) {
+        delete dataToSubmit.password;
+      }
+
+      await axios.put(`https://api.spoekle.com/api/admin/users/${editUser._id}`, dataToSubmit, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setEditUser(null);
@@ -295,15 +302,19 @@ function AdminDash() {
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="isAdmin" className="block text-gray-300">Admin:</label>
-              <input
-                type="checkbox"
-                id="isAdmin"
-                name="isAdmin"
-                checked={formData.isAdmin}
+              <label htmlFor="role" className="block text-gray-300">Role:</label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
                 onChange={handleChange}
-                className="form-checkbox h-5 w-5 text-blue-600"
-              />
+                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+              >
+                <option value="user">User</option>
+                <option value="editor">Editor</option>
+                <option value="uploader">Uploader</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
             <button
               type="submit"
@@ -326,8 +337,12 @@ function AdminDash() {
                 <div key={user._id} className="mb-4">
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-gray-300">{user.username}</p>
-                      <p className="text-gray-500">{user.isAdmin ? 'Admin' : 'User'}</p>
+                      <div className='flex ustify-between items-center'>
+                        <img src={user.profilePicture} alt={user.username} className="h-10 w-10 object-cover rounded-full mr-2"></img>
+                        <p className="text-gray-300">{user.username}
+                          <p className="text-gray-500">{user.role}</p>
+                        </p>
+                      </div>
                     </div>
                     <div>
                       <button
@@ -375,15 +390,19 @@ function AdminDash() {
                   />
                 </div>
                 <div className="mb-4">
-                  <label htmlFor="isAdmin" className="block text-gray-300">Admin:</label>
-                  <input
-                    type="checkbox"
-                    id="isAdmin"
-                    name="isAdmin"
-                    checked={editUser.isAdmin}
+                  <label htmlFor="role" className="block text-gray-300">Role:</label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={editUser.role}
                     onChange={handleEditChange}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
+                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                  >
+                    <option value="user">User</option>
+                    <option value="editor">Editor</option>
+                    <option value="uploader">Uploader</option>
+                    <option value="admin">Admin</option>
+                  </select>
                 </div>
                 <button
                   type="submit"
