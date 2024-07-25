@@ -56,7 +56,7 @@ const MessageComponent = ({ clipId }) => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ clipId, userId: user._id, user: user.username, message: newMessage })
+        body: JSON.stringify({ clipId, userId: user._id, user: user.username, message: newMessage, profilePicture: user.profilePicture }),
       });
       const newMsg = await response.json();
       setMessages((prevMessages) => [...prevMessages, newMsg]);
@@ -75,7 +75,7 @@ const MessageComponent = ({ clipId }) => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ userId: user._id, isAdmin: user.isAdmin })
+        body: JSON.stringify({ userId: user._id, role: user.role })
       });
 
       if (!response.ok) {
@@ -95,9 +95,9 @@ const MessageComponent = ({ clipId }) => {
   };
 
   return (
-    <div className="message-container w-96 bg-white/30 text-neutral-900 p-4 rounded-lg">
+    <div className="message-container w-96 bg-black/30 text-white p-4 drop-shadow-md rounded-lg">
       <p className="text-center font-bold text-2xl mb-4">Chat:</p>
-      <div className="messages bg-gray-100/40 p-2 rounded-lg overflow-y-scroll h-64">
+      <div className="messages bg-gray-100/40 p-2 rounded-lg overflow-y-scroll h-80">
         {messages.map((msg) => {
           const date = new Date(msg.timestamp);
           const formattedDate = date.toLocaleDateString('en-US', {
@@ -115,26 +115,28 @@ const MessageComponent = ({ clipId }) => {
           return (
             <div
               key={msg._id}
-              className={`mb-4 p-2 rounded-xl flex flex-col w-4/5 ${isOwnMessage ? 'bg-blue-500 ml-auto rounded-br-none text-white' : 'bg-white mr-auto rounded-bl-none text-gray-800'}`}
+              className={`mb-4 w-4/5 ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}
             >
-              <p className="text-xs text-gray-600">{readableDate}</p>
-              <div className="flex justify-between items-center">
-                <img src={user.profilePicture} alt={user.username} className="h-8 w-8 rounded-full mr-2"></img>
-                <p>
-                  <strong>{msg.user}:</strong>
-                </p>
-                {user && (user.isAdmin || user._id === msg.userId) && (
-                  <button onClick={() => handleDeleteMessage(msg._id)} className="text-red-500">
-                    <AiOutlineDelete size={20} />
-                  </button>
-                )}
+              <div className='flex flex-col m-4'>
+                <div className='flex items-center m-2 rounded-xl w-full'>
+                  <div className={`flex relative flex-col p-2 rounded-xl w-full drop-shadow-md ${isOwnMessage ? 'bg-blue-500 rounded-br-none text-white' : 'bg-white rounded-bl-none text-gray-800'}`}>
+                    <img src={msg.profilePicture} alt={msg.user} className={`absolute -bottom-4 h-8 w-8 rounded-full drop-shadow-md ${isOwnMessage ? '-right-4' : '-left-4'}`}></img>
+                    <p className="font-semibold">{msg.user}:</p>
+                    <p>{msg.message}</p>
+                    <p className={`flex text-gray-800 text-xs ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>{readableDate}</p> 
+                  </div>
+                  {user && (user.role === 'admin' || user._id === msg.userId) && (
+                    <button onClick={() => handleDeleteMessage(msg._id)} className={`ml-2 text-red-500`}>
+                      <AiOutlineDelete size={20} />
+                    </button>
+                  )}
+                </div>   
               </div>
-              <p>{msg.message}</p>
             </div>
           );
         })}
       </div>
-      <div className="send-message mt-4 flex">
+      <div className="send-message text-neutral-900 mt-4 flex">
         <input
           type="text"
           value={newMessage}
@@ -145,7 +147,7 @@ const MessageComponent = ({ clipId }) => {
         />
         <button
           onClick={handleSendMessage}
-          className="bg-blue-500 text-white p-2 rounded-r-lg flex items-center"
+          className="text-blue-500 bg-white p-2 rounded-r-lg flex items-center hover:text-blue-400 transition duration-200"
         >
           <AiOutlineSend size={24} />
         </button>
