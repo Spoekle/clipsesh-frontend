@@ -1,5 +1,3 @@
-// src/ClipSesh.js
-
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
@@ -16,6 +14,15 @@ function ClipSesh() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    const extractTokenFromURL = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      if (token) {
+        localStorage.setItem('token', token);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    };
+
     const fetchUser = async () => {
       const token = localStorage.getItem('token');
       if (token) {
@@ -29,6 +36,8 @@ function ClipSesh() {
         }
       }
     };
+
+    extractTokenFromURL();
     fetchUser();
   }, []);
 
@@ -37,7 +46,7 @@ function ClipSesh() {
       return <Navigate to="/clips" replace state={{ alert: "You must be logged in to view this page." }} />;
     }
 
-    if (isAdminRequired && !user.isAdmin) {
+    if (isAdminRequired && !user.role === 'user') {
       return <Navigate to="/clips" replace state={{ alert: "You must have admin rights to do this!" }} />;
     }
 
