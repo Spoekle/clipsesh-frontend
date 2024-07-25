@@ -97,7 +97,6 @@ function Navbar({ setUser, user }) {
                             viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg"
                         >
-                            <title>Menu</title>
                             <path d="M0 3h20v2H0zM0 7h20v2H0zM0 11h20v2H0z" />
                         </svg>
                     </button>
@@ -118,7 +117,7 @@ function Navbar({ setUser, user }) {
                         </NavLink>
                         {user ? (
                             <>
-                                {user.isAdmin && (
+                                {user.role === 'admin' && (
                                     <>
                                         <NavLink
                                             to="/upload"
@@ -146,11 +145,14 @@ function Navbar({ setUser, user }) {
                                         {user.username}
                                     </button>
                                     {isDropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-48 backdrop-blur-md bg-white/30 dark:bg-neutral-900/30 rounded-md shadow-lg py-2">
+                                        <div className="absolute lg:right-0 mt-2 w-48 backdrop-blur-md bg-white/30 dark:bg-neutral-900/30 rounded-md shadow-lg py-2">
                                             <NavLink
                                                 to="/profile"
                                                 className="block px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20 transition duration-200"
-                                                onClick={toggleDropdown}
+                                                onClick={() => {
+                                                    toggleDropdown();
+                                                    toggleNavbar();
+                                                }}
                                             >
                                                 Profile
                                             </NavLink>
@@ -177,7 +179,7 @@ function Navbar({ setUser, user }) {
                             </button>
                         )}
                         <button onClick={toggleDarkMode} className="py-2 px-3 mt-4 mx-3 lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200">
-                            {isDarkMode ? <FaSun className="transition duration-500" /> : <FaMoon className="transition duration-500" />}
+                            {isDarkMode ? <FaSun className="transition duration-200" /> : <FaMoon className="transition duration-200" />}
                         </button>
                     </div>
                 </div>
