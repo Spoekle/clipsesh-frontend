@@ -73,7 +73,7 @@ const RatedClips = ({ isLoggedIn, isLoading, setExpandedClip, currentClips, rati
                                             <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
                                                 <video
                                                     className="w-full rounded-lg border-white dark:border-neutral-800 transition duration-200"
-                                                    src={`https://api.spoekle.com${clip.url}`}
+                                                    src={`${clip.url}`}
                                                     controls
                                                 >
                                                 </video>
