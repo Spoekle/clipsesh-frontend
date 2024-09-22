@@ -3,13 +3,12 @@ import axios from 'axios';
 import background from '../media/background.jpg';
 import placeholder from '../media/placeholder.png';
 import banner1 from '../media/banner1.png';
-import { BiLoaderCircle } from 'react-icons/bi';
 import { LinearProgress } from '@mui/material';
 import Pagination from '@mui/material/Pagination';
 
 function UploadClip() {
   const [file, setFile] = useState(null);
-  const [link, setLink] = useState('');
+  const [url, setUrl] = useState('');
   const [uploadType, setUploadType] = useState('file');
   const [streamer, setStreamer] = useState('');
   const [title, setTitle] = useState('');
@@ -25,8 +24,8 @@ function UploadClip() {
     setFile(e.target.files[0]);
   };
 
-  const handleLinkChange = (e) => {
-    setLink(e.target.value);
+  const handleUrlChange = (e) => {
+    setUrl(e.target.value);
   };
 
   const handleStreamerChange = (e) => {
@@ -71,7 +70,7 @@ function UploadClip() {
     if (uploadType === 'file') {
       formData.append('clip', file);
     } else {
-      formData.append('link', link);
+      formData.append('url', url);
     }
 
     try {
@@ -119,7 +118,6 @@ function UploadClip() {
         break;
     }
     setClips(sortedClips);
-    setCurrentPage(1);
   };
 
   const handleDelete = async (id) => {
@@ -212,8 +210,8 @@ function UploadClip() {
               Upload File
             </button>
             <button
-              className={`px-4 py-2 rounded-r ${uploadType === 'link' ? 'bg-blue-500' : 'bg-gray-500'}`}
-              onClick={() => setUploadType('link')}
+              className={`px-4 py-2 rounded-r ${uploadType === 'url' ? 'bg-blue-500' : 'bg-gray-500'}`}
+              onClick={() => setUploadType('url')}
             >
               Upload Link
             </button>
@@ -230,8 +228,8 @@ function UploadClip() {
             <div>
               <input
                 type="text"
-                value={link}
-                onChange={handleLinkChange}
+                value={url}
+                onChange={handleUrlChange}
                 placeholder="Enter clip URL"
                 className="w-full mb-2 px-2 py-1 rounded bg-white text-neutral-800"
               />
