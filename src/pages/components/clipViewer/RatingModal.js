@@ -9,8 +9,29 @@ const RatingModal = ({ expandedClip, clips, setExpandedClip, isLoggedIn, ratings
 
     const handleClickOutside = (event) => {
         if (event.target.className.includes('modal-overlay')) {
-            setExpandedClip(null);
+            const modalContent = document.querySelector('.modal-content');
+            const modalOverlay = document.querySelector('.modal-overlay');
+            modalContent.style.transition = 'transform 600ms';
+            modalContent.style.transform = 'scale(0)';
+            modalOverlay.style.transition = 'opacity 200ms';
+            modalOverlay.style.opacity = '0';
+
+            setTimeout(() => {
+                setExpandedClip(null);
+              }, 200);
         }
+    };
+
+    const handleCloseButton = () => {
+        const modalContent = document.querySelector('.modal-content');
+        const modalOverlay = document.querySelector('.modal-overlay');
+        modalContent.style.transition = 'transform 600ms';
+        modalContent.style.transform = 'scale(0)';
+        modalOverlay.style.transition = 'opacity 200ms';
+        modalOverlay.style.opacity = '0';
+        setTimeout(() => {
+            setExpandedClip(null);
+          }, 200);
     };
 
     const date = new Date(clip.createdAt);
@@ -53,7 +74,7 @@ const RatingModal = ({ expandedClip, clips, setExpandedClip, isLoggedIn, ratings
                                 <div className='flex justify-end m-4'>
                                     <button
                                         className="text-white bg-red-500/60 hover:bg-red-500/80 rounded-md transition duration-300 p-2"
-                                        onClick={() => setExpandedClip(null)}
+                                        onClick={() => handleCloseButton()}
                                     >
                                         Close
                                     </button>
