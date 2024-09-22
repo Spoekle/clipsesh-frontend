@@ -17,9 +17,9 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
     if (event.target.className.includes('login-modal-overlay')) {
       const modalContent = document.querySelector('.modal-content');
       const modalOverlay = document.querySelector('.login-modal-overlay');
-      modalContent.style.transition = 'transform 50ms';
+      modalContent.style.transition = 'transform 600ms';
       modalContent.style.transform = 'scale(0)';
-      modalOverlay.style.transition = 'opacity 500ms';
+      modalOverlay.style.transition = 'opacity 200ms';
       modalOverlay.style.opacity = '0';
 
       setTimeout(() => {
@@ -80,7 +80,7 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
           className="login-modal-overlay fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm flex justify-center items-center z-50"
           onClick={handleLoginClickOutside}
         >
-          <div className="modal-content rounded-lg relative animate-jump-in animate-duration-300 flex">
+          <div className="modal-content rounded-lg relative flex">
             <div className="text-white flex items-center justify-center">
               <div className="max-w-md w-full bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white backdrop-blur-lg p-8 rounded-md shadow-md">
                 <h2 className="text-3xl font-bold mb-4">{isRegister ? 'Register' : 'ClipSesh! Login'}</h2>
