@@ -68,7 +68,7 @@ function ProfilePage({ user, setUser }) {
       },
     });
     if (response.data.message) {
-      setUser({ ...user, username });
+      setUser({ ...user, discordId: response.data.discordId, discordUsername: response.data.discordUsername });
       setMessage('Discord account unlinked successfully');
     }
   };
