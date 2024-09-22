@@ -3,6 +3,8 @@ import axios from 'axios';
 import { saveAs } from 'file-saver';
 import { BiLoaderCircle } from 'react-icons/bi';
 import LoadingBar from 'react-top-loading-bar';
+import background from '../media/background.jpg';
+import { FaDiscord } from "react-icons/fa";
 
 function AdminDash() {
   const [users, setUsers] = useState([]);
@@ -269,13 +271,21 @@ function AdminDash() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen text-white flex flex-col justify-center items-center bg-neutral-900">
       <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
       </div>
-      <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 pt-20 bg-gray-900 text-white min-h-screen justify-items-center">
-        <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
-          <h2 className="text-3xl font-bold mb-4">Admin Dashboard - Create User</h2>
+      <div className="w-full flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
+        <div className="flex bg-white/20 backdrop-blur-lg justify-center items-center w-full h-full">
+          <div className="flex flex-col justify-center items-center">
+            <h1 className="text-4xl font-bold mb-4 text-center">Admin Dashboard</h1>
+            <h1 className="text-3xl mb-4 text-center">Manage the unmanaged...</h1>
+          </div>
+        </div>
+      </div>
+      <div className="container grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 pt-20 bg-neutral-900 text-white min-h-screen justify-items-center">
+        <div className="max-w-md w-full bg-neutral-800 p-8 m-4 rounded-md shadow-md my-4">
+          <h2 className="text-3xl font-bold mb-4">Create Users</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label htmlFor="username" className="block text-gray-300">Username:</label>
@@ -285,7 +295,7 @@ function AdminDash() {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
                 required
               />
             </div>
@@ -297,7 +307,7 @@ function AdminDash() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
                 required
               />
             </div>
@@ -308,7 +318,7 @@ function AdminDash() {
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
               >
                 <option value="user">User</option>
                 <option value="editor">Editor</option>
@@ -324,46 +334,60 @@ function AdminDash() {
             </button>
           </form>
         </div>
-        <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+        <div className="col-span-2 w-full bg-neutral-800 p-8 m-4 rounded-md shadow-md my-4">
           <h2 className="text-3xl font-bold mb-4">Manage Users</h2>
-          {!users.length ? (
-            <div className="flex justify-center items-center space-x-2">
-              <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
-              <span>Loading Users...</span>
-            </div>
-          ) : (
-            users.filter(user => user.username !== 'admin')
-              .map(user => (
-                <div key={user._id} className="mb-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className='flex ustify-between items-center'>
-                        <img src={user.profilePicture} alt={user.username} className="h-10 w-10 object-cover rounded-full mr-2"></img>
-                        <p className="text-gray-300">{user.username}
-                          <p className="text-gray-500">{user.role}</p>
-                        </p>
+          <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+            {!users.length ? (
+              <div className="flex justify-center items-center space-x-2">
+                <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
+                <span>Loading Users...</span>
+              </div>
+            ) : (
+              users.filter(user => user.username !== 'admin')
+                .map(user => (
+                  <div
+                    key={user._id}
+                    className="relative bg-neutral-900 p-4 w-full rounded-lg hover:bg-neutral-950 transition duration-200 overflow-hidden"
+                  >
+                    <div
+                      className="absolute inset-0 bg-cover bg-center filter blur-sm"
+                      style={{
+                        backgroundImage: `url(${user.profilePicture})`,
+                      }}
+                    ></div>
+                    <div className="absolute inset-0 bg-black opacity-50 rounded-lg"></div>
+                    <div className="relative z-10 flex justify-between items-center">
+                      <div>
+                        <div className='relative flex justify-between items-center overflow-hidden'>
+                          <div className='flex-col justify-between items-center'>
+                            <p className="flex justify-between items-center text-white">{user.username}
+                              <FaDiscord className="ml-2" style={{ color: user.discordId ? '#7289da' : '#747f8d' }} />
+                            </p>
+                            <p className="text-gray-300">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <button
+                          onClick={() => setEditUser(user)}
+                          className="bg-orange-500/50 hover:bg-orange-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md mr-2 transition duration-200"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(user._id)}
+                          className="bg-red-500/50 hover:bg-red-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md transition duration-200"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
-                    <div>
-                      <button
-                        onClick={() => setEditUser(user)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-2 rounded-md mr-2"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user._id)}
-                        className="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded-md"
-                      >
-                        Delete
-                      </button>
-                    </div>
                   </div>
-                </div>
-              ))
-          )}
+                ))
+            )}
+          </div>
           {editUser && (
-            <div className="max-w-md w-full bg-gray-600 p-8 rounded-md shadow-md my-4">
+            <div className="max-w-md w-full bg-neutral-700 p-8 rounded-md shadow-md my-4">
               <h2 className="text-3xl font-bold mb-4">Edit {editUser.username}</h2>
               <form onSubmit={handleEditSubmit}>
                 <div className="mb-4">
@@ -374,7 +398,7 @@ function AdminDash() {
                     name="username"
                     value={editUser.username}
                     onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                    className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
                     required
                   />
                 </div>
@@ -386,7 +410,7 @@ function AdminDash() {
                     name="password"
                     value={editUser.password || ''}
                     onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                    className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
                   />
                 </div>
                 <div className="mb-4">
@@ -396,7 +420,7 @@ function AdminDash() {
                     name="role"
                     value={editUser.role}
                     onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                    className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
                   >
                     <option value="user">User</option>
                     <option value="editor">Editor</option>
@@ -406,13 +430,13 @@ function AdminDash() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600 transition duration-200"
                 >
                   Update User
                 </button>
                 <button
                   onClick={() => setEditUser(null)}
-                  className="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md focus:outline-none focus:bg-gray-600 mt-2"
+                  className="w-full bg-neutral-800 hover:bg-neutral-600 text-white py-2 rounded-md focus:outline-none focus:bg-neutral-600 mt-2 transition duration-200"
                 >
                   Cancel
                 </button>
@@ -420,13 +444,13 @@ function AdminDash() {
             </div>
           )}
         </div>
-        <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+        <div className="max-w-md w-full bg-neutral-800 p-8 m-4 rounded-md shadow-md my-4">
           <h2 className="text-3xl font-bold mb-4">Pending User Approvals</h2>
           {!pendingUsers.length ? (
             <p className="text-gray-300">No pending users.</p>
           ) : (
             pendingUsers.map(user => (
-              <div key={user._id} className="mb-4">
+              <div key={user._id} className="mb-4 bg-neutral-950 p-4 rounded-lg hover:bg-neutral-900 transition duration-200">
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="text-gray-300">{user.username}</p>
@@ -448,7 +472,7 @@ function AdminDash() {
             ))
           )}
         </div>
-        <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+        <div className="max-w-md w-full bg-neutral-800 p-8 m-4 rounded-md shadow-md my-4">
           <h2 className="text-3xl font-bold mb-4">Admin Config</h2>
           <form onSubmit={handleConfigSubmit}>
             <div className="mb-4">
@@ -459,7 +483,7 @@ function AdminDash() {
                 name="denyThreshold"
                 value={config.denyThreshold}
                 onChange={handleConfigChange}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:bg-gray-600"
+                className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
                 required
               />
             </div>
@@ -471,7 +495,7 @@ function AdminDash() {
             </button>
           </form>
         </div>
-        <div className="max-w-md w-full bg-gray-800 p-8 m-4 rounded-md shadow-md my-4">
+        <div className="max-w-md w-full bg-neutral-800 p-8 m-4 rounded-md shadow-md my-4">
           <h2 className="text-3xl font-bold mb-4">Download Clips</h2>
           {downloading && (
             <div className="flex justify-center items-center space-x-2">
@@ -481,13 +505,13 @@ function AdminDash() {
           )}
           <button
             onClick={downloadClips}
-            className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-md focus:outline-none focus:bg-green-600"
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-md focus:outline-none focus:bg-green-600"
           >
             Download All Clips
           </button>
           <h2 className="text-3xl font-bold my-4">Reset Database</h2>
           <button
-            className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-md focus:outline-none focus:bg-red-600"
+            className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-md focus:outline-none focus:bg-red-600"
             onClick={handleDeleteAllClips}
           >
             Reset Database
