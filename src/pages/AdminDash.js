@@ -270,6 +270,14 @@ function AdminDash() {
     }
   };
 
+  const toggleEditUser = (user) => {
+    if (editUser && editUser._id === user._id) {
+      setEditUser(null);
+    } else {
+      setEditUser(user);
+    }
+  };
+
   return (
     <div className="min-h-screen text-white flex flex-col justify-center items-center bg-neutral-900">
       <div className='w-full'>
@@ -347,7 +355,8 @@ function AdminDash() {
                 .map(user => (
                   <div
                     key={user._id}
-                    className="relative bg-neutral-900 p-4 w-full rounded-lg hover:bg-neutral-950 transition duration-200 overflow-hidden"
+                    className={`relative bg-neutral-900 p-4 w-full rounded-lg hover:bg-neutral-950 transition-all duration-300 overflow-hidden ${editUser && editUser._id === user._id ? 'max-h-screen' : 'max-h-32'}`}
+                    style={{ transition: 'max-height 0.3s ease-in-out' }}
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center filter blur-sm"
@@ -357,22 +366,18 @@ function AdminDash() {
                     ></div>
                     <div className="absolute inset-0 bg-black opacity-50 rounded-lg"></div>
                     <div className="relative z-10 flex justify-between items-center">
-                      <div>
-                        <div className='relative flex justify-between items-center overflow-hidden'>
-                          <div className='flex-col justify-between items-center'>
-                            <p className="flex justify-between items-center text-white">{user.username}
-                              <FaDiscord className="ml-2" style={{ color: user.discordId ? '#7289da' : '#747f8d' }} />
-                            </p>
-                            <p className="text-gray-300">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
-                          </div>
-                        </div>
+                      <div className='flex-col justify-between items-center'>
+                        <p className="flex justify-between items-center text-white">{user.username}
+                          <FaDiscord className="ml-2" style={{ color: user.discordId ? '#7289da' : '#747f8d' }} />
+                        </p>
+                        <p className="text-gray-300">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
                       </div>
                       <div>
                         <button
-                          onClick={() => setEditUser(user)}
+                          onClick={() => toggleEditUser(user)}
                           className="bg-orange-500/50 hover:bg-orange-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md mr-2 transition duration-200"
                         >
-                          Edit
+                          {editUser && editUser._id === user._id ? 'Cancel' : 'Edit'}
                         </button>
                         <button
                           onClick={() => handleDelete(user._id)}
@@ -382,67 +387,66 @@ function AdminDash() {
                         </button>
                       </div>
                     </div>
+                    <div className={`transition-transform duration-300 ${editUser && editUser._id === user._id ? 'scale-y-100' : 'scale-y-0'} origin-top`}>
+                      {editUser && editUser._id === user._id && (
+                        <div className="max-w-md w-full bg-black/20 p-4 rounded-md shadow-md backdrop-blur-2xl">
+                          <h2 className="text-3xl font-bold mb-4">Edit {editUser.username}</h2>
+                          <form onSubmit={handleEditSubmit}>
+                            <div className="mb-4">
+                              <label htmlFor="username" className="block text-gray-300">Username:</label>
+                              <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                value={editUser.username}
+                                onChange={handleEditChange}
+                                className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
+                                required
+                              />
+                            </div>
+                            <div className="mb-4">
+                              <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
+                              <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                value={editUser.password || ''}
+                                onChange={handleEditChange}
+                                className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
+                              />
+                            </div>
+                            <div className="mb-4">
+                              <label htmlFor="role" className="block text-gray-300">Role:</label>
+                              <select
+                                id="role"
+                                name="role"
+                                value={editUser.role}
+                                onChange={handleEditChange}
+                                className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
+                              >
+                                <option value="user">User</option>
+                                <option value="editor">Editor</option>
+                                <option value="uploader">Uploader</option>
+                                <option value="admin">Admin</option>
+                              </select>
+                            </div>
+                            <div className="flex justify-end">
+                              <button
+                                type="submit"
+                                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded-md transition duration-200"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))
             )}
           </div>
-          {editUser && (
-            <div className="max-w-md w-full bg-neutral-700 p-8 rounded-md shadow-md my-4">
-              <h2 className="text-3xl font-bold mb-4">Edit {editUser.username}</h2>
-              <form onSubmit={handleEditSubmit}>
-                <div className="mb-4">
-                  <label htmlFor="username" className="block text-gray-300">Username:</label>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    value={editUser.username}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={editUser.password || ''}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="role" className="block text-gray-300">Role:</label>
-                  <select
-                    id="role"
-                    name="role"
-                    value={editUser.role}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                  >
-                    <option value="user">User</option>
-                    <option value="editor">Editor</option>
-                    <option value="uploader">Uploader</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600 transition duration-200"
-                >
-                  Update User
-                </button>
-                <button
-                  onClick={() => setEditUser(null)}
-                  className="w-full bg-neutral-800 hover:bg-neutral-600 text-white py-2 rounded-md focus:outline-none focus:bg-neutral-600 mt-2 transition duration-200"
-                >
-                  Cancel
-                </button>
-              </form>
-            </div>
-          )}
+
         </div>
         <div className="max-w-md w-full bg-neutral-800 p-8 m-4 rounded-md shadow-md my-4">
           <h2 className="text-3xl font-bold mb-4">Pending User Approvals</h2>
