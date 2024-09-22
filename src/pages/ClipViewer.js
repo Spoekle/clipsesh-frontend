@@ -138,7 +138,6 @@ function ClipViewer() {
         break;
     }
     setClips(sortedClips);
-    setCurrentPage(1);
   };
 
   const handleError = (error, action) => {
@@ -295,7 +294,7 @@ function ClipViewer() {
                       }
                     })
                     .map(clip => (
-                      <div key={clip._id} className="p-4 relative animate-fade drop-shadow-md">
+                      <div key={clip._id} className="p-4 relative drop-shadow-md">
                         <div className="overflow-hidden w-full text-center relative">
                           {isLoggedIn && (
                             <div className="flex justify-center">
@@ -309,7 +308,9 @@ function ClipViewer() {
                               </div>
                             </div>
                           )}
-                          <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">{clip.streamer}</div>
+                          <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">
+                            <a href={clip.link} className='cursor-pointer'>{clip.streamer}</a>
+                          </div>
                           <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
                             <video
                               className="w-full rounded-lg border-white dark:border-neutral-800 transition duration-200"
@@ -345,8 +346,7 @@ function ClipViewer() {
 
           </div>
         </div>
-
-        <DeniedClips isLoggedIn={isLoggedIn} isLoading={isLoading} deniedClips={deniedClips} setExpandedClip={setExpandedClip} />
+        
 
         <RatingModal
           expandedClip={expandedClip}
@@ -360,5 +360,5 @@ function ClipViewer() {
     </div >
   );
 }
-
+// <DeniedClips isLoggedIn={isLoggedIn} isLoading={isLoading} deniedClips={deniedClips} setExpandedClip={setExpandedClip} />
 export default ClipViewer;
