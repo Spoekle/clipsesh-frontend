@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import AdminDash from './pages/AdminDash';
 import PrivacyStatement from './pages/PrivacyStatement';
 import ProfilePage from './pages/ProfilePage';
+import Stats from './pages/Stats';
 
 function ClipSesh() {
   const [user, setUser] = useState(null);
@@ -42,11 +43,39 @@ function ClipSesh() {
   }, []);
 
   const RequireAuth = ({ children, isAdminRequired = false }) => {
+    const [loading, setLoading] = useState(true);
+    const [showLoadingScreen, setShowLoadingScreen] = useState(true);
+  
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setShowLoadingScreen(false); // Hide loading screen after 1 second
+      }, 500);
+  
+      return () => clearTimeout(timer); // Cleanup timeout on unmount
+    }, []);
+  
+    useEffect(() => {
+      if (!loading) {
+        setLoading(false); // Set loading to false after checking authentication
+      }
+    }, [loading]);
+
+    if (showLoadingScreen) {
+      return (
+        <div className="absolute z-70 w-full h-full">
+        <div className="absolute inset-0 bg-gradient-to-br from-cc-blue to-cc-red"></div>
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center backdrop-blur-2xl">
+          <h1 className="sm:text-3xl md:text-5xl font-bold text-white animate-pulse">Checking Authentication...</h1>
+        </div>
+      </div>
+      );
+    }
+
     if (!user) {
       return <Navigate to="/clips" replace state={{ alert: "You must be logged in to view this page." }} />;
     }
 
-    if (isAdminRequired && !user.role === 'user') {
+    if (isAdminRequired && user.role !== 'admin') {
       return <Navigate to="/clips" replace state={{ alert: "You must have admin rights to do this!" }} />;
     }
 
@@ -62,6 +91,7 @@ function ClipSesh() {
         <Route path="/clips" element={<ClipViewer />} />
         <Route path="/admin" element={<RequireAuth isAdminRequired={true}><AdminDash /></RequireAuth>} />
         <Route path="/profile" element={<RequireAuth><ProfilePage user={user} setUser={setUser} /></RequireAuth>} />
+        <Route path="/stats" element={<RequireAuth><Stats user={user} setUser={setUser} /></RequireAuth>} />
         <Route path="/privacystatement" element={<PrivacyStatement />} />
       </Routes>
       <Footer />
