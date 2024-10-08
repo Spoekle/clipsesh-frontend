@@ -83,9 +83,9 @@ function ProfilePage({ user, setUser }) {
           </div>
         </div>
       </div>
-      <div className="grid justify-items-center text-white p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center">
+      <div className="grid text-white p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center">
         {message && <p className="my-4 px-4 py-3 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200">{message}</p>}
-        <div className="grid md:grid-cols-2 gap-4 items-center justify-center container">
+        <div className="grid md:grid-cols-2 gap-4 justify-center container">
           <div className="flex-col items-center justify-center p-4 mt-2 rounded-md text-neutral-900 dark:text-white bg-neutral-300 dark:bg-neutral-800 transition duration-200">
             <h1 className="text-2xl font-bold mb-4">Edit Profile</h1>
             <form onSubmit={handleProfileUpdate}>
@@ -95,7 +95,7 @@ function ProfilePage({ user, setUser }) {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="mt-1 block w-full text-neutral-900"
+                  className="mt-1 block w-full text-neutral-900 rounded-md p-1"
                 />
               </div>
               <div className="mb-4">
@@ -104,7 +104,7 @@ function ProfilePage({ user, setUser }) {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1 block w-full text-neutral-900"
+                  className="mt-1 block w-full text-neutral-900 rounded-md p-1"
                 />
               </div>
               <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
@@ -126,18 +126,18 @@ function ProfilePage({ user, setUser }) {
             </form>
           </div>
           <div className="items-center justify-center p-4 mt-2 rounded-md text-neutral-900 dark:text-white bg-neutral-300 dark:bg-neutral-800 transition duration-200">
-            <h1 className="text-2xl font-bold mb-4">Discord</h1>
+            <h1 className="text-2xl font-bold">Discord</h1>
             {user.discordId ? (
               <>
                 <p>Discord account linked</p>
-                <button onClick={unlinkDiscordAccount} className="flex items-center justify-center w-full bg-blurple hover:bg-blurple-dark text-white py-2 rounded-md focus:outline-none focus:bg-blurple-dark transition duration-300">
+                <button onClick={unlinkDiscordAccount} className="flex items-center justify-center w-full my-2 bg-blurple hover:bg-blurple-dark text-white py-2 rounded-md focus:outline-none focus:bg-blurple-dark transition duration-300">
                   Unlink?
                 </button>
               </>
             ) : (
               <>
                 <p>Link your Discord account to access more features</p>
-                <button onClick={linkDiscordAccount} className="flex items-center justify-center w-full bg-blurple hover:bg-blurple-dark text-white py-2 rounded-md focus:outline-none focus:bg-blurple-dark transition duration-300">
+                <button onClick={linkDiscordAccount} className="flex items-center justify-center w-full my-2 bg-blurple hover:bg-blurple-dark text-white py-2 rounded-md focus:outline-none focus:bg-blurple-dark transition duration-300">
                   Link Discord Account
                 </button>
               </>
