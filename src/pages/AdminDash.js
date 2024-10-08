@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 import { BiLoaderCircle } from 'react-icons/bi';
@@ -20,6 +21,8 @@ function AdminDash() {
   const [ratings, setRatings] = useState({});
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [userRatings, setUserRatings] = useState([]);
+  const [seasonInfo, setSeasonInfo] = useState({});
 
   useEffect(() => {
     fetchInitialData();
@@ -30,8 +33,10 @@ function AdminDash() {
       await fetchUsers();
       setProgress(10);
       await fetchConfig();
+      setProgress(30);
+      getSeason();
       setProgress(50);
-      await fetchClipsAndRatings();
+      await fetchClipsAndRatings();   
       setProgress(100);
     } catch (error) {
       console.error('Error fetching initial data:', error);
@@ -107,6 +112,68 @@ function AdminDash() {
       console.error('Error fetching clips and ratings:', error);
     }
   };
+
+  useEffect(() => {
+    if (Object.keys(ratings).length > 0) {
+      countRatingsPerUser();
+    }
+  }, [ratings]);
+
+  const countRatingsPerUser = () => {
+  const userRatingCount = {};
+
+  // Initialize userRatingCount with all users, exept UploadBot and roles editor and uploader
+  users
+    .filter(user => user.username !== 'UploadBot' && !['editor', 'uploader'].includes(user.role))
+    .forEach(user => {
+      userRatingCount[user.username] = 0;
+    });
+
+  const clipLength = Object.keys(ratings).length;
+  setSeasonInfo(prevSeasonInfo => ({
+    ...prevSeasonInfo,
+    clipAmount: clipLength
+  }));
+
+  Object.keys(ratings).forEach(clipId => {
+    const clipRatingCounts = ratings[clipId].ratingCounts;
+
+    // Check if clipRatingCounts is an array
+    if (!Array.isArray(clipRatingCounts)) {
+      console.error(`clipRatingCounts for Clip ID ${clipId} is not an array:`, clipRatingCounts);
+      return;
+    }
+
+    // Loop through each rating count entry in the array
+    clipRatingCounts.forEach(ratingData => {
+      if (ratingData.users && ratingData.users.length > 0) {
+        // Iterate over the users who rated this clip
+        ratingData.users.forEach(user => {
+          if (userRatingCount[user.username]) {
+            userRatingCount[user.username]++;
+          } else {
+            userRatingCount[user.username] = 1;
+          }
+        });
+      } else {
+        console.log(`No users found for ratingData:`, ratingData);
+      }
+    });
+  });
+
+  console.log('User Rating Count:', userRatingCount); // Log final userRatingCount
+
+  // Convert userRatingCount object into an array of objects with username
+  const userRatingCounts = Object.keys(userRatingCount).map(username => ({
+    username,
+    ClipsRated: userRatingCount[username]
+  }));
+
+  // Sort userRatingCounts by ClipsRated in descending order
+  userRatingCounts.sort((a, b) => b.ClipsRated - a.ClipsRated);
+
+  setUserRatings(userRatingCounts);
+};
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -278,6 +345,41 @@ function AdminDash() {
     }
   };
 
+  const getSeason = () => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    let season = '';
+  
+    if (currentMonth >= 0 && currentMonth <= 2) {
+      season = 'Winter';
+    } else if (currentMonth >= 3 && currentMonth <= 5) {
+      season = 'Spring';
+    } else if (currentMonth >= 6 && currentMonth <= 8) {
+      season = 'Summer';
+    } else {
+      season = 'Fall';
+    }
+  
+    setSeasonInfo(prevSeasonInfo => ({
+      ...prevSeasonInfo,
+      season
+    }));
+  };
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="custom-tooltip bg-neutral-700 p-4 rounded-md drop-shadow-lg">
+          <p className="text-lg font-bold">{`${payload[0].payload.username}`}</p>
+          <p className="text-sm">{`Clips Rated: ${payload[0].value}`}</p>
+          <p className="text-sm">{`Percentage Rated: ${((payload[0].value / seasonInfo.clipAmount) * 100).toFixed(2)}%`}</p>
+        </div>
+      );
+    }
+  
+    return null;
+  };
+
   return (
     <div className="min-h-screen text-white flex flex-col justify-center items-center bg-neutral-900">
       <div className='w-full'>
@@ -291,237 +393,287 @@ function AdminDash() {
           </div>
         </div>
       </div>
-      <div className="container grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 pt-20 bg-neutral-900 text-white min-h-screen justify-items-center">
-        <div className="max-w-md w-full bg-neutral-800 p-8 m-4 rounded-md shadow-md my-4">
-          <h2 className="text-3xl font-bold mb-4">Create Users</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="username" className="block text-gray-300">Username:</label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="password" className="block text-gray-300">Password:</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="role" className="block text-gray-300">Role:</label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
-              >
-                <option value="user">User</option>
-                <option value="editor">Editor</option>
-                <option value="uploader">Uploader</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
-            >
-              Create User
-            </button>
-          </form>
+
+      <div className="container pt-20 mb-4 bg-neutral-900 text-white justify-center justify-items-center">
+        <div className="w-full p-8 bg-neutral-800 rounded-md shadow-md">
+          <h2 className="text-3xl font-bold mb-4">Season info</h2>
+          <div className="grid grid-cols-2 text-center justify-center">
+            <h2 className="text-2xl font-bold mb-4">Season: {seasonInfo.season}</h2>
+            <h2 className="text-2xl font-bold mb-4">Clip Amount: {seasonInfo.clipAmount}</h2>
+          </div>
         </div>
-        <div className="col-span-2 w-full bg-neutral-800 p-8 m-4 rounded-md shadow-md my-4">
-          <h2 className="text-3xl font-bold mb-4">Manage Users</h2>
-          <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
-            {!users.length ? (
-              <div className="flex justify-center items-center space-x-2">
-                <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
-                <span>Loading Users...</span>
-              </div>
-            ) : (
-              users.filter(user => user.username !== 'admin')
-                .map(user => (
-                  <div
-                    key={user._id}
-                    className={`relative bg-neutral-900 p-4 w-full rounded-lg hover:bg-neutral-950 transition-all duration-300 overflow-hidden ${editUser && editUser._id === user._id ? 'max-h-screen' : 'max-h-32'}`}
-                    style={{ transition: 'max-height 0.3s ease-in-out' }}
-                  >
-                    <div
-                      className="absolute inset-0 bg-cover bg-center filter blur-sm"
-                      style={{
-                        backgroundImage: `url(${user.profilePicture})`,
-                      }}
-                    ></div>
-                    <div className="absolute inset-0 bg-black opacity-50 rounded-lg"></div>
-                    <div className="relative z-10 flex justify-between items-center">
-                      <div className='flex-col justify-between items-center'>
-                        <p className="flex justify-between items-center text-white">{user.username}
-                          <FaDiscord className="ml-2" style={{ color: user.discordId ? '#7289da' : '#747f8d' }} />
-                        </p>
-                        <p className="text-gray-300">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
-                      </div>
-                      <div>
-                        <button
-                          onClick={() => toggleEditUser(user)}
-                          className="bg-orange-500/50 hover:bg-orange-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md mr-2 transition duration-200"
-                        >
-                          {editUser && editUser._id === user._id ? 'Cancel' : 'Edit'}
-                        </button>
-                        <button
-                          onClick={() => handleDelete(user._id)}
-                          className="bg-red-500/50 hover:bg-red-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md transition duration-200"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                    <div className={`transition-transform duration-300 ${editUser && editUser._id === user._id ? 'scale-y-100' : 'scale-y-0'} origin-top`}>
-                      {editUser && editUser._id === user._id && (
-                        <div className="max-w-md w-full bg-black/20 p-4 rounded-md shadow-md backdrop-blur-2xl">
-                          <h2 className="text-3xl font-bold mb-4">Edit {editUser.username}</h2>
-                          <form onSubmit={handleEditSubmit}>
-                            <div className="mb-4">
-                              <label htmlFor="username" className="block text-gray-300">Username:</label>
-                              <input
-                                type="text"
-                                id="username"
-                                name="username"
-                                value={editUser.username}
-                                onChange={handleEditChange}
-                                className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                                required
-                              />
-                            </div>
-                            <div className="mb-4">
-                              <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
-                              <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                value={editUser.password || ''}
-                                onChange={handleEditChange}
-                                className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                              />
-                            </div>
-                            <div className="mb-4">
-                              <label htmlFor="role" className="block text-gray-300">Role:</label>
-                              <select
-                                id="role"
-                                name="role"
-                                value={editUser.role}
-                                onChange={handleEditChange}
-                                className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                              >
-                                <option value="user">User</option>
-                                <option value="editor">Editor</option>
-                                <option value="uploader">Uploader</option>
-                                <option value="admin">Admin</option>
-                              </select>
-                            </div>
-                            <div className="flex justify-end">
-                              <button
-                                type="submit"
-                                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded-md transition duration-200"
-                              >
-                                Save
-                              </button>
-                            </div>
-                          </form>
-                        </div>
-                      )}
-                    </div>
+
+        <div className="w-full p-8 mt-8 bg-neutral-800 rounded-md shadow-md">
+          <h2 className="text-3xl font-bold mb-4">User Performance</h2>
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={userRatings} margin={{ top: 20, right: 10, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="username" />
+              <YAxis />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Bar name="Clips Rated" dataKey="ClipsRated" fill="#82ca9d" />
+            </BarChart>
+          </ResponsiveContainer>
+          <div className="">
+            <h3 className="text-2xl font-bold mb-4">User Stats</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {userRatings && users
+              .map(user => {
+                const userRating = userRatings.find(rating => rating.username === user.username) || { ClipsRated: 0 };
+                return { ...user, ClipsRated: userRating.ClipsRated };
+              })
+              .filter(user => user.username !== 'UploadBot' && !['editor', 'uploader'].includes(user.role))
+              .sort((a, b) => b.ClipsRated - a.ClipsRated)
+              .map(user => (
+                <div key={user.username} className="p-4 bg-neutral-700 rounded-md">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-lg font-semibold mb-2">{user.username}</h4>
+                    <p className={`text-md px-2 py-1 rounded-lg ${user.ClipsRated > 0 ? 'bg-green-600' : 'bg-red-600'} origin-top`}>{user.ClipsRated > 0 ? 'Active' : 'Inactive'}</p>
                   </div>
-                ))
+                  <p className="text-sm">Clips Rated: {user.ClipsRated}</p>
+                  <p className="text-sm">Percentage Rated: {((user.ClipsRated / seasonInfo.clipAmount) * 100).toFixed(2)}%</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid mt-8 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 w-full">
+          <div className="col-span-1 min-w-full w-full bg-neutral-800 p-8 rounded-md shadow-md">
+            <h2 className="text-3xl font-bold mb-4">Create Users</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label htmlFor="username" className="block text-gray-300">Username:</label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="password" className="block text-gray-300">Password:</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="role" className="block text-gray-300">Role:</label>
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
+                >
+                  <option value="user">User</option>
+                  <option value="editor">Editor</option>
+                  <option value="uploader">Uploader</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+              >
+                Create User
+              </button>
+            </form>
+          </div>
+          <div className="col-span-1 min-w-full w-full bg-neutral-800 p-8 rounded-md shadow-md">
+            <h2 className="text-3xl font-bold mb-4">Pending User Approvals</h2>
+            {!pendingUsers.length ? (
+              <p className="text-gray-300">No pending users.</p>
+            ) : (
+              pendingUsers.map(user => (
+                <div key={user._id} className="mb-4 bg-neutral-950 p-4 rounded-lg hover:bg-neutral-900 transition duration-200">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-gray-300">{user.username}</p>
+                    </div>
+                    <button
+                      onClick={() => handleApproveUser(user._id)}
+                      className="bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded-md"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleDelete(user._id)}
+                      className="bg-red-500 hover:red-600 text-white py-1 px-2 rounded-md"
+                    >
+                      Deny
+                    </button>
+                  </div>
+                </div>
+              ))
             )}
           </div>
 
-        </div>
-        <div className="max-w-md w-full bg-neutral-800 p-8 m-4 rounded-md shadow-md my-4">
-          <h2 className="text-3xl font-bold mb-4">Pending User Approvals</h2>
-          {!pendingUsers.length ? (
-            <p className="text-gray-300">No pending users.</p>
-          ) : (
-            pendingUsers.map(user => (
-              <div key={user._id} className="mb-4 bg-neutral-950 p-4 rounded-lg hover:bg-neutral-900 transition duration-200">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-gray-300">{user.username}</p>
-                  </div>
-                  <button
-                    onClick={() => handleApproveUser(user._id)}
-                    className="bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded-md"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => handleDelete(user._id)}
-                    className="bg-red-500 hover:red-600 text-white py-1 px-2 rounded-md"
-                  >
-                    Deny
-                  </button>
+          <div className="lg:col-span-3 md:col-span-2 col-span-1 min-w-full bg-neutral-800 p-8 rounded-md shadow-md">
+            <h2 className="text-3xl font-bold mb-4">Manage Users</h2>
+            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+              {!users.length ? (
+                <div className="flex justify-center items-center space-x-2">
+                  <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
+                  <span>Loading Users...</span>
                 </div>
+              ) : (
+                users.filter(user => user.username !== 'admin')
+                  .map(user => (
+                    <div
+                      key={user._id}
+                      className={`relative bg-neutral-900 p-4 w-full rounded-lg hover:bg-neutral-950 transition-all duration-300 overflow-hidden ${editUser && editUser._id === user._id ? 'max-h-screen' : 'max-h-32'}`}
+                      style={{ transition: 'max-height 0.3s ease-in-out' }}
+                    >
+                      <div
+                        className="absolute inset-0 bg-cover bg-center filter blur-sm"
+                        style={{
+                          backgroundImage: `url(${user.profilePicture})`,
+                        }}
+                      ></div>
+                      <div className="absolute inset-0 bg-black opacity-50 rounded-lg"></div>
+                      <div className="relative z-10 flex justify-between items-center">
+                        <div className='flex-col justify-between items-center'>
+                          <p className="flex justify-between items-center text-white">{user.username}
+                            <FaDiscord className="ml-2" style={{ color: user.discordId ? '#7289da' : '#747f8d' }} />
+                          </p>
+                          <p className="text-gray-300">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                        </div>
+                        <div>
+                          <button
+                            onClick={() => toggleEditUser(user)}
+                            className="bg-blue-500/50 hover:bg-blue-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md mr-2 transition duration-200"
+                          >
+                            {editUser && editUser._id === user._id ? 'Cancel' : 'Edit'}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(user._id)}
+                            className="bg-red-500/50 hover:bg-red-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md transition duration-200"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                      <div className={`transition-transform duration-300 ${editUser && editUser._id === user._id ? 'scale-y-100' : 'scale-y-0'} origin-top`}>
+                        {editUser && editUser._id === user._id && (
+                          <div className="max-w-md w-full bg-black/20 mt-4 p-4 rounded-md shadow-md backdrop-blur-xl">
+                            <h2 className="text-2xl font-bold">Edit {editUser.username}</h2>
+                            <div className="w-full h-1 rounded-full my-2 bg-white"/>
+                            <form onSubmit={handleEditSubmit}>
+                              <div className="mb-4">
+                                <label htmlFor="username" className="block text-gray-300">Username:</label>
+                                <input
+                                  type="text"
+                                  id="username"
+                                  name="username"
+                                  value={editUser.username}
+                                  onChange={handleEditChange}
+                                  className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
+                                  required
+                                />
+                              </div>
+                              <div className="mb-4">
+                                <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
+                                <input
+                                  type="password"
+                                  id="password"
+                                  name="password"
+                                  value={editUser.password || ''}
+                                  onChange={handleEditChange}
+                                  className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
+                                />
+                              </div>
+                              <div className="mb-4">
+                                <label htmlFor="role" className="block text-gray-300">Role:</label>
+                                <select
+                                  id="role"
+                                  name="role"
+                                  value={editUser.role}
+                                  onChange={handleEditChange}
+                                  className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
+                                >
+                                  <option value="user">User</option>
+                                  <option value="editor">Editor</option>
+                                  <option value="uploader">Uploader</option>
+                                  <option value="admin">Admin</option>
+                                </select>
+                              </div>
+                              <div className="flex justify-end">
+                                <button
+                                  type="submit"
+                                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded-md transition duration-200"
+                                >
+                                  Save
+                                </button>
+                              </div>
+                            </form>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+
+          <div className="col-span-1 w-full bg-neutral-800 p-8 rounded-md shadow-md">
+            <h2 className="text-3xl font-bold mb-4">Admin Config</h2>
+            <form onSubmit={handleConfigSubmit}>
+              <div className="mb-4">
+                <label htmlFor="denyThreshold" className="block text-gray-300">Deny Threshold:</label>
+                <input
+                  type="number"
+                  id="denyThreshold"
+                  name="denyThreshold"
+                  value={config.denyThreshold}
+                  onChange={handleConfigChange}
+                  className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
+                  required
+                />
               </div>
-            ))
-          )}
-        </div>
-        <div className="max-w-md w-full bg-neutral-800 p-8 m-4 rounded-md shadow-md my-4">
-          <h2 className="text-3xl font-bold mb-4">Admin Config</h2>
-          <form onSubmit={handleConfigSubmit}>
-            <div className="mb-4">
-              <label htmlFor="denyThreshold" className="block text-gray-300">Deny Threshold:</label>
-              <input
-                type="number"
-                id="denyThreshold"
-                name="denyThreshold"
-                value={config.denyThreshold}
-                onChange={handleConfigChange}
-                className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
-                required
-              />
-            </div>
+              <button
+                type="submit"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+              >
+                Update Config
+              </button>
+            </form>
+          </div>
+
+          <div className="col-span-1 w-full bg-neutral-800 p-8 rounded-md shadow-md">
+            <h2 className="text-3xl font-bold mb-4">Download Clips</h2>
+            {downloading && (
+              <div className="flex justify-center items-center space-x-2">
+                <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
+                <span>Downloading Clips...</span>
+              </div>
+            )}
             <button
-              type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+              onClick={downloadClips}
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-md focus:outline-none focus:bg-green-600"
             >
-              Update Config
+              Download All Clips
             </button>
-          </form>
+            <h2 className="text-3xl font-bold my-4">Reset Database</h2>
+            <button
+              className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-md focus:outline-none focus:bg-red-600"
+              onClick={handleDeleteAllClips}
+            >
+              Reset Database
+            </button>
+          </div>
         </div>
-        <div className="max-w-md w-full bg-neutral-800 p-8 m-4 rounded-md shadow-md my-4">
-          <h2 className="text-3xl font-bold mb-4">Download Clips</h2>
-          {downloading && (
-            <div className="flex justify-center items-center space-x-2">
-              <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
-              <span>Downloading Clips...</span>
-            </div>
-          )}
-          <button
-            onClick={downloadClips}
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-md focus:outline-none focus:bg-green-600"
-          >
-            Download All Clips
-          </button>
-          <h2 className="text-3xl font-bold my-4">Reset Database</h2>
-          <button
-            className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-md focus:outline-none focus:bg-red-600"
-            onClick={handleDeleteAllClips}
-          >
-            Reset Database
-          </button>
-        </div>
-      </div>
+      </div>       
     </div>
   );
 }
