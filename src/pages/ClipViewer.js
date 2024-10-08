@@ -205,7 +205,7 @@ function ClipViewer() {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className="min-h-screen text-white relative">
+    <div className="min-h-screen text-white relative bg-neutral-200 dark:bg-neutral-900">
       <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
       </div>
@@ -217,7 +217,8 @@ function ClipViewer() {
           </div>
         </div>
       </div>
-      <div className="grid justify-items-center text-white p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center">
+      <div className="grid justify-items-center text-white p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center animate-fade"
+      >
         <div className="text-center py-4 justify-center items-center z-30">
           <div className="pb-4 flex justify-center">
             <select
@@ -234,7 +235,7 @@ function ClipViewer() {
             </select>
           </div>
         </div>
-        <div className="container mt-4 justify-center items-center rounded-md" style={{ backgroundImage: `url(${banner1})`, backgroundSize: 'cover' }}>
+        <div className="container w-full mt-4 justify-center items-center rounded-md" style={{ backgroundImage: `url(${banner1})`, backgroundSize: 'cover' }}>
           <div className='h-full w-full bg-white/20 backdrop-blur-lg rounded-md'>
             <h2 className="p-4 text-center text-neutral-800 bg-white dark:bg-neutral-800 dark:text-white transition duration-200 backdrop-blur-sm rounded-t-md text-2xl font-bold drop-shadow-md mb-4">Clips</h2>
             <div className="flex justify-center">
@@ -252,20 +253,8 @@ function ClipViewer() {
                 Array.from({ length: 6 }).map((_, index) => (
                   <div key={index} className="p-4 relative animate-pulse drop-shadow-md">
                     <div className="overflow-hidden w-full text-center relative">
-                      {isLoggedIn && (
-                        <div className="flex justify-center">
-                          <div className='absolute top-0 right-0 z-40 p-2 bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 rounded-md'>
-                            <button
-                              className="text-lg font-bold p-1 bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white transition duration-200 hover:text-blue-500 rounded-sm"
-                            >
-                              Rating!
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">Cube Community</div>
                       <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
-                        <img src={placeholder} alt="Logo" className="w-full rounded-t-lg border-8 border-white opacity-50" />
+                        <img src={placeholder} alt="Logo" className="w-full rounded-lg border-white opacity-50" />
                       </div>
                     </div>
                     <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4">
@@ -294,7 +283,7 @@ function ClipViewer() {
                       }
                     })
                     .map(clip => (
-                      <div key={clip._id} className="p-4 relative drop-shadow-md">
+                      <div key={clip._id} className="p-4 relative drop-shadow-md animate-fade">
                         <div className="overflow-hidden w-full text-center relative">
                           {isLoggedIn && (
                             <div className="flex justify-center">
