@@ -156,6 +156,17 @@ function Navbar({ setUser, user }) {
                                             >
                                                 Profile
                                             </NavLink>
+                                            <NavLink
+                                                to="/stats"
+                                                className="relative block px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20 transition duration-200"
+                                                onClick={() => {
+                                                    toggleDropdown();
+                                                    toggleNavbar();
+                                                }}
+                                            >
+                                                Stats
+                                                <span className="absolute top-1 right-0 p-1 mr-2 bg-blue-500 text-white rounded-md">New!</span>
+                                            </NavLink>
                                             <button
                                                 onClick={handleLogout}
                                                 className="block w-full text-left px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20 transition duration-200"
