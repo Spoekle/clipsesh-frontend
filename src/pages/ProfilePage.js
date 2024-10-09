@@ -75,8 +75,8 @@ function ProfilePage({ user, setUser }) {
 
   return (
     <div className="min-h-screen text-white relative bg-neutral-200 dark:bg-neutral-900 transition duration-200">
-      <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
-        <div className="flex bg-white/20 backdrop-blur-lg justify-center items-center w-full h-full">
+      <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${user.profilePicture})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Profile Page</h1>
             <h1 className="text-2xl font-semibold mb-4 text-center">{user.username}</h1>
