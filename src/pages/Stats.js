@@ -141,12 +141,12 @@ function Stats({ user }) {
       ];
 
   return (
-    <div className="min-h-screen text-white flex flex-col  items-center bg-neutral-900">
+    <div className="min-h-screen text-white flex flex-col items-center bg-neutral-200 dark:bg-neutral-900 transition duration-200">
       <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
       </div>
-      <div className="w-full flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
-        <div className="flex bg-white/20 backdrop-blur-lg justify-center items-center w-full h-full">
+      <div className="w-full flex h-96 justify-center items-center" style={{ backgroundImage: `url(${user.profilePicture})`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
+        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Stats</h1>
             <h1 className="text-3xl mb-4 text-center">Let's what you have done for ClipSesh this season {user.username}</h1>
@@ -154,8 +154,8 @@ function Stats({ user }) {
         </div>
       </div>
 
-      <div className="container pt-20 mb-4 bg-neutral-900 text-white justify-center justify-items-center">
-        <div className="w-full p-8 bg-neutral-800 rounded-md shadow-md">
+      <div className="container pt-20 mb-4 bg-neutral-200 dark:bg-neutral-900 transition duration-200 text-white justify-center justify-items-center animate-fade">
+        <div className="w-full p-8 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 rounded-md shadow-md">
           <h2 className="text-3xl font-bold mb-4">User summary</h2>
           <div className="justify-center">
             {userRatings.map(user => (
@@ -180,7 +180,7 @@ function Stats({ user }) {
           </div>
         </div>
 
-        <div className="w-full p-8 mt-8 bg-neutral-800 rounded-md shadow-md">
+        <div className="w-full p-8 mt-8 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 rounded-md shadow-md">
           <h2 className="text-3xl font-bold mb-4">Season info</h2>
           <div className="grid grid-cols-2 text-center justify-center">
             <h2 className="text-2xl font-bold mb-4">Season: {seasonInfo.season}</h2>
@@ -188,68 +188,51 @@ function Stats({ user }) {
           </div>
         </div>
 
-        <div className="w-full p-8 mt-8 bg-neutral-800 rounded-md shadow-md">
+        <div className="w-full p-8 mt-8 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 rounded-md shadow-md">
           <h2 className="text-3xl font-bold mb-4">User Performance</h2>
-          <ResponsiveContainer width="100%" height={500}>
-            <PieChart>
-            <Tooltip />
-            <Legend />
-            <Pie
-                data={combinedRatings}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={150}
-                fill="#8884d8"
-                label
-            >
-                {combinedRatings.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-            </Pie>
-            {userRatings.map(user => (
-            <Pie
-                key={user.username}
-                data={[
-                { name: 'Rated', value: user.total },
-                { name: 'Unrated', value: seasonInfo.clipAmount - user.total }
-                ]}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                startAngle={90}
-                endAngle={-270}
-                innerRadius={200}
-                outerRadius={220}
-                fill="#8884d8"
-                label
-                labelLine={false}
-            >
-                <Cell key="Rated" fill={COLORS[0]} />
-                <Cell key="Unrated" fill="#888888" />
-            </Pie>
-            ))}
-            </PieChart>
-          </ResponsiveContainer>    
-          <div className="">
-            <h3 className="text-2xl font-bold mb-4">User Stats</h3>
-            <div className="">
-            {userRatings
-              .filter(user => user.username !== 'UploadBot' && !['editor', 'uploader'].includes(user.role))
-              .sort((a, b) => b.ClipsRated - a.ClipsRated)
-              .map(user => (
-                <div key={user.username} className="p-4 bg-neutral-700 rounded-md">
-                  <div className="flex justify-between items-center">
-                    <h4 className="text-lg font-semibold mb-2">{user.username}</h4>
-                    <p className={`text-md px-2 py-1 rounded-lg ${user.total > 0 ? 'bg-green-600' : 'bg-red-600'} origin-top`}>{user.total > 0 ? 'Active' : 'Inactive'}</p>
-                  </div>
-                  <p className="text-sm">Clips Rated: {user.total}</p>
-                  <p className="text-sm">Percentage Rated: {user.percentageRated.toFixed(2)}%</p>
-                </div>
+          <div className='bg-neutral-600 rounded-xl p-8'>
+            <ResponsiveContainer width="100%" height={500}>
+              <PieChart>
+              <Tooltip />
+              <Legend layout='vertical' align='left' verticalAlign='middle'/>
+              <Pie
+                  data={combinedRatings}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={130}
+                  fill="#8884d8"
+                  label
+              >
+                  {combinedRatings.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+              </Pie>
+              {userRatings.map(user => (
+              <Pie
+                  key={user.username}
+                  data={[
+                  { name: 'Rated', value: user.total },
+                  { name: 'Unrated', value: seasonInfo.clipAmount - user.total }
+                  ]}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  startAngle={90}
+                  endAngle={-270}
+                  innerRadius={180}
+                  fill="#8884d8"
+                  label
+                  labelLine={false}
+              >
+                  <Cell key="Rated" fill={COLORS[0]} />
+                  <Cell key="Unrated" fill="#888888" />
+              </Pie>
               ))}
-            </div>
+              </PieChart>
+            </ResponsiveContainer>  
           </div>
         </div>
       </div>
