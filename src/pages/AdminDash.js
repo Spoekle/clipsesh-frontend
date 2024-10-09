@@ -122,12 +122,12 @@ function AdminDash() {
   const countRatingsPerUser = () => {
   const userRatingCount = {};
 
-  // Initialize userRatingCount with all users, exept UploadBot and roles editor and uploader
+  // Initialize userRatingCount with all users, except UploadBot and roles editor and uploader
   users
-    .filter(user => user.username !== 'UploadBot' && !['editor', 'uploader'].includes(user.role))
-    .forEach(user => {
-      userRatingCount[user.username] = 0;
-    });
+  .filter(user => user.username !== 'UploadBot' && !['editor', 'uploader'].includes(user.role))
+  .forEach(user => {
+    userRatingCount[user.username] = { '1': 0, '2': 0, '3': 0, '4': 0, 'deny': 0, total: 0, percentageRated: 0 };
+  });
 
   const clipLength = Object.keys(ratings).length;
   setSeasonInfo(prevSeasonInfo => ({
@@ -150,9 +150,13 @@ function AdminDash() {
         // Iterate over the users who rated this clip
         ratingData.users.forEach(user => {
           if (userRatingCount[user.username]) {
-            userRatingCount[user.username]++;
-          } else {
-            userRatingCount[user.username] = 1;
+            if (userRatingCount[user.username][ratingData.rating] !== undefined) {
+              userRatingCount[user.username][ratingData.rating]++;
+              userRatingCount[user.username].total++;
+            } else {
+              console.error(`Unknown rating type: ${ratingData.rating}`);
+            }
+            userRatingCount[user.username].percentageRated = (userRatingCount[user.username].total / clipLength) * 100;
           }
         });
       } else {
@@ -161,16 +165,14 @@ function AdminDash() {
     });
   });
 
-  console.log('User Rating Count:', userRatingCount); // Log final userRatingCount
-
-  // Convert userRatingCount object into an array of objects with username
+  // Convert userRatingCount object into an array of objects with username and rating counts
   const userRatingCounts = Object.keys(userRatingCount).map(username => ({
     username,
-    ClipsRated: userRatingCount[username]
+    ...userRatingCount[username]
   }));
 
-  // Sort userRatingCounts by ClipsRated in descending order
-  userRatingCounts.sort((a, b) => b.ClipsRated - a.ClipsRated);
+  // Sort userRatingCounts by total count in descending order
+  userRatingCounts.sort((a, b) => b.total - a.total);
 
   setUserRatings(userRatingCounts);
 };
@@ -381,12 +383,12 @@ function AdminDash() {
   };
 
   return (
-    <div className="min-h-screen text-white flex flex-col justify-center items-center bg-neutral-900">
+    <div className="min-h-screen text-white flex flex-col justify-center items-center bg-neutral-200 dark:bg-neutral-900 transition duration-200">
       <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
       </div>
-      <div className="w-full flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
-        <div className="flex bg-white/20 backdrop-blur-lg justify-center items-center w-full h-full">
+      <div className="w-full flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
+        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Admin Dashboard</h1>
             <h1 className="text-3xl mb-4 text-center">Manage the unmanaged...</h1>
@@ -394,8 +396,8 @@ function AdminDash() {
         </div>
       </div>
 
-      <div className="container pt-20 mb-4 bg-neutral-900 text-white justify-center justify-items-center">
-        <div className="w-full p-8 bg-neutral-800 rounded-md shadow-md">
+      <div className="container pt-20 mb-4 text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center justify-items-center animate-fade">
+        <div className="w-full p-8 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 rounded-md shadow-md">
           <h2 className="text-3xl font-bold mb-4">Season info</h2>
           <div className="grid grid-cols-2 text-center justify-center">
             <h2 className="text-2xl font-bold mb-4">Season: {seasonInfo.season}</h2>
@@ -403,7 +405,7 @@ function AdminDash() {
           </div>
         </div>
 
-        <div className="w-full p-8 mt-8 bg-neutral-800 rounded-md shadow-md">
+        <div className="w-full p-8 mt-8 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 rounded-md shadow-md animate-fade animate-delay-100">
           <h2 className="text-3xl font-bold mb-4">User Performance</h2>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={userRatings} margin={{ top: 20, right: 10, left: 10, bottom: 5 }}>
@@ -412,7 +414,12 @@ function AdminDash() {
               <YAxis />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Bar name="Clips Rated" dataKey="ClipsRated" fill="#82ca9d" />
+              <Bar name="Total Rated" dataKey="total" fill="#237aeb" />
+              <Bar name="Rated 1" dataKey="1" fill="#32d14d" />
+              <Bar name="Rated 2" dataKey="2" fill="#e6db10" />
+              <Bar name="Rated 3" dataKey="3" fill="#e6a910" />
+              <Bar name="Rated 4" dataKey="4" fill="#eb8723" />
+              <Bar name="Denied" dataKey="deny" fill="#e64040" />
             </BarChart>
           </ResponsiveContainer>
           <div className="">
@@ -420,19 +427,21 @@ function AdminDash() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {userRatings && users
               .map(user => {
-                const userRating = userRatings.find(rating => rating.username === user.username) || { ClipsRated: 0 };
-                return { ...user, ClipsRated: userRating.ClipsRated };
+                const userRating = userRatings.find(rating => rating.username === user.username) || { '1': 0, '2': 0, '3': 0, '4': 0, 'deny': 0, total: 0 };
+                const percentageRated = ((userRating.total / seasonInfo.clipAmount) * 100).toFixed(2);
+                return { ...user, ...userRating, percentageRated, total: Number(userRating.total) };
               })
               .filter(user => user.username !== 'UploadBot' && !['editor', 'uploader'].includes(user.role))
-              .sort((a, b) => b.ClipsRated - a.ClipsRated)
+              .sort((a, b) => b.total - a.total)
               .map(user => (
-                <div key={user.username} className="p-4 bg-neutral-700 rounded-md">
+                <div key={user.username} className="p-4 bg-neutral-400 dark:bg-neutral-700 text-neutral-900 dark:text-white transition duration-200 rounded-md">
                   <div className="flex justify-between items-center">
                     <h4 className="text-lg font-semibold mb-2">{user.username}</h4>
-                    <p className={`text-md px-2 py-1 rounded-lg ${user.ClipsRated > 0 ? 'bg-green-600' : 'bg-red-600'} origin-top`}>{user.ClipsRated > 0 ? 'Active' : 'Inactive'}</p>
+                    <p className={`text-md px-2 py-1 rounded-lg ${user.total > 0 ? 'bg-green-600' : 'bg-red-600'} origin-top`}>{user.total > 0 ? 'Active' : 'Inactive'}</p>
                   </div>
-                  <p className="text-sm">Clips Rated: {user.ClipsRated}</p>
-                  <p className="text-sm">Percentage Rated: {((user.ClipsRated / seasonInfo.clipAmount) * 100).toFixed(2)}%</p>
+                  <p className="text-sm">Clips Rated: {user.total}</p>
+                  <p className="text-sm">Percentage Rated: {user.percentageRated}%</p>
+                  <p className="text-sm">Denied: {user.deny}</p>
                 </div>
               ))}
             </div>
@@ -440,41 +449,41 @@ function AdminDash() {
         </div>
 
         <div className="grid mt-8 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 w-full">
-          <div className="col-span-1 min-w-full w-full bg-neutral-800 p-8 rounded-md shadow-md">
+          <div className="col-span-1 min-w-full w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-200">
             <h2 className="text-3xl font-bold mb-4">Create Users</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label htmlFor="username" className="block text-gray-300">Username:</label>
+                <label htmlFor="username" className="block text-neutral-900 dark:text-gray-300">Username:</label>
                 <input
                   type="text"
                   id="username"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
+                  className="w-full px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-200 dark:focus:bg-neutral-700"
                   required
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="password" className="block text-gray-300">Password:</label>
+                <label htmlFor="password" className="block text-neutral-900 dark:text-gray-300">Password:</label>
                 <input
                   type="password"
                   id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
+                  className="w-full px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-200 dark:focus:bg-neutral-700"
                   required
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="role" className="block text-gray-300">Role:</label>
+                <label htmlFor="role" className="block text-neutral-900 dark:text-gray-300">Role:</label>
                 <select
                   id="role"
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
+                  className="w-full px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-200 dark:focus:bg-neutral-700"
                 >
                   <option value="user">User</option>
                   <option value="editor">Editor</option>
@@ -490,7 +499,7 @@ function AdminDash() {
               </button>
             </form>
           </div>
-          <div className="col-span-1 min-w-full w-full bg-neutral-800 p-8 rounded-md shadow-md">
+          <div className="col-span-1 min-w-full w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-300">
             <h2 className="text-3xl font-bold mb-4">Pending User Approvals</h2>
             {!pendingUsers.length ? (
               <p className="text-gray-300">No pending users.</p>
@@ -519,7 +528,7 @@ function AdminDash() {
             )}
           </div>
 
-          <div className="lg:col-span-3 md:col-span-2 col-span-1 min-w-full bg-neutral-800 p-8 rounded-md shadow-md">
+          <div className="lg:col-span-3 md:col-span-2 col-span-1 min-w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-[400ms]">
             <h2 className="text-3xl font-bold mb-4">Manage Users</h2>
             <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
               {!users.length ? (
@@ -567,7 +576,7 @@ function AdminDash() {
                       <div className={`transition-transform duration-300 ${editUser && editUser._id === user._id ? 'scale-y-100' : 'scale-y-0'} origin-top`}>
                         {editUser && editUser._id === user._id && (
                           <div className="max-w-md w-full bg-black/20 mt-4 p-4 rounded-md shadow-md backdrop-blur-xl">
-                            <h2 className="text-2xl font-bold">Edit {editUser.username}</h2>
+                            <h2 className="text-2xl font-bold text-white">Edit {editUser.username}</h2>
                             <div className="w-full h-1 rounded-full my-2 bg-white"/>
                             <form onSubmit={handleEditSubmit}>
                               <div className="mb-4">
@@ -626,18 +635,18 @@ function AdminDash() {
             </div>
           </div>
 
-          <div className="col-span-1 w-full bg-neutral-800 p-8 rounded-md shadow-md">
+          <div className="col-span-1 w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-500">
             <h2 className="text-3xl font-bold mb-4">Admin Config</h2>
             <form onSubmit={handleConfigSubmit}>
               <div className="mb-4">
-                <label htmlFor="denyThreshold" className="block text-gray-300">Deny Threshold:</label>
+                <label htmlFor="denyThreshold" className="block text-neutral-900 dark:text-gray-300">Deny Threshold:</label>
                 <input
                   type="number"
                   id="denyThreshold"
                   name="denyThreshold"
                   value={config.denyThreshold}
                   onChange={handleConfigChange}
-                  className="w-full px-3 py-2 bg-neutral-700 text-white rounded-md focus:outline-none focus:bg-neutral-600"
+                  className="w-full px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-200 dark:focus:bg-neutral-700"
                   required
                 />
               </div>
@@ -650,7 +659,7 @@ function AdminDash() {
             </form>
           </div>
 
-          <div className="col-span-1 w-full bg-neutral-800 p-8 rounded-md shadow-md">
+          <div className="col-span-1 w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-[600ms]">
             <h2 className="text-3xl font-bold mb-4">Download Clips</h2>
             {downloading && (
               <div className="flex justify-center items-center space-x-2">
