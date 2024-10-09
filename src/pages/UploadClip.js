@@ -191,8 +191,8 @@ function UploadClip() {
 
   return (
     <div className="text-white min-h-screen relative">
-      <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
-        <div className="flex bg-white/20 backdrop-blur-lg justify-center items-center w-full h-full">
+      <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Clip Uploads</h1>
             <h1 className="text-3xl mb-4 text-center">Upload and alter clips!</h1>

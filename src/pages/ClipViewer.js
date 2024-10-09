@@ -209,8 +209,8 @@ function ClipViewer() {
       <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
       </div>
-      <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover' }}>
-        <div className="flex bg-white/20 backdrop-blur-lg justify-center items-center w-full h-full">
+      <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover',backgroundPosition: 'center' }}>
+        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Clip Viewer</h1>
             <h1 className="text-3xl mb-4 text-center">Rate the clips!</h1>
