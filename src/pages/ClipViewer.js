@@ -28,10 +28,6 @@ function ClipViewer() {
     fetchInitialData();
   }, []);
 
-  useEffect(() => {
-    sortClips(clips);
-  }, [sortOption]);
-
   const fetchInitialData = async () => {
     try {
       await fetchUser();
@@ -235,7 +231,7 @@ function ClipViewer() {
             </select>
           </div>
         </div>
-        <div className="container w-full mt-4 justify-center items-center rounded-md" style={{ backgroundImage: `url(${banner1})`, backgroundSize: 'cover' }}>
+        <div className="container w-full mt-4 justify-center items-center rounded-md animate-fade animate-delay-500" style={{ backgroundImage: `url(${banner1})`, backgroundSize: 'cover' }}>
           <div className='h-full w-full bg-white/20 backdrop-blur-lg rounded-md'>
             <h2 className="p-4 text-center text-neutral-800 bg-white dark:bg-neutral-800 dark:text-white transition duration-200 backdrop-blur-sm rounded-t-md text-2xl font-bold drop-shadow-md mb-4">Clips</h2>
             <div className="flex justify-center">

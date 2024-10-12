@@ -10,6 +10,7 @@ import AdminDash from './pages/AdminDash';
 import PrivacyStatement from './pages/PrivacyStatement';
 import ProfilePage from './pages/ProfilePage';
 import Stats from './pages/Stats';
+import background from './media/background.jpg';
 
 function ClipSesh() {
   const [user, setUser] = useState(null);
@@ -62,11 +63,14 @@ function ClipSesh() {
 
     if (showLoadingScreen) {
       return (
-        <div className="absolute z-70 w-full h-full">
-        <div className="absolute inset-0 bg-gradient-to-br from-cc-blue to-cc-red"></div>
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center backdrop-blur-2xl">
-          <h1 className="sm:text-3xl md:text-5xl font-bold text-white animate-pulse">Checking Authentication...</h1>
+        <div className="absolute z-70 w-full h-full bg-neutral-200 dark:bg-neutral-900 ">
+        <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover',backgroundPosition: 'center' }}>
+        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
+          <div className="flex flex-col justify-center items-center">
+            <h1 className="text-4xl font-bold mb-4 text-white text-center animate-pulse animate-duration-[800ms]">Checking Authentication...</h1>
+          </div>
         </div>
+      </div>
       </div>
       );
     }

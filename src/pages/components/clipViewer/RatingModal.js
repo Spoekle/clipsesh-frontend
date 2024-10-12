@@ -49,10 +49,10 @@ const RatingModal = ({ expandedClip, clips, setExpandedClip, isLoggedIn, ratings
 
     return ReactDOM.createPortal(
         <div
-            className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 animate-fade-in duration-300"
+            className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 duration-300"
             onClick={handleClickOutside}
         >
-            <div className="modal-content relative max-h-screen max-w-screen rounded-lg overflow-hidden">
+            <div className="modal-content relative max-h-screen max-w-screen rounded-lg overflow-hidden animate-fade">
                 <video
                     className="absolute top-0 left-0 w-full h-full object-cover z-0 hidden md:block"
                     src={`${clip.url}`}
