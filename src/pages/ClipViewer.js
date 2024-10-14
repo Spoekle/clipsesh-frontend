@@ -3,7 +3,13 @@ import axios from 'axios';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import LoadingBar from 'react-top-loading-bar';
 import Pagination from '@mui/material/Pagination';
+
 import background from '../media/background.jpg';
+import winterBg from '../media/winter.webp';
+import springBg from '../media/spring.jpg';
+import summerBg from '../media/summer.jpg';
+import fallBg from '../media/fall.jpg';
+
 import placeholder from '../media/placeholder.png';
 import banner1 from '../media/banner1.png';
 import RatingModal from './components/clipViewer/RatingModal';
@@ -22,21 +28,20 @@ function ClipViewer() {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [seasonInfo, setSeasonInfo] = useState({ season: '' });
   const [itemsPerPage] = useState(6);
 
   useEffect(() => {
     fetchInitialData();
   }, []);
 
-  useEffect(() => {
-    sortClips(clips);
-  }, [sortOption]);
-
   const fetchInitialData = async () => {
     try {
       await fetchUser();
       setProgress(10);
       await checkLoginStatus();
+      setProgress(20);
+      getSeason();
       setProgress(50);
       await fetchClipsAndRatings();
       setProgress(100);
@@ -46,6 +51,8 @@ function ClipViewer() {
       setIsLoading(false);
     }
   };
+
+  const background = seasonInfo.season === 'Winter' ? winterBg : seasonInfo.season === 'Spring' ? springBg : seasonInfo.season === 'Summer' ? summerBg : fallBg;
 
   const fetchUser = async () => {
     const token = localStorage.getItem('token');
@@ -190,6 +197,27 @@ function ClipViewer() {
     }
   };
 
+  const getSeason = () => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    let season = '';
+  
+    if (currentMonth >= 0 && currentMonth <= 2) {
+      season = 'Winter';
+    } else if (currentMonth >= 3 && currentMonth <= 5) {
+      season = 'Spring';
+    } else if (currentMonth >= 6 && currentMonth <= 8) {
+      season = 'Summer';
+    } else {
+      season = 'Fall';
+    }
+  
+    setSeasonInfo(prevSeasonInfo => ({
+      ...prevSeasonInfo,
+      season
+    }));
+  };
+
   const deniedClips = clips.filter(clip => {
     const ratingData = ratings[clip._id];
     return ratingData && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count >= denyThreshold);
@@ -209,7 +237,7 @@ function ClipViewer() {
       <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
       </div>
-      <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover',backgroundPosition: 'center' }}>
+      <div className="flex h-96 justify-center items-center drop-shadow-xl animate-fade" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Clip Viewer</h1>
@@ -235,9 +263,9 @@ function ClipViewer() {
             </select>
           </div>
         </div>
-        <div className="container w-full mt-4 justify-center items-center rounded-md" style={{ backgroundImage: `url(${banner1})`, backgroundSize: 'cover' }}>
-          <div className='h-full w-full bg-white/20 backdrop-blur-lg rounded-md'>
-            <h2 className="p-4 text-center text-neutral-800 bg-white dark:bg-neutral-800 dark:text-white transition duration-200 backdrop-blur-sm rounded-t-md text-2xl font-bold drop-shadow-md mb-4">Clips</h2>
+        <div className="container w-full mt-4 justify-center items-center rounded-2xl animate-fade animate-delay-500" style={{ backgroundImage: `url(${banner1})`, backgroundSize: 'cover', backgroundPosition: 'center'  }}>
+          <div className='h-full w-full bg-white/20 backdrop-blur-lg rounded-2xl'>
+            <h2 className="p-4 text-center text-neutral-800 bg-white dark:bg-neutral-800 dark:text-white transition duration-200 backdrop-blur-sm rounded-t-xl text-2xl font-bold drop-shadow-md mb-4">Clips</h2>
             <div className="flex justify-center">
               <div className="items-center bg-white justify-center rounded-md py-2 px-4">
                 <Pagination
@@ -283,7 +311,7 @@ function ClipViewer() {
                       }
                     })
                     .map(clip => (
-                      <div key={clip._id} className="p-4 relative drop-shadow-md animate-fade">
+                      <div key={clip._id} className="p-4 relative shadow-2xl animate-fade">
                         <div className="overflow-hidden w-full text-center relative">
                           {isLoggedIn && (
                             <div className="flex justify-center">

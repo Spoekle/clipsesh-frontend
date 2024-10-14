@@ -75,7 +75,7 @@ function ProfilePage({ user, setUser }) {
 
   return (
     <div className="min-h-screen text-white relative bg-neutral-200 dark:bg-neutral-900 transition duration-200">
-      <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${user.profilePicture})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <div className="flex h-96 justify-center items-center animate-fade" style={{ backgroundImage: `url(${user.profilePicture})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Profile Page</h1>
@@ -85,7 +85,7 @@ function ProfilePage({ user, setUser }) {
       </div>
       <div className="grid text-white p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center">
         {message && <p className="my-4 px-4 py-3 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200">{message}</p>}
-        <div className="grid md:grid-cols-2 gap-4 justify-center container">
+        <div className="grid md:grid-cols-2 gap-4 justify-center container animate-fade">
           <div className="flex-col items-center justify-center p-4 mt-2 rounded-md text-neutral-900 dark:text-white bg-neutral-300 dark:bg-neutral-800 transition duration-200">
             <h1 className="text-2xl font-bold mb-4">Edit Profile</h1>
             <form onSubmit={handleProfileUpdate}>
