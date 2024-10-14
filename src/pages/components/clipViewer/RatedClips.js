@@ -49,7 +49,7 @@ const RatedClips = ({ isLoggedIn, isLoading, setExpandedClip, currentClips, rati
                                 .filter(clip => {
                                     if (isLoggedIn) {
                                         const ratingData = ratings[clip._id];
-                                        return ratingData && ratingData.ratingCounts.some(rateData => rateData.users.some(ratingUser => ratingUser.userId === user._id)) && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count < denyThreshold);
+                                        return ratingData && ratingData.ratingCounts.some(rateData => rateData.users.some(ratingUser => ratingUser.userId === user._id));
                                     } else {
                                         return true;
                                     }

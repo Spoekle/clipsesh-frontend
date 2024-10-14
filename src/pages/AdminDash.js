@@ -4,7 +4,7 @@ import axios from 'axios';
 import { saveAs } from 'file-saver';
 import { BiLoaderCircle } from 'react-icons/bi';
 import LoadingBar from 'react-top-loading-bar';
-import background from '../media/background.jpg';
+import background from '../media/admin.jpg';
 import { FaDiscord } from "react-icons/fa";
 
 function AdminDash() {
@@ -118,6 +118,12 @@ function AdminDash() {
       console.error('Error fetching clips and ratings:', error);
     }
   };
+
+  //get the count of denied clips
+  const deniedClips = clips.filter(clip => {
+    const ratingData = ratings[clip._id];
+    return ratingData && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count >= config.denyThreshold);
+  }).length;
 
   useEffect(() => {
     if (Object.keys(ratings).length > 0) {
@@ -381,6 +387,13 @@ function AdminDash() {
           <p className="text-lg font-bold">{`${payload[0].payload.username}`}</p>
           <p className="text-sm">{`Clips Rated: ${payload[0].value}`}</p>
           <p className="text-sm">{`Percentage Rated: ${((payload[0].value / seasonInfo.clipAmount) * 100).toFixed(2)}%`}</p>
+          <div className="grid grid-cols-2 w-full rounded-md p-2 mt-2 bg-black/20 justify-center">
+            <p className="text-sm text-center">{`Rated 1: ${payload[1].value}`}</p>
+            <p className="text-sm text-center">{`Rated 2: ${payload[2].value}`}</p>
+            <p className="text-sm text-center">{`Rated 3: ${payload[3].value}`}</p>
+            <p className="text-sm text-center">{`Rated 4: ${payload[4].value}`}</p>
+            <p className="col-span-2 text-sm text-center text-red-600">{`Denied: ${payload[5].value}`}</p>
+          </div>
         </div>
       );
     }
@@ -389,12 +402,12 @@ function AdminDash() {
   };
 
   return (
-    <div className="min-h-screen text-white flex flex-col justify-center items-center bg-neutral-200 dark:bg-neutral-900 transition duration-200">
+    <div className="min-h-screen text-white flex flex-col items-center bg-neutral-200 dark:bg-neutral-900 transition duration-200">
       <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
       </div>
-      <div className="w-full flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
-        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
+      <div className="w-full flex h-96 justify-center items-center animate-fade" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
+        <div className="flex bg-black/20 backdrop-blur-md justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Admin Dashboard</h1>
             <h1 className="text-3xl mb-4 text-center">Manage the unmanaged...</h1>
@@ -403,9 +416,9 @@ function AdminDash() {
       </div>
 
       {loading ? (
-        <div className="container pt-20 mb-4 text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200 items-center justify-center justify-items-center animate-fade">
-          <h1 className="text-3xl font-bold mb-4 text-center">Loading...</h1>
-          <BiLoaderCircle className="animate-spin text-5xl text-center" />
+        <div className="container pt-20 mb-4 text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center animate-fade">
+          <h1 className="text-5xl font-bold mb-8 text-center">Loading...</h1>
+          <BiLoaderCircle className="animate-spin text-7xl" />
         </div>
       ) : (
 
@@ -414,7 +427,10 @@ function AdminDash() {
             <h2 className="text-3xl font-bold mb-4">Season info</h2>
             <div className="grid grid-cols-2 text-center justify-center">
               <h2 className="text-2xl font-bold mb-4">Season: {seasonInfo.season}</h2>
-              <h2 className="text-2xl font-bold mb-4">Clip Amount: {seasonInfo.clipAmount}</h2>
+              <div>
+                <h2 className="text-2xl font-bold mb-4">Clip Amount: {seasonInfo.clipAmount}</h2>
+                <h2 className="text-xl font-semibold mb-4 text-red-600">Denied Clips: {deniedClips}</h2>
+              </div>
             </div>
           </div>
 

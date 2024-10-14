@@ -24,6 +24,7 @@ function Navbar({ setUser, user }) {
                 });
                 setUser(response.data);
             } catch (error) {
+                localStorage.removeItem('token');
                 console.error('Error fetching user:', error);
             }
         }
