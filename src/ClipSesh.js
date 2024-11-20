@@ -29,7 +29,7 @@ function ClipSesh() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('https://api.spoekle.com/api/users/me', {
+          const response = await axios.get('https://api-main.spoekle.com/api/users/me', {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(response.data);
@@ -37,6 +37,7 @@ function ClipSesh() {
           console.error('Error fetching user:', error);
         }
       }
+      setLoading(false); // Set loading to false after fetching user data
     };
 
     extractTokenFromURL();
@@ -64,14 +65,14 @@ function ClipSesh() {
     if (showLoadingScreen) {
       return (
         <div className="absolute z-70 w-full h-full bg-neutral-200 dark:bg-neutral-900 ">
-        <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover',backgroundPosition: 'center' }}>
-        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
-          <div className="flex flex-col justify-center items-center">
-            <h1 className="text-4xl font-bold mb-4 text-white text-center animate-pulse animate-duration-[800ms]">Checking Authentication...</h1>
+          <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover',backgroundPosition: 'center' }}>
+            <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
+              <div className="flex flex-col justify-center items-center">
+                <h1 className="text-4xl font-bold mb-4 text-white text-center animate-pulse animate-duration-[800ms]">Checking Authentication...</h1>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      </div>
       );
     }
 

@@ -86,7 +86,7 @@ function Stats({ user }) {
                   } else {
                     console.error(`Unknown rating type: ${ratingData.rating}`);
                   }
-                  userRatingCount[user.username].percentageRated = (userRatingCount[user.username].total / seasonInfo.clipAmount) * 100;
+                  userRatingCount[user.username].percentageRated = (userRatingCount[user.username].total / clipLength) * 100;
                   
                 }
               });
@@ -149,7 +149,7 @@ function Stats({ user }) {
         <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Stats</h1>
-            <h1 className="text-3xl mb-4 text-center">Let's what you have done for ClipSesh this season {user.username}</h1>
+            <h1 className="text-3xl mb-4 text-center">Let's see what you have done for ClipSesh this season {user.username}</h1>
           </div>
         </div>
       </div>
@@ -161,14 +161,16 @@ function Stats({ user }) {
             {userRatings.map(user => (
               <div key={user.username}>
                 <div className="text-2xl">
-                    {user.percentageRated === 50 ? (
-                      <p>Aww man, you rated less than half of the clips, we would love to see you rate some more!</p>
-                    ) : user.percentageRated === 100 ? (
-                      <p>No way! You rated every single clip that has been uploaded to ClipSesh up until now.<br/>
-                        Sit back and relax, you deserved it!</p>
-                    ) : (
-                      <p>Keep it up, you rated more than half of the clips on ClipSesh!</p>
-                    )}
+                  {user.percentageRated < 20 ? (
+                    <p>Oh no, you have rated less than 20% of the clips. We would love to see you rate some more!</p>
+                  ) : user.percentageRated === 100 ? (
+                    <p>No way! You rated every single clip that has been uploaded to ClipSesh up until now.<br/>
+                      Sit back and relax, you deserved it!</p>
+                  ) : user.percentageRated > 50 ? (
+                    <p>Keep it up, you rated more than half of the clips on ClipSesh!</p>
+                  ) : (
+                    <p>Good job, you have rated between 20% and 50% of the clips. Keep going!</p>
+                  )}
                 </div>
                 <div className="">
                     <h3 className="text-xl mt-2">This is what you have done so far {user.username}:</h3>

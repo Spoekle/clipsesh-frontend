@@ -11,8 +11,8 @@ const RatedClips = ({ isLoggedIn, isLoading, setExpandedClip, currentClips, rati
                 <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     {isLoading ? (
                         Array.from({ length: 6 }).map((_, index) => (
-                            <div key={index} className="p-4 relative animate-pulse">
-                                <div className="overflow-hidden w-full text-center relative">
+                            <div key={index} className="m-4 relative animate-pulse">
+                                <div className="overflow-hidden w-full text-center relative shadow-2xl">
                                     {isLoggedIn && (
                                         <div className="flex justify-center">
                                             <div className='absolute top-0 right-0 z-40 p-2 bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 rounded-md'>
@@ -29,7 +29,7 @@ const RatedClips = ({ isLoggedIn, isLoading, setExpandedClip, currentClips, rati
                                         <img src={placeholder} alt="Logo" className="w-full rounded-t-lg border-8 border-white opacity-50" />
                                     </div>
                                 </div>
-                                <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4">
+                                <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4 shadow-2xl">
                                     <button
                                         className="w-1/2 text-green-500 dark:text-green-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-green-500 dark:hover:bg-green-800 transition duration-300 py-2 px-6 rounded-l-md"
                                     >
@@ -55,8 +55,8 @@ const RatedClips = ({ isLoggedIn, isLoading, setExpandedClip, currentClips, rati
                                     }
                                 })
                                 .map(clip => (
-                                    <div key={clip._id} className="p-4 relative animate-fade">
-                                        <div className="overflow-hidden w-full text-center relative">
+                                    <div key={clip._id} className="m-4 relative animate-fade">
+                                        <div className="overflow-hidden w-full text-center relative shadow-2xl">
                                             {isLoggedIn && (
                                                 <div className="flex justify-center">
                                                     <div className='absolute top-0 right-0 z-40 p-2 bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 rounded-md'>
@@ -79,7 +79,7 @@ const RatedClips = ({ isLoggedIn, isLoading, setExpandedClip, currentClips, rati
                                                 </video>
                                             </div>
                                         </div>
-                                        <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4">
+                                        <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4 shadow-2xl">
                                             <button
                                                 className="w-1/2 text-green-500 dark:text-green-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-green-500 dark:hover:bg-green-800 transition duration-300 py-2 px-6 rounded-l-md"
                                                 onClick={() => upvoteClip(clip._id)}

@@ -263,8 +263,8 @@ function ClipViewer() {
             </select>
           </div>
         </div>
-        <div className="container w-full mt-4 justify-center items-center rounded-2xl animate-fade animate-delay-500" style={{ backgroundImage: `url(${banner1})`, backgroundSize: 'cover', backgroundPosition: 'center'  }}>
-          <div className='h-full w-full bg-white/20 backdrop-blur-lg rounded-2xl'>
+        <div className="container w-full min-w-full mt-4 justify-center items-center rounded-2xl animate-fade animate-delay-500" style={{ backgroundImage: `url(${banner1})`, backgroundSize: 'cover', backgroundPosition: 'center'  }}>
+          <div className='h-full w-full min-w-full bg-white/20 backdrop-blur-lg rounded-2xl'>
             <h2 className="p-4 text-center text-neutral-800 bg-white dark:bg-neutral-800 dark:text-white transition duration-200 backdrop-blur-sm rounded-t-xl text-2xl font-bold drop-shadow-md mb-4">Clips</h2>
             <div className="flex justify-center">
               <div className="items-center bg-white justify-center rounded-md py-2 px-4">
@@ -276,16 +276,16 @@ function ClipViewer() {
                 />
               </div>
             </div>
-            <div className="justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className="w-full min-w-full justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="p-4 relative animate-pulse drop-shadow-md">
-                    <div className="overflow-hidden w-full text-center relative">
+                  <div key={index} className="m-4 shadow-2xl relative animate-pulse drop-shadow-md">
+                    <div className="overflow-hidden w-full text-center relative shadow-2xl">
                       <div className='rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200 p-2'>
                         <img src={placeholder} alt="Logo" className="w-full rounded-lg border-white opacity-50" />
                       </div>
                     </div>
-                    <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4">
+                    <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4 shadow-2xl">
                       <button
                         className="w-1/2 text-green-500 dark:text-green-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-green-500 dark:hover:bg-green-800 transition duration-300 py-2 px-6 rounded-l-md"
                       >
@@ -311,8 +311,8 @@ function ClipViewer() {
                       }
                     })
                     .map(clip => (
-                      <div key={clip._id} className="p-4 relative shadow-2xl animate-fade">
-                        <div className="overflow-hidden w-full text-center relative">
+                      <div key={clip._id} className="m-4 relative animate-fade">
+                        <div className="overflow-hidden w-full text-center relative shadow-2xl">
                           {isLoggedIn && (
                             <div className="flex justify-center">
                               <div className='absolute top-0 right-0 z-40 p-2 bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 rounded-md'>
@@ -337,7 +337,7 @@ function ClipViewer() {
                             </video>
                           </div>
                         </div>
-                        <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4">
+                        <div className="w-full flex justify-center bg-white dark:bg-neutral-900 transition duration-200 rounded-b-lg px-4 pt-2 pb-4 shadow-2xl">
                           <button
                             className="w-1/2 text-green-500 dark:text-green-800 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 hover:text-white hover:bg-green-500 dark:hover:bg-green-800 transition duration-300 py-2 px-6 rounded-l-md"
                             onClick={() => upvoteClip(clip._id)}
