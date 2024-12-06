@@ -14,6 +14,7 @@ import background from './media/background.jpg';
 
 function ClipSesh() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const extractTokenFromURL = () => {
@@ -29,7 +30,7 @@ function ClipSesh() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('https://api-main.spoekle.com/api/users/me', {
+          const response = await axios.get('https://api.spoekle.com/api/users/me', {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(response.data);
@@ -44,7 +45,7 @@ function ClipSesh() {
     fetchUser();
   }, []);
 
-  const RequireAuth = ({ children, isAdminRequired = false }) => {
+  const RequireAuth = ({ children, isAdminRequired = false, isVerifiedRequired = false}) => {
     const [loading, setLoading] = useState(true);
     const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   
@@ -84,6 +85,10 @@ function ClipSesh() {
       return <Navigate to="/clips" replace state={{ alert: "You must have admin rights to do this!" }} />;
     }
 
+    if (isVerifiedRequired && user.role !== 'admin' && user.role !== 'clipteam') {
+      return <Navigate to="/clips" replace state={{ alert: "You must have verified rights to do this!" }} />;
+    }
+
     return children;
   };
 
@@ -94,9 +99,10 @@ function ClipSesh() {
         <Route exact path="/" element={<Home />} />
         <Route path="/upload" element={<RequireAuth isAdminRequired={true}><UploadClip /></RequireAuth>} />
         <Route path="/clips" element={<ClipViewer />} />
+        <Route path="/clips/:clipId" element={<ClipViewer />} />
         <Route path="/admin" element={<RequireAuth isAdminRequired={true}><AdminDash /></RequireAuth>} />
         <Route path="/profile" element={<RequireAuth><ProfilePage user={user} setUser={setUser} /></RequireAuth>} />
-        <Route path="/stats" element={<RequireAuth><Stats user={user} setUser={setUser} /></RequireAuth>} />
+        <Route path="/stats" element={<RequireAuth isVerifiedRequired={true}><Stats user={user} setUser={setUser} /></RequireAuth>} />
         <Route path="/privacystatement" element={<PrivacyStatement />} />
       </Routes>
       <Footer />

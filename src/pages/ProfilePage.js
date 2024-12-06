@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import background from '../media/background.jpg';
 
 function ProfilePage({ user, setUser }) {
   const [username, setUsername] = useState(user.username);

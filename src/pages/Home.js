@@ -1,9 +1,27 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import background from '../media/background.jpg';
 import banner1 from '../media/banner1.png';
 import { FaYoutube } from 'react-icons/fa';
 
 function HomePage() {
+  const [config, setConfig] = useState({});
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const response = await axios.get('https://api.spoekle.com/api/admin/config');
+        setConfig(response.data[0]);
+        console.log('Config:', response.data[0]);
+      } catch (error) {
+        console.error('Error fetching config:', error);
+      }
+    };
+
+    fetchConfig();
+  }, []);
+
   return (
     <div className="min-h-screen bg-neutral-200 dark:bg-neutral-900 text-neutral-900 dark:text-white relative">
       <div className="flex min-h-screen justify-center items-center animate-fade" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
@@ -44,13 +62,17 @@ function HomePage() {
 
         <div className="container grid grid-cols-1 md:grid-cols-2 justify-center items-center w-full h-full">
           <div className='w-auto m-4'>
-            <iframe
-              src='https://youtu.be/OZCVt4jvNBc?si=5hXkVrQtchBZ_QeT'
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              title="Latest YouTube Video"
-              className='rounded-2xl w-full aspect-video'
-            ></iframe>
+            {config.latestVideoLink ? (
+              <iframe
+                src={config.latestVideoLink.replace('watch?v=', 'embed/')}
+                allow="accelerometer; autoplay; clipboard-write;"
+                allowFullScreen
+                title="Latest YouTube Video"
+                className='rounded-2xl w-full aspect-video'
+              ></iframe>
+            ) : (
+              <p className="text-center text-lg">Video not available</p>
+            )}
           </div>
           <div className="flex flex-col justify-center items-center m-4 p-4 bg-neutral-300 dark:bg-neutral-950 transition duration-200 rounded-lg aspect-video">
             <h1 className="text-3xl m-4 text-center">Watch the latest highlights here!</h1>

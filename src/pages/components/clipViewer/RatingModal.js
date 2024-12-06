@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Link } from 'react-router-dom';
 import MessageComponent from './MessageComponent';
 import { FaAngleDown } from "react-icons/fa";
 
@@ -72,12 +73,13 @@ const RatingModal = ({ expandedClip, clips, setExpandedClip, isLoggedIn, ratings
                                     <h3 className="text-sm text-gray-200">Uploaded on: {readableDate}</h3>
                                 </div>
                                 <div className='flex justify-end m-4'>
-                                    <button
+                                    <Link
+                                        to={`/clips/`}
                                         className="text-white bg-red-500/60 hover:bg-red-500/80 rounded-md transition duration-300 p-2"
                                         onClick={() => handleCloseButton()}
                                     >
                                         Close
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         </div>

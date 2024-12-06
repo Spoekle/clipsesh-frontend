@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AiOutlineSend, AiOutlineDelete } from 'react-icons/ai';
 import axios from 'axios';
 
-const MessageComponent = ({ clipId }) => {
+const MessageComponent = ({ clipId, setPopout }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [user, setUser] = useState(null);
@@ -12,11 +12,14 @@ const MessageComponent = ({ clipId }) => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await fetch(`https://api.spoekle.com/api/messages?clipId=${clipId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          const response = await fetch(
+            `https://api.spoekle.com/api/messages?clipId=${clipId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
           const data = await response.json();
-          setMessages(data);
+          setMessages(data.reverse()); // Reverse the order to show newest first
         } catch (error) {
           console.error('Failed to fetch messages:', error);
         }
@@ -56,10 +59,16 @@ const MessageComponent = ({ clipId }) => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ clipId, userId: user._id, user: user.username, message: newMessage, profilePicture: user.profilePicture }),
+        body: JSON.stringify({
+          clipId,
+          userId: user._id,
+          user: user.username,
+          message: newMessage,
+          profilePicture: user.profilePicture,
+        }),
       });
       const newMsg = await response.json();
-      setMessages((prevMessages) => [...prevMessages, newMsg]);
+      setMessages((prevMessages) => [newMsg, ...prevMessages]); // Prepend new message
       setNewMessage('');
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -75,7 +84,7 @@ const MessageComponent = ({ clipId }) => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ userId: user._id, role: user.role })
+        body: JSON.stringify({ userId: user._id, role: user.role }),
       });
 
       if (!response.ok) {
@@ -95,9 +104,14 @@ const MessageComponent = ({ clipId }) => {
   };
 
   return (
-    <div className="message-container w-96 bg-black/30 text-white p-4 drop-shadow-md rounded-lg">
-      <p className="text-center font-bold text-2xl mb-4">Chat:</p>
-      <div className="messages bg-gray-100/40 p-2 rounded-lg overflow-y-scroll h-80">
+    <div className="fixed bottom-0 right-4 w-64 bg-neutral-950 text-white p-4 drop-shadow-md rounded-t-xl justify-items-center">
+      <button
+        className="text-center font-bold text-2xl mb-2 bg-white/30 p-2 px-8 rounded-md w-full"
+        onClick={() => setPopout('')}
+      >
+        Chat:
+      </button>
+      <div className="messages bg-gray-100/40 p-2 rounded-lg overflow-y-scroll h-80 w-full">
         {messages.map((msg) => {
           const date = new Date(msg.timestamp);
           const formattedDate = date.toLocaleDateString('en-US', {
@@ -115,22 +129,43 @@ const MessageComponent = ({ clipId }) => {
           return (
             <div
               key={msg._id}
-              className={`mb-4 w-4/5 ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}
+              className={`mb-4 w-[90%] ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}
             >
-              <div className='flex flex-col m-4'>
-                <div className='flex items-center m-2 rounded-xl w-full'>
-                  <div className={`flex relative flex-col p-2 rounded-xl w-full drop-shadow-md ${isOwnMessage ? 'bg-blue-500 rounded-br-none text-white' : 'bg-white rounded-bl-none text-gray-800'}`}>
-                    <img src={msg.profilePicture} alt={msg.user} className={`absolute -bottom-4 h-8 w-8 rounded-full drop-shadow-md ${isOwnMessage ? '-right-4' : '-left-4'}`}></img>
-                    <p className="font-semibold">{msg.user}:</p>
-                    <p>{msg.message}</p>
-                    <p className={`flex text-gray-800 text-xs ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>{readableDate}</p> 
+              <div className="flex flex-col m-2">
+                <div className="flex items-center m-2 rounded-xl w-full">
+                  <div
+                    className={`flex relative flex-col p-2 rounded-xl w-full drop-shadow-md ${
+                      isOwnMessage
+                        ? 'bg-blue-500 rounded-br-none text-white'
+                        : 'bg-white rounded-bl-none text-gray-800'
+                    }`}
+                  >
+                    <img
+                      src={msg.profilePicture}
+                      alt={msg.user}
+                      className={`absolute -bottom-4 h-8 w-8 rounded-full drop-shadow-md ${
+                        isOwnMessage ? '-right-4' : '-left-4'
+                      }`}
+                    ></img>
+                    <p className="font-semibold text-sm">{msg.user}:</p>
+                    <p className='text-xs'>{msg.message}</p>
+                    <p
+                      className={`flex text-gray-800 text-xs ${
+                        isOwnMessage ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      {readableDate}
+                    </p>
                   </div>
                   {user && (user.role === 'admin' || user._id === msg.userId) && (
-                    <button onClick={() => handleDeleteMessage(msg._id)} className={`ml-2 text-red-500`}>
+                    <button
+                      onClick={() => handleDeleteMessage(msg._id)}
+                      className={`mx-1 text-red-500`}
+                    >
                       <AiOutlineDelete size={20} />
                     </button>
                   )}
-                </div>   
+                </div>
               </div>
             </div>
           );

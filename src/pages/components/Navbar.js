@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaSun, FaMoon } from 'react-icons/fa';
 import axios from 'axios';
-import logo from '../../media/CC250.png';
+import logo from '../../media/CC_Logo_250px.png';
 import LoginModal from '../components/LoginModal';
 
 function Navbar({ setUser, user }) {
@@ -63,7 +63,7 @@ function Navbar({ setUser, user }) {
 
     const [isDarkMode, setIsDarkMode] = useState(() => {
         const savedTheme = localStorage.getItem('theme');
-        return savedTheme === 'dark' ? true : false;
+        return savedTheme !== 'light';
     });
 
     useEffect(() => {
@@ -157,17 +157,19 @@ function Navbar({ setUser, user }) {
                                             >
                                                 Profile
                                             </NavLink>
-                                            <NavLink
-                                                to="/stats"
-                                                className="relative block px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20 transition duration-200"
-                                                onClick={() => {
-                                                    toggleDropdown();
-                                                    toggleNavbar();
-                                                }}
-                                            >
-                                                Stats
-                                                <span className="absolute top-1 right-0 p-1 mr-2 bg-blue-500 text-white rounded-md">New!</span>
-                                            </NavLink>
+                                            {user.role === 'clipteam' || user.role === 'admin' && (
+                                                <NavLink
+                                                    to="/stats"
+                                                    className="relative block px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20 transition duration-200"
+                                                    onClick={() => {
+                                                        toggleDropdown();
+                                                        toggleNavbar();
+                                                    }}
+                                                >
+                                                    Stats
+                                                    <span className="absolute top-1 right-0 p-1 mr-2 bg-blue-500 text-white rounded-md">New!</span>
+                                                </NavLink>
+                                            )}
                                             <button
                                                 onClick={handleLogout}
                                                 className="block w-full text-left px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20 transition duration-200"
