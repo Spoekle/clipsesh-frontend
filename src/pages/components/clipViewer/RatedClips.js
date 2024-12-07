@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import placeholder from '../../../media/placeholder.png';
-import { useParams, useSearchParams, useLocation, useNavigate, Link } from 'react-router-dom';
+import { useParams, useSearchParams, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import Pagination from '@mui/material/Pagination';
 
@@ -9,7 +9,6 @@ const RatedClips = ({ ratingsData, clipsData }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const sortOption = searchParams.get('sort') || 'newest';
     const page = parseInt(searchParams.get('page')) || 1;
-    const navigate = useNavigate();
     const location = useLocation();
     const token = localStorage.getItem('token');
 

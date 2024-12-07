@@ -108,7 +108,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
         await axios.delete(`https://api.spoekle.com/api/clips/${currentClip._id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setExpandedClip(null);
+        closeExpandedClip();
       } catch (error) {
         console.error('Error deleting clip:', error);
       }
@@ -270,8 +270,12 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
                 className="p-3 mb-2 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white rounded-md border border-neutral-300 dark:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                rows={4}
+                rows={3}
+                maxLength={300}
               ></textarea>
+              <p className={`text-sm self-end ${newComment.length === 300 ? 'text-red-500 animate-jump' : 'text-gray-500 dark:text-gray-400'}`}>
+                {newComment.length}/300
+              </p>
               <button
                 type="submit"
                 className="self-end bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-200"

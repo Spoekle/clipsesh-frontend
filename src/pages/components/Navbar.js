@@ -85,7 +85,10 @@ function Navbar({ setUser, user }) {
             <div className="container mx-auto flex items-center justify-between flex-wrap">
                 <div className="items-center text-white ml-6 mr-6 inline hover:scale-110 transition duration-200">
                     <NavLink to="/">
-                        <img src={logo} alt="Logo" className="h-10 mr-2 block" />
+                        <div className="flex items-center">
+                            <img src={logo} alt="Logo" className="h-10 mr-2 block" />
+                            <span className="font-semibold text-xl tracking-tight">ClipSesh!</span>
+                        </div>
                     </NavLink>
                 </div>
                 <div className="block lg:hidden">
@@ -114,7 +117,7 @@ function Navbar({ setUser, user }) {
                             }
                             onClick={toggleNavbar}
                         >
-                            View Clips!
+                            Clips
                         </NavLink>
                         {user ? (
                             <>
@@ -127,7 +130,7 @@ function Navbar({ setUser, user }) {
                                             }
                                             onClick={toggleNavbar}
                                         >
-                                            Upload!
+                                            Upload
                                         </NavLink>
                                         <NavLink
                                             to="/admin"
@@ -136,7 +139,7 @@ function Navbar({ setUser, user }) {
                                             }
                                             onClick={toggleNavbar}
                                         >
-                                            Admin Dashboard
+                                            Admin Dash
                                         </NavLink>
                                     </>
                                 )}
@@ -189,7 +192,7 @@ function Navbar({ setUser, user }) {
                                     `block mt-4 lg:inline-block font-semibold lg:mt-0 ${isActive ? 'underline bg-black/20 scale-110' : 'bg-transparent hover:bg-black/20 hover:scale-110'} rounded-md py-2 px-3 mx-3 transition duration-200`
                                 }
                             >
-                                Login!
+                                Login
                             </button>
                         )}
                         <button onClick={toggleDarkMode} className="py-2 px-3 mt-4 mx-3 lg:mt-0 bg-transparent hover:bg-black/20 hover:scale-110 rounded-md transition duration-200">

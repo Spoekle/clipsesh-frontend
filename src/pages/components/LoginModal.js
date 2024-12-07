@@ -83,27 +83,29 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
           <div className="modal-content rounded-lg relative flex">
             <div className="text-white flex items-center justify-center">
               <div className="max-w-md w-full bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white backdrop-blur-lg p-8 rounded-md shadow-md">
-                <h2 className="text-3xl font-bold mb-4">{isRegister ? 'Register' : 'ClipSesh! Login'}</h2>
+                <h2 className="text-3xl font-bold mb-4">{isRegister ? 'Register' : 'Login'}</h2>
                 <form onSubmit={handleSubmit}>
-                  <div className="mb-4">
-                    <label htmlFor="username" className="block text-neutral-900 dark:text-gray-300">Username:</label>
+                  <div className="relative mb-4">
                     <input
                       type="text"
                       id="username"
                       name="username"
+                      placeholder='Username'
                       value={formData.username}
                       onKeyDown={handleKeyDown}
                       onChange={handleChange}
+                      maxLength={30}
                       className="w-full px-3 py-2 bg-neutral-200 dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-300 dark:focus:bg-neutral-700"
                       required
                     />
+                    <p className="absolute bottom--2 right-0 text-sm text-gray-500">{formData.username.length}/30</p>
                   </div>
                   <div className="mb-4">
-                    <label htmlFor="password" className="block text-neutral-900 dark:text-gray-300">Password:</label>
                     <input
                       type="password"
                       id="password"
                       name="password"
+                      placeholder='Password'
                       value={formData.password}
                       onKeyDown={handleKeyDown}
                       onChange={handleChange}
@@ -118,7 +120,6 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
                     {isRegister ? 'Register' : 'Login'}
                   </button>
                 </form>
-                {!isRegister && (
                   <div className="mt-4 text-center">
                     <button
                       onClick={handleDiscordLogin}
@@ -127,7 +128,6 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
                       <FaDiscord className="mr-1" /> Login with Discord
                     </button>
                   </div>
-                )}
                 <div className="mt-4 text-center">
                   <button
                     onClick={handleFormToggle}

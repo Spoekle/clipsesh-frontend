@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import LoadingBar from 'react-top-loading-bar';
-import Pagination from '@mui/material/Pagination';
+import Pagination from './components/clipViewer/Pagination';
 
 import winterBg from '../media/winter.webp';
 import springBg from '../media/spring.jpg';
@@ -274,7 +274,7 @@ function ClipViewer() {
 
   const totalPages = Math.ceil(unratedClips.length / itemsPerPage);
 
-  const paginate = (event, pageNumber) => {
+  const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
     setSearchParams({ sort: sortOption, page: pageNumber });
   };
@@ -391,17 +391,15 @@ function ClipViewer() {
                         );
                       })
                   ) : (
-                    <div>No clips available.</div>
+                    <div className=''>No clips available :(</div>
                   )}
                 </div>
                 <div className="flex justify-center">
-                  <div className="items-center bg-white justify-center rounded-md mb-4 py-2 px-4">
+                  <div className="items-center justify-center rounded-md mb-4 py-2 px-4">
                     <Pagination
-                      showFirstButton
-                      showLastButton
-                      count={totalPages}
-                      page={currentPage}
-                      onChange={paginate}
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={paginate}
                     />
                   </div>
                 </div>
