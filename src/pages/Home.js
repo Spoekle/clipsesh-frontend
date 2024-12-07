@@ -24,6 +24,12 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-neutral-200 dark:bg-neutral-900 text-neutral-900 dark:text-white relative">
+      <head>
+        <title>ClipSesh! | Home</title>
+        <meta name="description" description="ClipSesh! is a site for Beat Saber players by Beat Saber players. On this site you will be able to view all submitted clips
+          from the Cube Community highlights channel. You can rate them, leave comments and discuss with fellow players!"
+        />
+      </head>
       <div className="flex min-h-screen justify-center items-center animate-fade" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="flex bg-black/20 backdrop-blur-lg text-white justify-center items-center w-screen h-screen">
           <div className="grid grid-cols-1 md:grid-cols-2 justify-between items-center">

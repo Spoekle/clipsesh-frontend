@@ -74,6 +74,11 @@ function ProfilePage({ user, setUser }) {
 
   return (
     <div className="min-h-screen text-white relative bg-neutral-200 dark:bg-neutral-900 transition duration-200">
+      <head>
+        <title>{user && user.username + "'s profile"}</title>
+        <meta name="description" description={user && user.username + "'s profile page"}
+        />
+      </head>
       <div className="flex h-96 justify-center items-center animate-fade" style={{ backgroundImage: `url(${user.profilePicture})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">

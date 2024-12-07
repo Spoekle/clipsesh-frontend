@@ -243,7 +243,7 @@ function AdminDash() {
       [name]: name === 'denyThreshold' ? Number(value) : value
     });
   };
-  
+
   const handleConfigSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -431,6 +431,11 @@ function AdminDash() {
 
   return (
     <div className="min-h-screen text-white flex flex-col items-center bg-neutral-200 dark:bg-neutral-900 transition duration-200">
+      <head>
+        <title>Admin Dash</title>
+        <meta name="description" description="ClipSesh! is a site for Beat Saber players by Beat Saber players. On this site you will be able to view all submitted clips"
+        />
+      </head>
       <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
       </div>

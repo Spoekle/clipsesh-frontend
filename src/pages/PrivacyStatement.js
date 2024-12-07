@@ -5,6 +5,12 @@ function PrivacyStatement() {
 
     return (
         <div className="min-h-screen relative text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200">
+            <head>
+                <title>ClipSesh! | Privacy</title>
+                <meta name="description" description="ClipSesh! is a site for Beat Saber players by Beat Saber players. On this site you will be able to view all submitted clips
+                    from the Cube Community highlights channel. You can rate them, leave comments and discuss with fellow players!"
+                />
+            </head>
             <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
                     <div className="flex flex-col justify-center items-center">
@@ -13,7 +19,7 @@ function PrivacyStatement() {
                     </div>
                 </div>
             </div>
-            <div className="container grid justify-items-center text-neutral-900 dark:text-white p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center">
+            <div className="container grid mx-auto justify-items-center text-neutral-900 dark:text-white p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center">
                 <div className="container mx-auto">
                     <h1 className="text-4xl font-bold mb-6">Privacy Policy</h1>
                     <p className="mb-4">Effective Date: 9 July, 2024</p>

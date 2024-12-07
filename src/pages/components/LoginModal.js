@@ -98,7 +98,11 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
                       className="w-full px-3 py-2 bg-neutral-200 dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-300 dark:focus:bg-neutral-700"
                       required
                     />
-                    <p className="absolute bottom--2 right-0 text-sm text-gray-500">{formData.username.length}/30</p>
+                    { isRegister && formData.username.length > 0 &&
+                      <p className={`absolute bottom-1 right-1 bg-white/10 rounded-md backdrop-blur-md p-1 ${formData.username.length === 30 ? 'text-red-500' : 'text-neutral-800'}`}>
+                        {formData.username.length}/30
+                      </p>
+                    }
                   </div>
                   <div className="mb-4">
                     <input
@@ -120,14 +124,14 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
                     {isRegister ? 'Register' : 'Login'}
                   </button>
                 </form>
-                  <div className="mt-4 text-center">
-                    <button
-                      onClick={handleDiscordLogin}
-                      className="flex items-center justify-center w-full bg-blurple hover:bg-blurple-dark text-white py-2 rounded-md focus:outline-none focus:bg-blurple-dark transition duration-300"
-                    >
-                      <FaDiscord className="mr-1" /> Login with Discord
-                    </button>
-                  </div>
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={handleDiscordLogin}
+                    className="flex items-center justify-center w-full bg-blurple hover:bg-blurple-dark text-white py-2 rounded-md focus:outline-none focus:bg-blurple-dark transition duration-300"
+                  >
+                    <FaDiscord className="mr-1" /> Login with Discord
+                  </button>
+                </div>
                 <div className="mt-4 text-center">
                   <button
                     onClick={handleFormToggle}

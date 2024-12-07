@@ -26,8 +26,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                 key={page}
                 onClick={() => handlePageClick(page)}
                 className={`mx-1 px-3 py-1 rounded-md ${page === currentPage
-                    ? 'bg-cc-red  text-white scale-110'
-                    : 'bg-white bg-opacity-20 text-white hover:bg-cc-red/80 hover:scale-105 transition duration-200'
+                    ? 'bg-cc-red  text-white text-lg scale-110'
+                    : 'bg-white bg-opacity-20 text-white text-lg hover:bg-cc-red/80 hover:scale-105 transition duration-200'
                     }`}
             >
                 {page}
@@ -40,13 +40,13 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
             {currentPage !== 1 &&
                 <button
                     onClick={() => currentPage > 1 && handlePageClick(1)}
-                    className={`mx-1 px-3 py-2 rounded-md ${currentPage === 1
+                    className={`mx-1 px-3 py-2 rounded-md hidden md:flex ${currentPage === 1
                         ? 'bg-gray-500 cursor-not-allowed'
                         : 'bg-white bg-opacity-20 text-white hover:bg-cc-blue hover:scale-105 transition duration-200'
                         }`}
                     disabled={currentPage === 1}
                 >
-                    <FaAngleDoubleLeft />
+                    <FaAngleDoubleLeft className='text-lg'/>
                 </button>
             }
             <button
@@ -57,7 +57,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                     }`}
                 disabled={currentPage === 1}
             >
-                <FaAngleLeft />
+                <FaAngleLeft className='text-lg'/>
             </button>
             {renderPageNumbers()}
             <button
@@ -68,19 +68,19 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                     }`}
                 disabled={currentPage === totalPages}
             >
-                <FaAngleRight />
+                <FaAngleRight className='text-lg'/>
             </button>
             {currentPage !== totalPages &&
 
                 <button
                     onClick={() => currentPage < totalPages && handlePageClick(totalPages)}
-                    className={`mx-1 px-3 py-2 rounded-md ${currentPage === totalPages
+                    className={`mx-1 px-3 py-2 rounded-md hidden md:flex ${currentPage === totalPages
                         ? 'bg-gray-500 cursor-not-allowed'
                         : 'bg-white bg-opacity-20 text-white hover:bg-cc-blue hover:scale-105 transition duration-200'
                         }`}
                     disabled={currentPage === totalPages}
                 >
-                    <FaAngleDoubleRight />
+                    <FaAngleDoubleRight className='text-lg'/>
                 </button>
             }
         </div>

@@ -117,16 +117,30 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
 
   return (
     <div className="p-4 animate-fade">
-      <div className="flex justify-between items-center bg-neutral-950 p-2 rounded-t-xl">
+      <head>
+        <title>{currentClip && currentClip.streamer + " | " + currentClip.title}</title>
+        <meta name="description" description={currentClip && currentClip.title + " by " + currentClip.streamer + " on " + new Date(currentClip.createdAt).toLocaleString() 
+        + ". Watch the clip and rate it on ClipSesh!" + currentClip.upvotes + " upvotes and" + currentClip.downvotes + " downvotes. " + currentClip.comments.length + " comments." + currentClip.link}
+        />
+      </head>
+      <div className="flex justify-between items-center bg-neutral-100 dark:bg-neutral-800 p-2 rounded-t-xl">
         <Link
-          className="bg-neutral-800 hover:bg-neutral-900 text-white px-4 py-2 rounded-lg"
+          className="bg-neutral-300 dark:bg-neutral-900 dark:hover:bg-neutral-950 hover:bg-neutral-400 text-neutral-950 dark:text-white px-4 py-2 rounded-lg"
           to={from}
           onClick={closeExpandedClip}
         >
           Back
         </Link>
+        {user && user.role === 'admin' && (
+          <button
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+            onClick={handleDeleteClip}
+          >
+            Delete
+          </button>
+        )}
       </div>
-      <div className="bg-neutral-800 flex-grow p-4 overflow-auto">
+      <div className="bg-neutral-100 dark:bg-neutral-800 flex-grow p-4 overflow-auto">
         <div className="flex-col flex-grow">
           <div className="rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200">
             <video
@@ -138,30 +152,30 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
           </div>
         </div>
         <div className="flex flex-col justify-between my-2">
-          <h1 className="text-2xl text-white font-bold mb-2">Clip Info:</h1>
+          <h1 className="text-2xl text-neutral-950 dark:text-white font-bold mb-2">Clip Info:</h1>
           <a
             href={currentClip.link}
-            className="text-xl text-white font-bold underline hover:text-blue-600"
+            className="text-xl text-neutral-950 dark:text-white font-bold underline hover:text-blue-600"
             target="_blank"
             rel="noreferrer"
           >
             {currentClip.title}
           </a>
-          <h2 className="text-xl text-white font-semibold">{currentClip.streamer}</h2>
-          <p className="text-sm text-white">Uploaded on: {new Date(currentClip.createdAt).toLocaleString()}</p>
+          <h2 className="text-xl text-neutral-950 dark:text-white font-semibold">{currentClip.streamer}</h2>
+          <p className="text-sm text-neutral-950 dark:text-white">Uploaded on: {new Date(currentClip.createdAt).toLocaleString()}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center justify-between p-4 bg-neutral-700 rounded-b-xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-between p-4 bg-neutral-100 dark:bg-neutral-800 rounded-b-xl">
         <div className="flex justify-center md:justify-start items-center">
           <button
-            className="flex items-center bg-green-600 hover:bg-white p-4 px-6 rounded-l-lg text-white hover:text-green-600 transition duration-200"
+            className="flex items-center bg-green-500 hover:bg-white p-4 px-6 rounded-l-lg text-white hover:text-green-500 transition duration-200"
             onClick={handleUpvote}
           >
             <FaThumbsUp className="mr-1" /> {currentClip.upvotes}
           </button>
           <button
-            className="flex items-center bg-red-600 hover:bg-white p-4 px-6 rounded-r-lg text-white hover:text-red-600 transition duration-200"
+            className="flex items-center bg-red-500 hover:bg-white p-4 px-6 rounded-r-lg text-white hover:text-red-500 transition duration-200"
             onClick={handleDownvote}
           >
             <FaThumbsDown className="mr-1" /> {currentClip.downvotes}
@@ -169,7 +183,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
         </div>
         {user && user.role && (user.role === 'clipteam' || user.role === 'admin') && (
           <div className="text-neutral-900 p-2 drop-shadow-md rounded-lg mb-2">
-            <div className="flex justify-center w-full">
+            <div className="grid grid-cols-2 md:grid-cols-4 justify-center w-full">
               {[1, 2, 3, 4].map((rate) => {
                 // Find if the user has rated and with which rating
                 const userRatingData = ratings[clip._id]?.ratingCounts.find(
@@ -220,21 +234,15 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
             </div>
           </div>
         )}
-        {user && user.role === 'admin' && (
-          <button
-            className="bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg"
-            onClick={handleDeleteClip}
-          >
-            Delete Clip
-          </button>
-        )}
       </div>
 
       <div className="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-xl mt-4">
-        <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-4">Comments</h3>
-        <div className="space-y-4">
+        <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-4">
+          Comments {currentClip.comments && currentClip.comments.length > 0 ? `(${currentClip.comments.length})` : ''}
+        </h3>
+        <div className="bg-neutral-100 dark:bg-neutral-900 p-2 py-4 rounded-xl space-y-4 max-h-[50vh] overflow-y-auto">
           {currentClip.comments && currentClip.comments.length > 0 ? (
-            currentClip.comments.map((comment, index) => (
+            currentClip.comments.slice().reverse().map((comment, index) => (
               <div key={index} className="bg-neutral-200 dark:bg-neutral-700 p-4 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center">
@@ -258,7 +266,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
               </div>
             ))
           ) : (
-            <p className="text-neutral-700 dark:text-gray-300">No comments yet.</p>
+            <p className="text-neutral-700 dark:text-gray-300">No comments yet. Be the first!</p>
           )}
         </div>
         {isLoggedIn ? (
@@ -270,6 +278,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
                 className="p-3 mb-2 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white rounded-md border border-neutral-300 dark:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddComment(e)}
                 rows={3}
                 maxLength={300}
               ></textarea>

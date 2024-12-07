@@ -309,6 +309,11 @@ function ClipViewer() {
           <div
             className="grid justify-items-center text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center animate-fade"
           >
+            <head>
+              <title>Clips</title>
+              <meta name="description" description={ unratedClips.map(clip => clip.title + " by " + clip.streamer).join(', ')}
+              />
+            </head>
             <div className="text-center py-4 justify-center items-center z-30">
               <div className="mb-4 flex justify-center">
                 <select
@@ -380,7 +385,7 @@ function ClipViewer() {
                           ratings[clip._id].ratingCounts.some((rateData) =>
                             rateData.users.some((u) => u.userId === user._id)
                           );
-          
+
                         return (
                           <ClipItem
                             key={clip._id}

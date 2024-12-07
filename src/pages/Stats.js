@@ -142,6 +142,11 @@ function Stats({ user }) {
 
   return (
     <div className="min-h-screen text-white flex flex-col items-center bg-neutral-200 dark:bg-neutral-900 transition duration-200">
+      <head>
+        <title>{user && user.username + "'s stats"}</title>
+        <meta name="description" description={user && user.username + "'s stats page"}
+        />
+      </head>
       <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
       </div>
