@@ -77,7 +77,7 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
     <>
       {isLoginModalOpen && (
         <div
-          className="login-modal-overlay fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm flex justify-center items-center z-50"
+          className="login-modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 ml-0"
           onClick={handleLoginClickOutside}
         >
           <div className="modal-content rounded-lg relative flex">

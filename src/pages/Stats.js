@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 import axios from 'axios';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import LoadingBar from 'react-top-loading-bar';
@@ -142,16 +143,16 @@ function Stats({ user }) {
 
   return (
     <div className="min-h-screen text-white flex flex-col items-center bg-neutral-200 dark:bg-neutral-900 transition duration-200">
-      <head>
+      <Helmet>
         <title>{user && user.username + "'s stats"}</title>
         <meta name="description" description={user && user.username + "'s stats page"}
         />
-      </head>
+      </Helmet>
       <div className='w-full'>
         <LoadingBar color='#f11946' progress={progress} onLoaderFinished={() => setProgress(0)} />
       </div>
       <div className="w-full flex h-96 justify-center items-center animate-fade" style={{ backgroundImage: `url(${user.profilePicture})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
+        <div className="flex bg-gradient-to-b from-neutral-900 to-bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Stats</h1>
             <h1 className="text-3xl mb-4 text-center">Let's see what you have done for ClipSesh this season {user.username}</h1>

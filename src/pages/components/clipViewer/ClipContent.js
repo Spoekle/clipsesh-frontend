@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaThumbsUp, FaThumbsDown, FaAngleDown } from 'react-icons/fa';
@@ -117,12 +118,12 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
 
   return (
     <div className="p-4 animate-fade">
-      <head>
+      <Helmet>
         <title>{currentClip && currentClip.streamer + " | " + currentClip.title}</title>
         <meta name="description" description={currentClip && currentClip.title + " by " + currentClip.streamer + " on " + new Date(currentClip.createdAt).toLocaleString() 
         + ". Watch the clip and rate it on ClipSesh!" + currentClip.upvotes + " upvotes and" + currentClip.downvotes + " downvotes. " + currentClip.comments.length + " comments." + currentClip.link}
         />
-      </head>
+      </Helmet>
       <div className="flex justify-between items-center bg-neutral-100 dark:bg-neutral-800 p-2 rounded-t-xl">
         <Link
           className="bg-neutral-300 dark:bg-neutral-900 dark:hover:bg-neutral-950 hover:bg-neutral-400 text-neutral-950 dark:text-white px-4 py-2 rounded-lg"

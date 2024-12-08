@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 import axios from 'axios';
 import background from '../media/background.jpg';
 import placeholder from '../media/placeholder.png';
@@ -191,13 +192,13 @@ function UploadClip() {
 
   return (
     <div className="text-white min-h-screen relative">
-      <head>
+      <Helmet>
         <title>Upload</title>
         <meta name="description" description="Upload and alter clips!"
         />
-      </head>
+      </Helmet>
       <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
+        <div className="flex bg-gradient-to-b from-neutral-900 to-bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Clip Uploads</h1>
             <h1 className="text-3xl mb-4 text-center">Upload and alter clips!</h1>

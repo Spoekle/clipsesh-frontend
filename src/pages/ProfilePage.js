@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet';
 import axios from 'axios';
 
 function ProfilePage({ user, setUser }) {
@@ -74,13 +75,13 @@ function ProfilePage({ user, setUser }) {
 
   return (
     <div className="min-h-screen text-white relative bg-neutral-200 dark:bg-neutral-900 transition duration-200">
-      <head>
+      <Helmet>
         <title>{user && user.username + "'s profile"}</title>
         <meta name="description" description={user && user.username + "'s profile page"}
         />
-      </head>
+      </Helmet>
       <div className="flex h-96 justify-center items-center animate-fade" style={{ backgroundImage: `url(${user.profilePicture})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
+        <div className="flex bg-gradient-to-b from-neutral-900 to-bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Profile Page</h1>
             <h1 className="text-2xl font-semibold mb-4 text-center">{user.username}</h1>
@@ -133,7 +134,8 @@ function ProfilePage({ user, setUser }) {
             <h1 className="text-2xl font-bold">Discord</h1>
             {user.discordId ? (
               <>
-                <p>Discord account linked</p>
+                <p>Discord account linked to {user.discordUsername}</p>
+                <p>Discord ID: {user.discordId}</p>
                 <button onClick={unlinkDiscordAccount} className="flex items-center justify-center w-full my-2 bg-blurple hover:bg-blurple-dark text-white py-2 rounded-md focus:outline-none focus:bg-blurple-dark transition duration-300">
                   Unlink?
                 </button>

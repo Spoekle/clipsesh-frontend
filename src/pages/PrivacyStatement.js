@@ -1,18 +1,19 @@
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import background from '../media/background.jpg';
 
 function PrivacyStatement() {
 
     return (
         <div className="min-h-screen relative text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200">
-            <head>
-                <title>ClipSesh! | Privacy</title>
+            <Helmet>
+                <title>Privacy Statement</title>
                 <meta name="description" description="ClipSesh! is a site for Beat Saber players by Beat Saber players. On this site you will be able to view all submitted clips
                     from the Cube Community highlights channel. You can rate them, leave comments and discuss with fellow players!"
                 />
-            </head>
+            </Helmet>
             <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
+                <div className="flex bg-gradient-to-b from-neutral-900 to-bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
                     <div className="flex flex-col justify-center items-center">
                         <h1 className="text-4xl font-bold mb-4 text-center">Privacy</h1>
                         <h1 className="text-2xl mb-4 text-center">Your privacy matters to me (sorta)</h1>

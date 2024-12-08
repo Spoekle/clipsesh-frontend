@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 import axios from 'axios';
-import background from '../media/background.jpg';
 import banner1 from '../media/banner1.png';
 import { FaYoutube } from 'react-icons/fa';
 
@@ -24,14 +24,29 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-neutral-200 dark:bg-neutral-900 text-neutral-900 dark:text-white relative">
-      <head>
-        <title>ClipSesh! | Home</title>
-        <meta name="description" description="ClipSesh! is a site for Beat Saber players by Beat Saber players. On this site you will be able to view all submitted clips
-          from the Cube Community highlights channel. You can rate them, leave comments and discuss with fellow players!"
+      <Helmet>
+        <title>Home</title>
+        <meta
+          name="description"
+          description="ClipSesh! is a site for Beat Saber players by Beat Saber players. On this site you will be able to view all submitted clips
+              from the Cube Community highlights channel. You can rate them, leave comments and discuss with fellow players!"
         />
-      </head>
-      <div className="flex min-h-screen justify-center items-center animate-fade" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-        <div className="flex bg-black/20 backdrop-blur-lg text-white justify-center items-center w-screen h-screen">
+      </Helmet>
+
+      <div className="flex min-h-screen justify-center items-center animate-fade relative z-10">
+        {config.latestVideoLink ? (
+          <iframe
+            className="absolute w-full h-full z-0 object-cover"
+            src={config.latestVideoLink.replace('watch?v=', 'embed/') + '?autoplay=1&mute=1'}
+            frameborder="0"
+            allowfullscreen
+            allow='autoplay'
+            title="Latest YouTube Video"
+          />
+        ) : (
+          <img src={banner1} className="absolute w-full h-full z-0 object-cover" />
+        )}
+        <div className="flex bg-gradient-to-b from-neutral-900 to-bg-black/20 to-60% backdrop-blur-lg text-white justify-center items-center w-screen h-screen">
           <div className="grid grid-cols-1 md:grid-cols-2 justify-between items-center">
             <div className="flex flex-col justify-center items-center">
               <h1 className="text-4xl md:text-7xl lg:text-9xl font-bold mb-4 text-center">ClipSesh!</h1>
@@ -48,7 +63,7 @@ function HomePage() {
         </div>
       </div>
 
-      <div className="flex-grow flex flex-col p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center">
+      <div className="flex-grow flex flex-col p-4 pt-8 bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center relative z-10">
         <div className="container grid grid-cols-1 md:grid-cols-2 justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center m-4 p-4 bg-neutral-300 dark:bg-neutral-950 transition duration-200 rounded-lg aspect-video">
             <p className="text-2xl font-bold m-4 text-center">Content Cubes come together to rate YOUR clips for the highlights!</p>
@@ -61,8 +76,8 @@ function HomePage() {
               </Link>
             </div>
           </div>
-          <div className='w-auto m-4'>
-            <img src={banner1} alt="Banner" className='rounded-lg aspect-video' />
+          <div className="w-auto m-4">
+            <img src={banner1} alt="Banner" className="rounded-lg aspect-video" />
           </div>
         </div>
 
@@ -74,10 +89,10 @@ function HomePage() {
                 allow="accelerometer; autoplay; clipboard-write;"
                 allowFullScreen
                 title="Latest YouTube Video"
-                className='rounded-2xl w-full aspect-video'
+                className="rounded-2xl w-full aspect-video"
               ></iframe>
             ) : (
-              <p className="text-center text-lg">Video not available</p>
+              <p className="text-cc-red">No video found for the latest highlights</p>
             )}
           </div>
           <div className="flex flex-col justify-center items-center m-4 p-4 bg-neutral-300 dark:bg-neutral-950 transition duration-200 rounded-lg aspect-video">

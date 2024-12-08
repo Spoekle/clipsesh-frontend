@@ -4,7 +4,8 @@ import axios from 'axios';
 import Navbar from './pages/components/Navbar';
 import Footer from './pages/components/Footer';
 import UploadClip from './pages/UploadClip';
-import ClipViewer from './pages/ClipViewer';
+import ClipViewer from './pages/ClipViewer'
+import ClipSearch from './pages/ClipSearch';
 import Home from './pages/Home';
 import AdminDash from './pages/AdminDash';
 import PrivacyStatement from './pages/PrivacyStatement';
@@ -45,18 +46,18 @@ function ClipSesh() {
     fetchUser();
   }, []);
 
-  const RequireAuth = ({ children, isAdminRequired = false, isVerifiedRequired = false}) => {
+  const RequireAuth = ({ children, isAdminRequired = false, isVerifiedRequired = false }) => {
     const [loading, setLoading] = useState(true);
     const [showLoadingScreen, setShowLoadingScreen] = useState(true);
-  
+
     useEffect(() => {
       const timer = setTimeout(() => {
         setShowLoadingScreen(false); // Hide loading screen after 1 second
       }, 500);
-  
+
       return () => clearTimeout(timer); // Cleanup timeout on unmount
     }, []);
-  
+
     useEffect(() => {
       if (!loading) {
         setLoading(false); // Set loading to false after checking authentication
@@ -66,8 +67,8 @@ function ClipSesh() {
     if (showLoadingScreen) {
       return (
         <div className="absolute z-70 w-full h-full bg-neutral-200 dark:bg-neutral-900 ">
-          <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover',backgroundPosition: 'center' }}>
-            <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
+          <div className="flex h-96 justify-center items-center" style={{ backgroundImage: `url(${background})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+            <div className="flex bg-gradient-to-b from-neutral-900 to-bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
               <div className="flex flex-col justify-center items-center">
                 <h1 className="text-4xl font-bold mb-4 text-white text-center animate-pulse animate-duration-[800ms]">Checking Authentication...</h1>
               </div>
@@ -100,6 +101,7 @@ function ClipSesh() {
         <Route path="/upload" element={<RequireAuth isAdminRequired={true}><UploadClip /></RequireAuth>} />
         <Route path="/clips" element={<ClipViewer />} />
         <Route path="/clips/:clipId" element={<ClipViewer />} />
+        <Route path="/search" element={<ClipSearch />} />
         <Route path="/admin" element={<RequireAuth isAdminRequired={true}><AdminDash /></RequireAuth>} />
         <Route path="/profile" element={<RequireAuth><ProfilePage user={user} setUser={setUser} /></RequireAuth>} />
         <Route path="/stats" element={<RequireAuth isVerifiedRequired={true}><Stats user={user} setUser={setUser} /></RequireAuth>} />

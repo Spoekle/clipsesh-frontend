@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import placeholder from '../../../media/placeholder.png';
 
@@ -7,6 +7,19 @@ const DeniedClips = ({ user, isLoading, deniedClips, setExpandedClip }) => {
     const [visibleDenied, setVisibleDenied] = useState(3);
 
     const location = useLocation();
+    const videoRef = useRef(null);
+
+    const handleMouseEnter = () => {
+        if (videoRef.current) {
+            videoRef.current.play();
+        }
+    };
+
+    const handleMouseLeave = () => {
+        if (videoRef.current) {
+            videoRef.current.pause();
+        }
+    };
 
     const loadMoreDenied = () => {
         setVisibleDenied((prev) => prev + 3);
@@ -31,26 +44,32 @@ const DeniedClips = ({ user, isLoading, deniedClips, setExpandedClip }) => {
                         deniedClips
                             .slice(0, visibleDenied)
                             .map((clip) => (
-                                <Link key={clip._id}
-                                    className="m-4 relative animate-fade"
+                                <Link
                                     to={`/clips/${clip._id}`}
                                     state={{ from: location }}
                                     onClick={() => setExpandedClip(clip._id)}
+                                    onMouseEnter={handleMouseEnter}
+                                    onMouseLeave={handleMouseLeave}
+                                    className="relative animate-fade hover:scale-105 transition duration-200 rounded-lg overflow-hidden border-4 border-neutral-950"
                                 >
-                                    <div className="overflow-hidden w-full text-center relative shadow-2xl">
-                                        <div className="absolute flex justify-center top-0 left-0 z-30 text-lg font-bold bg-white text-neutral-900 dark:bg-neutral-800 dark:text-white transition duration-200 p-2 rounded-md text-center">
-                                            <a href={clip.link} className="cursor-pointer">
-                                                {clip.streamer}
-                                            </a>
-                                        </div>
-                                        <div className="rounded-lg bg-white dark:bg-neutral-800 transition duration-200 p-2">
-                                            <video
-                                                className="w-full rounded-lg border-white dark:border-neutral-800 transition duration-200"
-                                                src={`${clip.url}`}
-                                            >
-                                            </video>
-                                        </div>
+
+                                    {/* Streamer Information */}
+                                    <div className="absolute z-30 top-2 left-2 bg-black/50 text-white px-2 py-1 font-bold rounded-md flex items-center backdrop-blur-sm">
+                                        <a href={clip.link} className="cursor-pointer">
+                                            {clip.streamer}
+                                        </a>
                                     </div>
+
+                                    {/* Video Element */}
+                                    <video
+                                        ref={videoRef}
+                                        className="w-full h-full object-cover transition duration-200 opacity-50 hover:opacity-100"
+                                        src={clip.url}
+                                        muted
+                                        preload="metadata"
+                                    >
+                                        Your browser does not support the video tag.
+                                    </video>
                                 </Link>
                             ))
                     ) : (

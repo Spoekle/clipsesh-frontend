@@ -3,31 +3,30 @@ import { Link, useLocation } from 'react-router-dom';
 import { FaCheck } from 'react-icons/fa';
 
 const ClipItem = ({ clip, hasUserRated, setExpandedClip }) => {
-    const videoRef = useRef(null);
-    const location = useLocation();
+  const videoRef = useRef(null);
+  const location = useLocation();
 
-    const handleMouseEnter = () => {
-        if (videoRef.current) {
-            videoRef.current.play();
-        }
-    };
+  const handleMouseEnter = () => {
+    if (videoRef.current) {
+      videoRef.current.play();
+    }
+  };
 
-    const handleMouseLeave = () => {
-        if (videoRef.current) {
-            videoRef.current.pause();
-        }
-    };
+  const handleMouseLeave = () => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+  };
 
-    return (
-        <Link
+  return (
+    <Link
       to={`/clips/${clip._id}`}
       state={{ from: location }}
       onClick={() => setExpandedClip(clip._id)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative animate-fade hover:scale-105 transition duration-200 rounded-lg overflow-hidden ${
-        hasUserRated ? 'border-4 border-blue-500' : 'border-4 border-neutral-950'
-      }`}
+      className={`relative animate-fade hover:scale-105 transition duration-200 rounded-lg overflow-hidden ${hasUserRated ? 'border-4 border-blue-500' : 'border-4 border-neutral-950'
+        }`}
     >
       {/* Rated Overlay */}
       {hasUserRated && (
@@ -54,7 +53,7 @@ const ClipItem = ({ clip, hasUserRated, setExpandedClip }) => {
         Your browser does not support the video tag.
       </video>
     </Link>
-    );
+  );
 };
 
 export default ClipItem;

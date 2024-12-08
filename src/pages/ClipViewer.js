@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { Helmet } from 'react-helmet';
 import { useParams, useSearchParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import LoadingBar from 'react-top-loading-bar';
@@ -13,6 +14,7 @@ import placeholder from '../media/placeholder.png';
 import DeniedClips from './components/clipViewer/DeniedClips';
 import ClipContent from './components/clipViewer/ClipContent';
 import ClipItem from './components/clipViewer/ClipItem';
+import ClipSearch from './ClipSearch';
 
 function ClipViewer() {
   const { clipId } = useParams();
@@ -239,6 +241,74 @@ function ClipViewer() {
           return ratioA - ratioB;
         });
         break;
+      case 'highestScore':
+        sortedClips.sort((a, b) => {
+          const calculateScore = (clip) => {
+            const clipRatings = ratings[clip._id]?.ratingCounts || [];
+            let score = 0;
+            clipRatings.forEach((rate) => {
+              switch (rate.rating) {
+                case 1:
+                  score += 10 * rate.count;
+                  break;
+                case 2:
+                  score += 6 * rate.count;
+                  break;
+                case 3:
+                  score += 4 * rate.count;
+                  break;
+                case 4:
+                  score += 2 * rate.count;
+                  break;
+                case 'deny':
+                  score += -5 * rate.count;
+                  break;
+                default:
+                  break;
+              }
+            });
+            return score;
+          };
+
+          const scoreA = calculateScore(a);
+          const scoreB = calculateScore(b);
+          return scoreB - scoreA;
+        });
+        break;
+      case 'lowestScore':
+        sortedClips.sort((a, b) => {
+          const calculateScore = (clip) => {
+            const clipRatings = ratings[clip._id]?.ratingCounts || [];
+            let score = 0;
+            clipRatings.forEach((rate) => {
+              switch (rate.rating) {
+                case 1:
+                  score += 10 * rate.count;
+                  break;
+                case 2:
+                  score += 6 * rate.count;
+                  break;
+                case 3:
+                  score += 4 * rate.count;
+                  break;
+                case 4:
+                  score += 2 * rate.count;
+                  break;
+                case 'deny':
+                  score += -5 * rate.count;
+                  break;
+                default:
+                  break;
+              }
+            });
+            return score;
+          };
+
+          const scoreA = calculateScore(a);
+          const scoreB = calculateScore(b);
+          return scoreA - scoreB;
+        });
+        break;
       default:
         break;
     }
@@ -281,7 +351,7 @@ function ClipViewer() {
 
   const renderContent = () => {
     if (expandedClip === 'new') {
-      //return <NewClipForm setExpandedPost={setExpandedClip} fetchClips={fetchClipsAndRatings} />;
+      return <ClipSearch setExpandedPost={setExpandedClip} fetchClips={fetchClipsAndRatings} />;
     } else if (expandedClip) {
       if (isClipLoading) {
         return <div className="text-center py-8">Loading clip...</div>;
@@ -309,11 +379,6 @@ function ClipViewer() {
           <div
             className="grid justify-items-center text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center animate-fade"
           >
-            <head>
-              <title>Clips</title>
-              <meta name="description" description={ unratedClips.map(clip => clip.title + " by " + clip.streamer).join(', ')}
-              />
-            </head>
             <div className="text-center py-4 justify-center items-center z-30">
               <div className="mb-4 flex justify-center">
                 <select
@@ -333,6 +398,12 @@ function ClipViewer() {
                   <option value="highestDownvotes">Highest Downvotes</option>
                   <option value="highestRatio">Highest Upvote/Downvote Ratio</option>
                   <option value="lowestRatio">Lowest Upvote/Downvote Ratio</option>
+                  {user && (user.role === 'clipteam' || user.role === 'admin') && (
+                    <>
+                      <option value="highestScore">(Clip Team) Highest Rated</option>
+                      <option value="lowestScore">(Clip Team) Lowest Rated</option>
+                    </>
+                  )}
                 </select>
               </div>
               {user && (user.role === 'clipteam' || user.role === 'admin') && (
@@ -425,7 +496,14 @@ function ClipViewer() {
   };
 
   return (
-    <div className="min-h-screen w-full top-0 text-white absolute bg-neutral-200 dark:bg-neutral-900 transition duration-200 overflow-hidden">
+    <div className="min-h-screen text-white flex flex-col items-center bg-neutral-200 dark:bg-neutral-900 transition duration-200">
+      <Helmet>
+        <title>Clip Viewer</title>
+        <meta
+          name="description"
+          content={unratedClips.map(clip => `${clip.title} by ${clip.streamer}`).join(', ')}
+        />
+      </Helmet>
       <div className="w-full">
         <LoadingBar
           color="#f11946"
@@ -434,7 +512,7 @@ function ClipViewer() {
         />
       </div>
       <div
-        className="flex h-96 justify-center items-center drop-shadow-xl animate-fade"
+        className="flex h-96 w-full justify-center items-center drop-shadow-xl animate-fade"
         style={{
           backgroundImage: `url(${seasonInfo.season === 'Winter'
             ? winterBg
@@ -447,7 +525,7 @@ function ClipViewer() {
           backgroundPosition: 'center',
         }}
       >
-        <div className="flex bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
+        <div className="flex bg-gradient-to-b from-neutral-900 to-bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Clip Viewer</h1>
             <h1 className="text-3xl mb-4 text-center">Rate the clips!</h1>
