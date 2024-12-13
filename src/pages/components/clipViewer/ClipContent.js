@@ -1,23 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaThumbsUp, FaThumbsDown, FaAngleDown } from 'react-icons/fa';
 import MessageComponent from './MessageComponent';
+import EditModal from './EditClipModal';
 
-const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClipsAndRatings, ratings, searchParams }) => {
+const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClipsAndRatings, ratings }) => {
   const [currentClip, setCurrentClip] = useState(clip);
   const [newComment, setNewComment] = useState('');
   const [popout, setPopout] = useState('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
 
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = location.state?.from || { pathname: '/clips', search: '' };
-
-  useEffect(() => {
-    console.log(from.search)
-  }, [from])
 
   if (!currentClip) {
     return <div>Loading...</div>;
@@ -31,13 +30,17 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
     });
   };
 
+  const toggleEditModal = () => {
+    setIsEditModalOpen(!isEditModalOpen);
+  };
+
   const rateOrDenyClip = async (id, rating = null, deny = false) => {
     try {
       const data = rating !== null ? { rating } : { deny };
       await axios.post(`https://api.spoekle.com/api/rate/${id}`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      await fetchClipsAndRatings(user, isLoggedIn);
+      await fetchClipsAndRatings(user);
     } catch (error) {
       alert('Error rating/denying clip:', error);
     }
@@ -118,12 +121,14 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
 
   return (
     <div className="p-4 animate-fade">
-      <Helmet>
-        <title>{currentClip && currentClip.streamer + " | " + currentClip.title}</title>
-        <meta name="description" description={currentClip && currentClip.title + " by " + currentClip.streamer + " on " + new Date(currentClip.createdAt).toLocaleString() 
-        + ". Watch the clip and rate it on ClipSesh!" + currentClip.upvotes + " upvotes and" + currentClip.downvotes + " downvotes. " + currentClip.comments.length + " comments." + currentClip.link}
-        />
-      </Helmet>
+      {clip && (
+        <Helmet>
+          <title>{currentClip && currentClip.streamer + " | " + currentClip.title}</title>
+          <meta name="description" description={currentClip && currentClip.title + " by " + currentClip.streamer + " on " + new Date(currentClip.createdAt).toLocaleString()
+            + ". Watch the clip and rate it on ClipSesh!" + currentClip.upvotes + " upvotes and" + currentClip.downvotes + " downvotes. " + currentClip.comments.length + " comments." + currentClip.link}
+          />
+        </Helmet>
+      )}
       <div className="flex justify-between items-center bg-neutral-100 dark:bg-neutral-800 p-2 rounded-t-xl">
         <Link
           className="bg-neutral-300 dark:bg-neutral-900 dark:hover:bg-neutral-950 hover:bg-neutral-400 text-neutral-950 dark:text-white px-4 py-2 rounded-lg"
@@ -133,20 +138,29 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
           Back
         </Link>
         {user && user.role === 'admin' && (
-          <button
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-            onClick={handleDeleteClip}
-          >
-            Delete
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg"
+              onClick={toggleEditModal}
+            >
+              Edit
+            </button>
+            <button
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+              onClick={handleDeleteClip}
+            >
+              Delete
+            </button>
+          </div>
         )}
       </div>
       <div className="bg-neutral-100 dark:bg-neutral-800 flex-grow p-4 overflow-auto">
         <div className="flex-col flex-grow">
-          <div className="rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200">
+          <div className="relative rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200">
             <video
-              className="w-full rounded-lg border-white dark:border-neutral-800 transition duration-200"
-              src={`${clip.url}`}
+              className="w-full aspect-video rounded-l bg-black/20 border-white dark:border-neutral-800 transition duration-200"
+              src={clip.url + '#t=0.001'}
+              id="video"
               controls
             >
             </video>
@@ -197,11 +211,11 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
                   <button
                     key={rate}
                     className={`font-bold py-2 px-6 rounded-md transition duration-300 m-2 ${userCurrentRating === rate
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-neutral-200 hover:bg-blue-300'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-neutral-200 hover:bg-blue-300'
                       }`}
                     onClick={() => {
-                        rateOrDenyClip(clip._id, rate);
+                      rateOrDenyClip(clip._id, rate);
                     }}
                   >
                     {rate}
@@ -218,7 +232,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
                   className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-md transition duration-300 m-2"
                   onClick={() => {
                     rateOrDenyClip(clip._id, null, true);
-                }}
+                  }}
                 >
                   Denied
                 </button>
@@ -226,7 +240,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
                 <button
                   className={`bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-md transition duration-300 m-2`}
                   onClick={() => {
-                      rateOrDenyClip(clip._id, null, true);
+                    rateOrDenyClip(clip._id, null, true);
                   }}
                 >
                   Deny
@@ -307,7 +321,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
       {popout === 'chat' ? (
         <MessageComponent clipId={clip._id} setPopout={setPopout} />
       ) : popout === 'ratings' ? (
-        <div className="fixed bottom-0 right-4">
+        <div className="fixed z-30 bottom-0 right-4">
           <div className="flex flex-col w-64">
             <div className="bg-neutral-950 text-white p-4 drop-shadow-md rounded-t-xl w-full justify-items-center">
               <button
@@ -368,7 +382,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
         </div>
       ) : (
         user && user.role && (user.role === 'clipteam' || user.role === 'admin') && (
-          <div className="flex space-x-2 fixed bottom-0 right-4">
+          <div className="flex z-30 space-x-2 fixed bottom-0 right-4">
             <button
               className="bg-neutral-600 hover:bg-neutral-700 text-white px-4 py-2 rounded-t-xl"
               onClick={() => setPopout('chat')}
@@ -384,7 +398,17 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
           </div>
         )
       )}
+      {isEditModalOpen && (
+        <EditModal
+          isEditModalOpen={isEditModalOpen}
+          setIsEditModalOpen={toggleEditModal}
+          clip={currentClip}
+          setCurrentClip={setCurrentClip}
+          token={token}
+        />
+      )}
     </div>
+
   );
 };
 

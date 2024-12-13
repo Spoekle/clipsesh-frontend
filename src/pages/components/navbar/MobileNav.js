@@ -88,34 +88,39 @@ function MobileNavbar({
                                         <p className="text-sm text-neutral-500 dark:text-neutral-400">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
                                     </div>
                                 </NavLink>
-                                {user.role === 'admin' && (
+                                {user && (
                                     <>
                                         <div className="border-t border-neutral-200 dark:border-neutral-800 my-2" />
-                                        <NavLink
-                                            to="/upload"
-                                            className="block px-4 py-2 text-sm font-semibold text-neutral-900 dark:text-white hover:bg-black/20"
-                                            onClick={toggleDropdown}
-                                        >
-                                            Upload
-                                        </NavLink>
-                                        <NavLink
-                                            to="/admin"
-                                            className="block px-4 py-2 text-sm font-semibold text-neutral-900 dark:text-white hover:bg-black/20"
-                                            onClick={toggleDropdown}
-                                        >
-                                            Admin Dash
-                                        </NavLink>
+                                        {(user.role === 'editor' || user.role === 'admin') && (
+                                            <NavLink
+                                                to="/editor"
+                                                className="block px-4 py-2 text-sm font-semibold text-neutral-900 dark:text-white hover:bg-black/20"
+                                                onClick={toggleDropdown}
+                                            >
+                                                Editor Dash
+                                            </NavLink>
+                                        )}
+                                        {user.role === 'admin' && (
+                                            <NavLink
+                                                to="/admin"
+                                                className="block px-4 py-2 text-sm font-semibold text-neutral-900 dark:text-white hover:bg-black/20"
+                                                onClick={toggleDropdown}
+                                            >
+                                                Admin Dash
+                                            </NavLink>
+                                        )}
+                                        {(user.role === 'clipteam' || user.role === 'admin') && (
+                                            <NavLink
+                                                to="/stats"
+                                                className="relative block px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20"
+                                                onClick={toggleDropdown}
+                                            >
+                                                Stats
+                                            </NavLink>
+                                        )}
                                     </>
                                 )}
-                                {(user.role === 'clipteam' || user.role === 'admin') && (
-                                    <NavLink
-                                        to="/stats"
-                                        className="relative block px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20"
-                                        onClick={toggleDropdown}
-                                    >
-                                        Stats
-                                    </NavLink>
-                                )}
+
                                 <div className="border-t border-neutral-200 dark:border-neutral-800 my-2" />
                                 <button
                                     onClick={handleLogout}

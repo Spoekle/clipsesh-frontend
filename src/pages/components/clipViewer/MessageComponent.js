@@ -104,7 +104,7 @@ const MessageComponent = ({ clipId, setPopout }) => {
   };
 
   return (
-    <div className="fixed bottom-0 right-4 w-64 bg-neutral-950 text-white p-4 drop-shadow-md rounded-t-xl justify-items-center">
+    <div className="fixed bottom-0 right-4 w-64 z-30 bg-neutral-950 text-white p-4 drop-shadow-md rounded-t-xl justify-items-center">
       <button
         className="text-center font-bold text-2xl mb-2 bg-white/30 p-2 px-8 rounded-md w-full"
         onClick={() => setPopout('')}

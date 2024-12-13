@@ -47,9 +47,8 @@ const ClipSearch = () => {
 
     // Handler for pagination
     const handlePageChange = (newPage) => {
-        // Assuming you're using React Router v6
         window.history.pushState({}, '', `/search?query=${encodeURIComponent(searchTerm)}&page=${newPage}`);
-        window.dispatchEvent(new Event('popstate')); // Trigger a re-render
+        window.dispatchEvent(new Event('popstate'));
     };
 
     return (
@@ -61,13 +60,14 @@ const ClipSearch = () => {
                 <p className="text-red-500">{error}</p>
             ) : clips.length > 0 ? (
                 <>
-                    <ul className="space-y-4">
-                        {clips.map((clip) => (
+                    <ul className="space-y-4 container mx-auto">
+                        {clips.map((clip, index) => (
                             <Link
                                 key={clip._id}
                                 to={`/clips/${clip._id}`}
-                                state={{ from: location}}
-                                className="flex items-center bg-white hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-md p-4 shadow-md"
+                                state={{ from: location }}
+                                className={`flex items-center bg-white hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-md p-4 shadow-md animate-fade-left`}
+                                style={{ animationDelay: `${index * 70}ms` }}
                             >
                                 <video
                                     src={clip.url}

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import axios from 'axios';
 import Navbar from './pages/components/Navbar';
 import Footer from './pages/components/Footer';
-import UploadClip from './pages/UploadClip';
+import EditorDash from './pages/EditorDash';
 import ClipViewer from './pages/ClipViewer'
 import ClipSearch from './pages/ClipSearch';
 import Home from './pages/Home';
@@ -46,7 +46,7 @@ function ClipSesh() {
     fetchUser();
   }, []);
 
-  const RequireAuth = ({ children, isAdminRequired = false, isVerifiedRequired = false }) => {
+  const RequireAuth = ({ children, isAdminRequired = false, isEditorRequired = false, isVerifiedRequired = false }) => {
     const [loading, setLoading] = useState(true);
     const [showLoadingScreen, setShowLoadingScreen] = useState(true);
 
@@ -86,6 +86,10 @@ function ClipSesh() {
       return <Navigate to="/clips" replace state={{ alert: "You must have admin rights to do this!" }} />;
     }
 
+    if (isEditorRequired && user.role !== 'admin' && user.role !== 'editor') {
+      return <Navigate to="/clips" replace state={{ alert: "You must have verified rights to do this!" }} />;
+    }
+
     if (isVerifiedRequired && user.role !== 'admin' && user.role !== 'clipteam') {
       return <Navigate to="/clips" replace state={{ alert: "You must have verified rights to do this!" }} />;
     }
@@ -98,7 +102,7 @@ function ClipSesh() {
       <Navbar user={user} setUser={setUser} />
       <Routes>
         <Route exact path="/" element={<Home />} />
-        <Route path="/upload" element={<RequireAuth isAdminRequired={true}><UploadClip /></RequireAuth>} />
+        <Route path="/editor" element={<RequireAuth isEditorRequired={true}><EditorDash /></RequireAuth>} />
         <Route path="/clips" element={<ClipViewer />} />
         <Route path="/clips/:clipId" element={<ClipViewer />} />
         <Route path="/search" element={<ClipSearch />} />

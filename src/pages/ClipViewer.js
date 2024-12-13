@@ -59,7 +59,6 @@ function ClipViewer() {
           })
         );
 
-        // Assuming fetchConfig is defined elsewhere
         await fetchConfig();
 
         const ratingResponses = await Promise.all(ratingPromises);
@@ -180,7 +179,7 @@ function ClipViewer() {
 
   const filterDeniedClips = (clipsData, ratingsData) => {
     const denied = [];
-    const threshold = config.denyThreshold || 3;
+    const threshold = config.denyThreshold;
     clipsData.forEach((clip) => {
       const ratingData = ratingsData[clip._id];
       if (

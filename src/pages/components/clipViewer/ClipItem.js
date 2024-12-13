@@ -45,8 +45,8 @@ const ClipItem = ({ clip, hasUserRated, setExpandedClip }) => {
       {/* Video Element */}
       <video
         ref={videoRef}
-        className="w-full h-full object-cover transition duration-200 opacity-50 hover:opacity-100"
-        src={clip.url}
+        className="w-full h-full object-cover transition duration-200 opacity-50 hover:opacity-100 aspect-video"
+        src={clip.url + '#t=0.001'} 
         muted
         preload="metadata"
       >

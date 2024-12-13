@@ -3,12 +3,12 @@
   "name": "ClipSesh! - Rate your favorite clips",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "CC-Logo-32px.png",
+      "sizes": "32x32",
+      "type": "image/png"
     },
     {
-      "src": "logo512.png",
+      "src": "CC_Logo_250px.png",
       "type": "image/png",
       "sizes": "512x512"
     }
@@ -16,5 +16,5 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#161616"
 }

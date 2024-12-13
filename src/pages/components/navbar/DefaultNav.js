@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaSun, FaMoon, FaSearch, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaTimes } from 'react-icons/fa';
 import LoginModal from '../LoginModal';
 
 function DesktopNavbar({
@@ -16,13 +16,23 @@ function DesktopNavbar({
     handleSearch,
     recentSearches,
     removeRecentSearch,
-    handleRecentSearch
 }) {
     const [showRecentSearched, setShowRecentSearched] = useState(false);
 
-    const toggleRecentSearched = () => {
-        setShowRecentSearched((prev) => !prev);
-    };
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                !event.target.closest('.search-container') &&
+                !event.target.closest('.recent-searches')
+            ) {
+                setShowRecentSearched(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     return (
         <>
@@ -36,16 +46,18 @@ function DesktopNavbar({
                     >
                         Clips
                     </NavLink>
+                    {user && (user.role === 'editor' || user.role === 'admin') && (
+                        <NavLink
+                            to="/editor"
+                            className={({ isActive }) =>
+                                `text-md font-semibold ${isActive ? 'underline bg-black/20 scale-110' : 'hover:bg-black/20 hover:scale-110'} rounded-md py-2 px-3 transition duration-200 text-left`
+                            }
+                        >
+                            Editor Dash
+                        </NavLink>
+                    )}
                     {user && user.role === 'admin' && (
                         <>
-                            <NavLink
-                                to="/upload"
-                                className={({ isActive }) =>
-                                    `text-md font-semibold ${isActive ? 'underline bg-black/20 scale-110' : 'hover:bg-black/20 hover:scale-110'} rounded-md py-2 px-3 transition duration-200 text-left`
-                                }
-                            >
-                                Upload
-                            </NavLink>
                             <NavLink
                                 to="/admin"
                                 className={({ isActive }) =>
@@ -58,21 +70,23 @@ function DesktopNavbar({
                     )}
                 </div>
                 <div className="flex items-center space-x-3">
-                    <form onSubmit={handleSearch} className="flex relative">
+                    <form onSubmit={handleSearch} className="flex relative search-container">
                         <div className="relative flex">
                             <input
                                 type="text"
                                 placeholder="Search..."
                                 value={searchInput}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSearch(e)}
                                 onFocus={() => setShowRecentSearched(true)}
                                 onChange={(e) => setSearchInput(e.target.value)}
                                 className="px-3 py-2 rounded-md bg-white dark:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
                             />
-                            <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                            <FaSearch
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-600 cursor-pointer"
+                                onClick={handleSearch}
+                            />
                         </div>
-                        {(showRecentSearched || searchInput) && (
-                            <div className="absolute top-8 mt-2 w-full bg-white/60 dark:bg-neutral-900 rounded-md shadow-lg py-2 z-10">
+                        {showRecentSearched && (
+                            <div className="absolute top-8 mt-2 w-full bg-white/60 dark:bg-neutral-900 rounded-md shadow-lg py-2 z-10 recent-searches">
                                 <button
                                     type="button"
                                     onClick={() => setShowRecentSearched(false)}
@@ -87,15 +101,18 @@ function DesktopNavbar({
                                 )}
                                 <div className="flex flex-col mt-1">
                                     {recentSearches
-                                        .filter((search) => search.toLowerCase().includes(searchInput.toLowerCase()))
                                         .slice(0, 4)
                                         .map((search) => (
                                             <div key={search} className="flex items-center bg-black/10 hover:bg-black/20 justify-between px-2 py-1">
                                                 <button
                                                     type="button"
-                                                    onClick={() => {
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
                                                         setSearchInput(search);
                                                         setShowRecentSearched(false);
+                                                        setSearchInput(search);
+                                                        setShowRecentSearched(false);
+                                                        handleSearch({ target: { value: search }, preventDefault: () => {} });
                                                     }}
                                                     className="text-sm text-left flex-1"
                                                 >
