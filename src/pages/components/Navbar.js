@@ -112,7 +112,7 @@ function Navbar({ setUser, user }) {
         <nav className="p-2 z-50 sticky text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200">
             <div className="container mx-auto flex items-center justify-between flex-wrap">
                 <div className="flex items-center">
-                    <NavLink to="/" className="flex items-center mr-6 hover:scale-110 transition duration-200">
+                    <NavLink to="/" className="flex items-center mr-6 bg-transparent hover:bg-gradient-to-r from-cc-red from-30% to-cc-blue hover:text-transparent hover:bg-clip-text hover:scale-110 transition-all duration-200">
                         <img src={logo} alt="Logo" className="h-10 mr-2" />
                         <span className="font-semibold text-xl tracking-tight">ClipSesh!</span>
                     </NavLink>

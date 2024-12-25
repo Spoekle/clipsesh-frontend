@@ -134,25 +134,22 @@ const MessageComponent = ({ clipId, setPopout }) => {
               <div className="flex flex-col m-2">
                 <div className="flex items-center m-2 rounded-xl w-full">
                   <div
-                    className={`flex relative flex-col p-2 rounded-xl w-full drop-shadow-md ${
-                      isOwnMessage
-                        ? 'bg-blue-500 rounded-br-none text-white'
-                        : 'bg-white rounded-bl-none text-gray-800'
-                    }`}
+                    className={`flex relative flex-col p-2 rounded-xl w-full drop-shadow-md ${isOwnMessage
+                      ? 'bg-blue-500 rounded-br-none text-white'
+                      : 'bg-white rounded-bl-none text-gray-800'
+                      }`}
                   >
                     <img
                       src={msg.profilePicture}
                       alt={msg.user}
-                      className={`absolute -bottom-4 h-8 w-8 rounded-full drop-shadow-md ${
-                        isOwnMessage ? '-right-4' : '-left-4'
-                      }`}
+                      className={`absolute -bottom-4 h-8 w-8 rounded-full drop-shadow-md ${isOwnMessage ? '-right-4' : '-left-4'
+                        }`}
                     ></img>
                     <p className="font-semibold text-sm">{msg.user}:</p>
                     <p className='text-xs'>{msg.message}</p>
                     <p
-                      className={`flex text-gray-800 text-xs ${
-                        isOwnMessage ? 'justify-end' : 'justify-start'
-                      }`}
+                      className={`flex text-gray-800 text-xs ${isOwnMessage ? 'justify-end' : 'justify-start'
+                        }`}
                     >
                       {readableDate}
                     </p>
@@ -171,22 +168,24 @@ const MessageComponent = ({ clipId, setPopout }) => {
           );
         })}
       </div>
-      <div className="send-message text-neutral-900 mt-4 flex">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="flex-grow p-2 rounded-l-lg border"
-          placeholder="Type your message..."
-        />
-        <button
-          onClick={handleSendMessage}
-          className="text-blue-500 bg-white p-2 rounded-r-lg flex items-center hover:text-blue-400 transition duration-200"
-        >
-          <AiOutlineSend size={24} />
-        </button>
-      </div>
+      {user && user.role && (user.role === 'clipteam' || user.role === 'admin') && (
+        <div className="send-message text-neutral-900 mt-4 flex">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-grow p-2 rounded-l-lg border"
+            placeholder="Type your message..."
+          />
+          <button
+            onClick={handleSendMessage}
+            className="text-blue-500 bg-white p-2 rounded-r-lg flex items-center hover:text-blue-400 transition duration-200"
+          >
+            <AiOutlineSend size={24} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

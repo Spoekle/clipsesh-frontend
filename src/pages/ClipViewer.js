@@ -10,8 +10,6 @@ import springBg from '../media/spring.jpg';
 import summerBg from '../media/summer.jpg';
 import fallBg from '../media/fall.jpg';
 
-import placeholder from '../media/placeholder.png';
-import DeniedClips from './components/clipViewer/DeniedClips';
 import ClipContent from './components/clipViewer/ClipContent';
 import ClipItem from './components/clipViewer/ClipItem';
 import ClipSearch from './ClipSearch';
@@ -36,7 +34,7 @@ function ClipViewer() {
   const [user, setUser] = useState(null);
   const [currentClip, setCurrentClip] = useState(null);
   const [expandedClip, setExpandedClip] = useState(clipId || null);
-  const [sortOptionState, setSortOptionState] = useState(sortOption);
+  const [sortOptionState, setSortOptionState] = useState(sortOption || 'newest');
   const [config, setConfig] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -139,7 +137,9 @@ function ClipViewer() {
   const fetchInitialData = useCallback(async () => {
     try {
       const userData = await fetchUser();
-      getSeason(); // Assuming getSeason is defined elsewhere
+      localStorage.setItem('filterRatedClips', filterRatedClips);
+      setProgress(30);
+      getSeason();
       setProgress(50);
       await fetchClipsAndRatings(userData, filterRatedClips);
       setProgress(100);
@@ -152,14 +152,6 @@ function ClipViewer() {
   useEffect(() => {
     fetchInitialData();
   }, [fetchInitialData, location.search]);
-
-  useEffect(() => {
-    // Update localStorage whenever filterRatedClips changes
-    localStorage.setItem('filterRatedClips', filterRatedClips);
-
-    // Fetch clips and ratings based on the current filter
-    fetchClipsAndRatings(user, filterRatedClips);
-  }, [filterRatedClips, fetchClipsAndRatings, user]);
 
   useEffect(() => {
     if (expandedClip && expandedClip !== 'new') {
@@ -178,24 +170,30 @@ function ClipViewer() {
   }, [expandedClip]);
 
   const filterDeniedClips = (clipsData, ratingsData) => {
-    const denied = [];
-    const threshold = config.denyThreshold;
-    clipsData.forEach((clip) => {
-      const ratingData = ratingsData[clip._id];
-      if (
-        ratingData &&
-        ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count >= threshold)
-      ) {
-        denied.push(clip);
-      }
-    });
-    console.log(denied);
+    if (config.denyThreshold) {
+      const denied = [];
+      const threshold = config.denyThreshold;
+      clipsData.forEach((clip) => {
+        const ratingData = ratingsData[clip._id];
+        if (
+          ratingData &&
+          ratingData.ratingCounts.some(
+            (rateData) => rateData.rating === 'deny' && rateData.count >= threshold
+          )
+        ) {
+          denied.push(clip);
+        }
+      });
 
-    // Sort the denied array
-    const sortedDenied = sortClips(denied, sortOption);
+      // Sort the denied array
+      const sortedDenied = sortClips(denied, sortOption);
 
-    // Set State
-    setDeniedClips(sortedDenied);
+      // Set State
+      setDeniedClips(sortedDenied);
+    } else {
+      setDeniedClips([]);
+      console.error('Error fetching deny threshold:');
+    }
   };
 
   const fetchConfig = async () => {
@@ -203,9 +201,10 @@ function ClipViewer() {
       const response = await axios.get('https://api.spoekle.com/api/admin/config', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (response.data.length > 0) {
+      if (response.data) {
         setConfig(response.data[0]);
       }
+      console.log('Config fetched successfully:', config);
     } catch (error) {
       console.error('Error fetching deny threshold:', error);
     }
@@ -315,23 +314,22 @@ function ClipViewer() {
   };
 
   const getSeason = () => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
+    const currentDate = new Date().toLocaleDateString();
     let season = '';
 
-    if (currentMonth >= 0 && currentMonth <= 2) {
+    if (currentDate >= '12-21' || currentDate <= '03-19') {
       season = 'Winter';
-    } else if (currentMonth >= 3 && currentMonth <= 5) {
+    } else if (currentDate >= '03-20' && currentDate <= '06-20') {
       season = 'Spring';
-    } else if (currentMonth >= 6 && currentMonth <= 8) {
+    } else if (currentDate >= '06-21' && currentDate <= '09-21') {
       season = 'Summer';
     } else {
       season = 'Fall';
     }
 
-    setSeasonInfo((prevSeasonInfo) => ({
+    setSeasonInfo(prevSeasonInfo => ({
       ...prevSeasonInfo,
-      season,
+      season
     }));
   };
 
@@ -371,9 +369,6 @@ function ClipViewer() {
         return <div className="text-center py-8">Clip not found.</div>;
       }
     } else {
-      if (isLoading) {
-        return <div className="text-center py-8">Loading Clips...</div>;
-      } else {
         return (
           <div
             className="grid justify-items-center text-white bg-neutral-200 dark:bg-neutral-900 transition duration-200 justify-center items-center animate-fade"
@@ -418,17 +413,12 @@ function ClipViewer() {
                 </div>
               )}
             </div>
-            <div className="container w-full min-w-full mt-4 justify-center items-center rounded-2xl animate-fade animate-delay-500">
-              <div className="h-full w-full min-w-full bg-white/30 dark:bg-black/30 dark:text-white transition duration-200 backdrop-blur-lg rounded-2xl">
+            <div className="container w-full min-w-full mt-4 justify-center items-center rounded-2xl animate-fade">
+              <div className="h-full w-full min-w-full dark:text-white transition duration-200 backdrop-blur-lg rounded-2xl">
                 <div className="p-4 w-full min-w-full justify-center gap-4 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                   {isLoading ? (
-                    Array.from({ length: itemsPerPage }).map((_, index) => (
-                      <div key={index} className="shadow-2xl relative animate-pulse drop-shadow-md">
-                        <div className="overflow-hidden w-full text-center relative shadow-2xl">
-                          <div className="rounded-lg bg-white dark:bg-neutral-800 transition duration-200 p-2">
-                            <img src={placeholder} alt="Loading..." className="w-full rounded-lg border-white opacity-50" />
-                          </div>
-                        </div>
+                    Array.from({ length: 6 }).map((_, index) => (
+                      <div key={index} className="relative bg-neutral-950 w-[80vw] md:w-[30vw] lg:w-[25vw] max-w-[450px] aspect-video animate-pulse rounded-lg overflow-hidden border-4 border-neutral-950">
                       </div>
                     ))
                   ) : currentClips.length > 0 ? (
@@ -448,7 +438,7 @@ function ClipViewer() {
 
                         return true;
                       })
-                      .map((clip) => {
+                      .map((clip, index) => {
                         const hasUserRated =
                           user &&
                           ratings[clip._id] &&
@@ -462,11 +452,12 @@ function ClipViewer() {
                             clip={clip}
                             hasUserRated={hasUserRated}
                             setExpandedClip={setExpandedClip}
+                            index={index}
                           />
                         );
                       })
                   ) : (
-                    <div className=''>No clips available :(</div>
+                    <h2 className='text-center justify-center'>No clips available</h2>
                   )}
                 </div>
                 <div className="flex justify-center">
@@ -480,17 +471,8 @@ function ClipViewer() {
                 </div>
               </div>
             </div>
-            {filterRatedClips &&
-              <DeniedClips
-                isLoading={isLoading}
-                deniedClips={deniedClips}
-                setExpandedClip={setExpandedClip}
-                user={user}
-              />
-            }
           </div>
         );
-      };
     };
   };
 

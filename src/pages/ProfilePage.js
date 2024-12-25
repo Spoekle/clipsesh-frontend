@@ -58,11 +58,11 @@ function ProfilePage({ user, setUser }) {
   };
 
   const linkDiscordAccount = () => {
-    window.location.href = `https://api.spoekle.com/api/auth/discord?siteUserId=${user._id}`;
+    window.location.href = `https://api.spoekle.com/api/discord/auth?siteUserId=${user._id}`;
   };
 
   const unlinkDiscordAccount = () => {
-    const response = axios.put(`https://api.spoekle.com/api/discord/users/${user._id}`, { discordId: "", discordUsername: "" }, {
+    const response = axios.put(`https://api.spoekle.com/api/users/${user._id}`, { discordId: "", discordUsername: "" }, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },

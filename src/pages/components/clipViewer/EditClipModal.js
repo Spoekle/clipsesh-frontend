@@ -5,6 +5,7 @@ import { FaClipboard } from "react-icons/fa";
 const EditClipModal = ({ clip, setCurrentClip, setIsEditModalOpen, isEditModalOpen, token }) => {
   const [streamer, setStreamer] = useState(clip.streamer);
   const [title, setTitle] = useState(clip.title);
+  const [submitter, setSubmitter] = useState(clip.submitter);
 
   useEffect(() => {
     setStreamer(clip.streamer);
@@ -15,7 +16,7 @@ const EditClipModal = ({ clip, setCurrentClip, setIsEditModalOpen, isEditModalOp
     try {
       const response = await axios.put(
         `https://api.spoekle.com/api/clips/${id}`,
-        { streamer, title },
+        { streamer, title, submitter },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -59,6 +60,13 @@ const EditClipModal = ({ clip, setCurrentClip, setIsEditModalOpen, isEditModalOp
                 value={streamer}
                 onChange={(e) => setStreamer(e.target.value)}
                 placeholder="Streamer"
+                className="w-full px-2 py-1 mb-2 rounded bg-neutral-200 text-neutral-800"
+              />
+              <input
+                type="text"
+                value={submitter}
+                onChange={(e) => setSubmitter(e.target.value)}
+                placeholder="Submitter"
                 className="w-full px-2 py-1 mb-2 rounded bg-neutral-200 text-neutral-800"
               />
               <input

@@ -70,7 +70,7 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
   };
 
   const handleDiscordLogin = () => {
-    window.location.href = `https://api.spoekle.com/api/auth/discord`;
+    window.location.href = `https://api.spoekle.com/api/discord/auth`;
   };
 
   return (

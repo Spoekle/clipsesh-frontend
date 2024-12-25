@@ -15,6 +15,7 @@ function EditorDash() {
   const [downloading, setDownloading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [downloadProgress, setDownloadProgress] = useState(0);
   const [seasonInfo, setSeasonInfo] = useState({});
 
   useEffect(() => {
@@ -95,9 +96,10 @@ function EditorDash() {
     if (!window.confirm("Are you sure you want to download the clips? This might take a while so please stay on this page.")) {
       return;
     }
-
+  
     setDownloading(true);
-
+    setDownloadProgress(0);
+  
     const filteredClips = clips.filter((clip) => {
       const ratingData = ratings[clip._id];
       return (
@@ -107,45 +109,51 @@ function EditorDash() {
         )
       );
     });
-
+  
     try {
       const response = await axios.post('https://api.spoekle.com/download-clips-zip', {
-        clips: filteredClips.map(clip => {
+        clips: filteredClips.map((clip) => {
           const ratingData = ratings[clip._id];
-          const mostChosenRating = ratingData.ratingCounts.reduce((max, rateData) =>
-            rateData.count > max.count ? rateData : max, ratingData.ratingCounts[0]
+          const mostChosenRating = ratingData.ratingCounts.reduce(
+            (max, rateData) => (rateData.count > max.count ? rateData : max),
+            ratingData.ratingCounts[0]
           );
           return { ...clip, rating: mostChosenRating.rating };
         }),
       }, {
-        responseType: 'blob',
+        responseType: 'blob', // Download as binary data (zip)
+        onDownloadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            setDownloadProgress(Math.round((progressEvent.loaded / progressEvent.total) * 100));
+          } else {
+            setDownloadProgress(0);
+          }
+        },
       });
-
+  
       if (response.status !== 200) {
         throw new Error('Failed to download clips');
       }
-
+  
       const blob = new Blob([response.data], { type: 'application/zip' });
       const currentDate = getCurrentDate();
       saveAs(blob, `clips-${currentDate}.zip`);
     } catch (error) {
       console.error('Error downloading clips:', error);
-    }
-    finally {
+    } finally {
       setDownloading(false);
     }
   };
 
   const getSeason = () => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
+    const currentDate = new Date().toLocaleDateString();
     let season = '';
 
-    if (currentMonth >= 0 && currentMonth <= 2) {
+    if (currentDate >= '12-21' || currentDate <= '03-19') {
       season = 'Winter';
-    } else if (currentMonth >= 3 && currentMonth <= 5) {
+    } else if (currentDate >= '03-20' && currentDate <= '06-20') {
       season = 'Spring';
-    } else if (currentMonth >= 6 && currentMonth <= 8) {
+    } else if (currentDate >= '06-21' && currentDate <= '09-21') {
       season = 'Summer';
     } else {
       season = 'Fall';
@@ -171,7 +179,7 @@ function EditorDash() {
         <div className="flex bg-gradient-to-b from-neutral-900 to-bg-black/20 backdrop-blur-lg justify-center items-center w-full h-full">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold mb-4 text-center">Editor Dashboard</h1>
-            <h1 className="text-3xl mb-4 text-center">Manage the unmanaged...</h1>
+            <h1 className="text-3xl mb-4 text-center">Download the whole season in 1 click...</h1>
           </div>
         </div>
       </div>
@@ -199,9 +207,10 @@ function EditorDash() {
             <div className="col-span-1 w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-[200ms]">
               <h2 className="text-3xl font-bold mb-4">Download Clips</h2>
               {downloading && (
-                <div className="flex justify-center items-center space-x-2">
+                <div className="flex flex-col justify-center items-center space-y-2">
                   <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
                   <span>Downloading Clips...</span>
+                  <progress value={downloadProgress} max="100" className="w-full"></progress>
                 </div>
               )}
               <button

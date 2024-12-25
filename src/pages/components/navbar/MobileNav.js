@@ -3,6 +3,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaSearch } from 'react-icons/fa';
+import { MdLogin, MdLogout } from 'react-icons/md';
 import LoginModal from '../LoginModal';
 
 function MobileNavbar({
@@ -124,9 +125,9 @@ function MobileNavbar({
                                 <div className="border-t border-neutral-200 dark:border-neutral-800 my-2" />
                                 <button
                                     onClick={handleLogout}
-                                    className="block w-full text-left px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20"
+                                    className="flex w-full items-center text-left px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20"
                                 >
-                                    Logout
+                                    Logout <MdLogout size={16} className='ml-2' />
                                 </button>
                             </div>
                         )}

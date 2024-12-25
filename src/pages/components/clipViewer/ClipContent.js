@@ -37,7 +37,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
   const rateOrDenyClip = async (id, rating = null, deny = false) => {
     try {
       const data = rating !== null ? { rating } : { deny };
-      await axios.post(`https://api.spoekle.com/api/rate/${id}`, data, {
+      await axios.post(`https://api.spoekle.com/api/ratings/${id}`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await fetchClipsAndRatings(user);
@@ -158,7 +158,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
         <div className="flex-col flex-grow">
           <div className="relative rounded-t-lg bg-white dark:bg-neutral-800 transition duration-200">
             <video
-              className="w-full aspect-video rounded-l bg-black/20 border-white dark:border-neutral-800 transition duration-200"
+              className="w-full aspect-video rounded-lg bg-black/20 border-white dark:border-neutral-800 transition duration-200"
               src={clip.url + '#t=0.001'}
               id="video"
               controls
@@ -177,6 +177,9 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
             {currentClip.title}
           </a>
           <h2 className="text-xl text-neutral-950 dark:text-white font-semibold">{currentClip.streamer}</h2>
+          {currentClip && currentClip.submitter !== 'Legacy(no data)' && (
+            <h2 className="text-xl text-neutral-950 dark:text-white font-semibold">Submitted by: {currentClip.submitter}</h2>
+          )}
           <p className="text-sm text-neutral-950 dark:text-white">Uploaded on: {new Date(currentClip.createdAt).toLocaleString()}</p>
         </div>
       </div>
@@ -255,11 +258,11 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
         <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-4">
           Comments {currentClip.comments && currentClip.comments.length > 0 ? `(${currentClip.comments.length})` : ''}
         </h3>
-        <div className="bg-neutral-100 dark:bg-neutral-900 p-2 py-4 rounded-xl space-y-4 max-h-[50vh] overflow-y-auto">
+        <div className="relative p-2 py-4 rounded-xl max-h-[50vh] overflow-y-auto">
           {currentClip.comments && currentClip.comments.length > 0 ? (
             currentClip.comments.slice().reverse().map((comment, index) => (
-              <div key={index} className="bg-neutral-200 dark:bg-neutral-700 p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+              <div key={index} className="mx-2 py-2 border-b border-t border-neutral-300 dark:border-neutral-600">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <p className="font-semibold text-neutral-900 dark:text-white mr-2">
                       {comment.username}
@@ -381,7 +384,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
           </div>
         </div>
       ) : (
-        user && user.role && (user.role === 'clipteam' || user.role === 'admin') && (
+        user && user.role && (user.role === 'clipteam' || user.role === 'editor' || user.role === 'uploader' || user.role === 'admin') && (
           <div className="flex z-30 space-x-2 fixed bottom-0 right-4">
             <button
               className="bg-neutral-600 hover:bg-neutral-700 text-white px-4 py-2 rounded-t-xl"

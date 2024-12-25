@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaCheck } from 'react-icons/fa';
 
-const ClipItem = ({ clip, hasUserRated, setExpandedClip }) => {
+const ClipItem = ({ clip, hasUserRated, setExpandedClip, index }) => {
   const videoRef = useRef(null);
   const location = useLocation();
 
@@ -25,8 +25,9 @@ const ClipItem = ({ clip, hasUserRated, setExpandedClip }) => {
       onClick={() => setExpandedClip(clip._id)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative animate-fade hover:scale-105 transition duration-200 rounded-lg overflow-hidden ${hasUserRated ? 'border-4 border-blue-500' : 'border-4 border-neutral-950'
+      className={`relative w-[80vw] md:w-[30vw] lg:w-[25vw] max-w-[450px] aspect-video animate-fade hover:scale-105 transition duration-200 rounded-lg overflow-hidden ${hasUserRated ? 'border-4 border-blue-500' : 'border-4 border-neutral-950'
         }`}
+      style={{ animationDelay: `${index * 70}ms` }}
     >
       {/* Rated Overlay */}
       {hasUserRated && (

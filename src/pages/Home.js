@@ -70,7 +70,7 @@ function HomePage() {
             <p className="text-lg m-4 text-center">Now everyone can upvote or downvote clips to influence how the highlights will play out</p>
             <div className="flex flex-col justify-between mt-8">
               <Link to="/clips">
-                <button className="bg-white text-cc-blue hover:bg-cc-red hover:text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300">
+                <button className="bg-cc-red text-white hover:bg-white hover:text-cc-red font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300">
                   View Clips
                 </button>
               </Link>
@@ -99,8 +99,8 @@ function HomePage() {
             <h1 className="text-3xl m-4 text-center">Watch the latest highlights here!</h1>
             <div className="flex flex-col justify-between mt-8">
               <Link to="https://www.youtube.com/@CubeCommunity">
-                <button className="bg-cc-red text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300">
-                  YouTube <FaYoutube className="inline" />
+                <button className="flex bg-cc-red text-white hover:bg-white hover:text-cc-red items-center font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300">
+                  YouTube <FaYoutube className="ml-2" />
                 </button>
               </Link>
             </div>

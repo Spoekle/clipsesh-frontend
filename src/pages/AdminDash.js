@@ -6,7 +6,10 @@ import { saveAs } from 'file-saver';
 import { BiLoaderCircle } from 'react-icons/bi';
 import LoadingBar from 'react-top-loading-bar';
 import background from '../media/admin.jpg';
-import { FaDiscord } from "react-icons/fa";
+import { FaDiscord, FaCheck, FaTimes, FaArrowUp, FaArrowDown } from "react-icons/fa";
+import { Link, useLocation } from 'react-router-dom';
+import DeniedClips from './components/adminDash/DeniedClips';
+import UserList from './components/adminDash/UserList';
 
 function AdminDash() {
   const [allUsers, setAllUsers] = useState([]);
@@ -32,6 +35,8 @@ function AdminDash() {
   const [progress, setProgress] = useState(0);
   const [userRatings, setUserRatings] = useState([]);
   const [seasonInfo, setSeasonInfo] = useState({});
+
+  const location = useLocation();
 
   useEffect(() => {
     fetchInitialData();
@@ -93,19 +98,6 @@ function AdminDash() {
       fetchUsers();
     } catch (error) {
       console.error('Error approving user:', error);
-    }
-  };
-
-  const handleDisableUser = async (userId) => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post('https://api.spoekle.com/api/users/disable', { userId }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setDisabledUsers(disabledUsers.filter(user => user._id !== userId));
-      fetchUsers();
-    } catch (error) {
-      console.error('Error disabling user:', error);
     }
   };
 
@@ -259,37 +251,6 @@ function AdminDash() {
     }
   };
 
-  const handleEditChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setEditUser({
-      ...editUser,
-      [name]: type === 'checkbox' ? checked : value
-    });
-  };
-
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      const dataToSubmit = { ...editUser };
-
-      // Remove password if it is empty
-      if (!dataToSubmit.password) {
-        delete dataToSubmit.password;
-      }
-
-      await axios.put(`https://api.spoekle.com/api/admin/users/${editUser._id}`, dataToSubmit, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setEditUser(null);
-      alert('User updated successfully');
-      fetchUsers();
-    } catch (error) {
-      console.error('Error updating user:', error);
-      alert('Failed to update user. Please try again.');
-    }
-  };
-
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this user?")) {
       return;
@@ -316,6 +277,37 @@ function AdminDash() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  const [zipFile, setZipFile] = useState(null);
+
+  const handleZipChange = (e) => {
+    setZipFile(e.target.files[0]);
+  };
+
+  const handleZipSubmit = async (e) => {
+    e.preventDefault();
+    if (!zipFile) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('zip', zipFile);
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('https://api.spoekle.com/api/upload-clips-zip', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      alert('Clips uploaded successfully');
+      fetchClipsAndRatings();
+    } catch (error) {
+      console.error('Error uploading clips:', error);
+      alert('Failed to upload clips. Please try again.');
+    }
   };
 
   const downloadClips = async () => {
@@ -389,15 +381,14 @@ function AdminDash() {
   };
 
   const getSeason = () => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
+    const currentDate = new Date().toLocaleDateString();
     let season = '';
 
-    if (currentMonth >= 0 && currentMonth <= 2) {
+    if (currentDate >= '12-21' || currentDate <= '03-19') {
       season = 'Winter';
-    } else if (currentMonth >= 3 && currentMonth <= 5) {
+    } else if (currentDate >= '03-20' && currentDate <= '06-20') {
       season = 'Spring';
-    } else if (currentMonth >= 6 && currentMonth <= 8) {
+    } else if (currentDate >= '06-21' && currentDate <= '09-21') {
       season = 'Summer';
     } else {
       season = 'Fall';
@@ -500,7 +491,7 @@ function AdminDash() {
                     <div key={user.username} className="p-4 bg-neutral-400 dark:bg-neutral-700 text-neutral-900 dark:text-white transition duration-200 rounded-md">
                       <div className="flex justify-between items-center">
                         <h4 className="text-lg font-semibold mb-2">{user.username}</h4>
-                        <p className={`text-md px-2 py-1 rounded-lg ${user.total > 0 ? 'bg-green-600' : 'bg-red-600'} origin-top`}>{user.total > 0 ? 'Active' : 'Inactive'}</p>
+                        <p className={`text-md px-2 py-1 rounded-lg ${user.percentageRated > 20 ? 'bg-green-600' : 'bg-red-600'} origin-top`}>{user.percentageRated > 20 ? <FaCheck /> : <FaTimes />}</p>
                       </div>
                       <p className="text-sm">Clips Rated: {user.total}</p>
                       <p className="text-sm">Percentage Rated: {user.percentageRated}%</p>
@@ -608,219 +599,16 @@ function AdminDash() {
               )}
             </div>
 
-            <div className="col-span-1 w-full max-h-[600px] overflow-y-scroll bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-[400ms]">
-              <h2 className="text-3xl font-bold mb-4">Manage Users</h2>
-              <div className="grid grid-cols-1 gap-4">
-                {!users.length ? (
-                  <div className="flex justify-center items-center space-x-2">
-                    <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
-                    <span>Loading Users...</span>
-                  </div>
-                ) : (
-                  users.map(user => (
-                    <div
-                      key={user._id}
-                      className={`relative bg-neutral-900 p-4 w-full min-h-16 rounded-lg hover:bg-neutral-950 transition-all duration-300 overflow-hidden ${editUser && editUser._id === user._id ? 'max-h-screen' : 'max-h-32'}`}
-                      style={{ transition: 'max-height 0.3s ease-in-out' }}
-                    >
-                      <div
-                        className="absolute inset-0 bg-cover bg-center filter blur-sm"
-                        style={{
-                          backgroundImage: `url(${user.profilePicture})`,
-                        }}
-                      ></div>
-                      <div className="absolute inset-0 bg-black opacity-50 rounded-lg"></div>
-                      <div className="relative z-10 flex justify-between items-center">
-                        <div className='flex-col justify-between items-center'>
-                          <p className="flex justify-between items-center text-white">{user.username}
-                            <FaDiscord className="ml-2" style={{ color: user.discordId ? '#7289da' : '#747f8d' }} />
-                          </p>
-                        </div>
-                        <div>
-                          <button
-                            onClick={() => toggleEditUser(user)}
-                            className="bg-blue-500/50 hover:bg-blue-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md mr-2 transition duration-200"
-                          >
-                            {editUser && editUser._id === user._id ? 'Cancel' : 'Edit'}
-                          </button>
-                          <button
-                            onClick={() => handleDisableUser(user._id)}
-                            className="bg-red-500/50 hover:bg-red-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md transition duration-200"
-                          >
-                            Disable
-                          </button>
-                        </div>
-                      </div>
-                      <div className={`transition-transform duration-300 ${editUser && editUser._id === user._id ? 'scale-y-100' : 'scale-y-0'} origin-top`}>
-                        {editUser && editUser._id === user._id && (
-                          <div className="max-w-md w-full bg-black/20 mt-4 p-4 rounded-md shadow-md backdrop-blur-xl">
-                            <h2 className="text-2xl font-bold text-white">Edit {editUser.username}</h2>
-                            <div className="w-full h-1 rounded-full my-2 bg-white" />
-                            <form onSubmit={handleEditSubmit}>
-                              <div className="mb-4">
-                                <label htmlFor="username" className="block text-gray-300">Username:</label>
-                                <input
-                                  type="text"
-                                  id="username"
-                                  name="username"
-                                  value={editUser.username}
-                                  onChange={handleEditChange}
-                                  className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                                  required
-                                />
-                              </div>
-                              <div className="mb-4">
-                                <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
-                                <input
-                                  type="password"
-                                  id="password"
-                                  name="password"
-                                  value={editUser.password || ''}
-                                  onChange={handleEditChange}
-                                  className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                                />
-                              </div>
-                              <div className="mb-4">
-                                <label htmlFor="role" className="block text-gray-300">Role:</label>
-                                <select
-                                  id="role"
-                                  name="role"
-                                  value={editUser.role}
-                                  onChange={handleEditChange}
-                                  className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                                >
-                                  <option value="user">User</option>
-                                  <option value="clipteam">Clip Team</option>
-                                  <option value="editor">Editor</option>
-                                  <option value="uploader">Uploader</option>
-                                  <option value="admin">Admin</option>
-                                </select>
-                              </div>
-                              <div className="flex justify-end">
-                                <button
-                                  type="submit"
-                                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded-md transition duration-200"
-                                >
-                                  Save
-                                </button>
-                              </div>
-                            </form>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="lg:col-span-3 md:col-span-2 col-span-1 min-w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-[400ms]">
-              <h2 className="text-3xl font-bold mb-4">Manage Verified Users</h2>
-              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
-                {!otherRoles.length ? (
-                  <div className="flex justify-center items-center space-x-2">
-                    <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
-                    <span>Loading Users...</span>
-                  </div>
-                ) : (
-                  otherRoles.filter(user => user.username !== 'admin')
-                    .map(user => (
-                      <div
-                        key={user._id}
-                        className={`relative bg-neutral-900 p-4 w-full rounded-lg hover:bg-neutral-950 transition-all duration-300 overflow-hidden ${editUser && editUser._id === user._id ? 'max-h-screen' : 'max-h-32'}`}
-                        style={{ transition: 'max-height 0.3s ease-in-out' }}
-                      >
-                        <div
-                          className="absolute inset-0 bg-cover bg-center filter blur-sm"
-                          style={{
-                            backgroundImage: `url(${user.profilePicture})`,
-                          }}
-                        ></div>
-                        <div className="absolute inset-0 bg-black opacity-50 rounded-lg"></div>
-                        <div className="relative z-10 flex justify-between items-center">
-                          <div className='flex-col justify-between items-center'>
-                            <p className="flex justify-between items-center text-white">{user.username}
-                              <FaDiscord className="ml-2" style={{ color: user.discordId ? '#7289da' : '#747f8d' }} />
-                            </p>
-                            <p className="text-gray-300">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
-                          </div>
-                          <div>
-                            <button
-                              onClick={() => toggleEditUser(user)}
-                              className="bg-blue-500/50 hover:bg-blue-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md mr-2 transition duration-200"
-                            >
-                              {editUser && editUser._id === user._id ? 'Cancel' : 'Edit'}
-                            </button>
-                            <button
-                              onClick={() => handleDisableUser(user._id)}
-                              className="bg-red-500/50 hover:bg-red-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md transition duration-200"
-                            >
-                              Disable
-                            </button>
-                          </div>
-                        </div>
-                        <div className={`transition-transform duration-300 ${editUser && editUser._id === user._id ? 'scale-y-100' : 'scale-y-0'} origin-top`}>
-                          {editUser && editUser._id === user._id && (
-                            <div className="max-w-md w-full bg-black/20 mt-4 p-4 rounded-md shadow-md backdrop-blur-xl">
-                              <h2 className="text-2xl font-bold text-white">Edit {editUser.username}</h2>
-                              <div className="w-full h-1 rounded-full my-2 bg-white" />
-                              <form onSubmit={handleEditSubmit}>
-                                <div className="mb-4">
-                                  <label htmlFor="username" className="block text-gray-300">Username:</label>
-                                  <input
-                                    type="text"
-                                    id="username"
-                                    name="username"
-                                    value={editUser.username}
-                                    onChange={handleEditChange}
-                                    className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                                    required
-                                  />
-                                </div>
-                                <div className="mb-4">
-                                  <label htmlFor="password" className="block text-gray-300">Password (leave blank to keep unchanged):</label>
-                                  <input
-                                    type="password"
-                                    id="password"
-                                    name="password"
-                                    value={editUser.password || ''}
-                                    onChange={handleEditChange}
-                                    className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                                  />
-                                </div>
-                                <div className="mb-4">
-                                  <label htmlFor="role" className="block text-gray-300">Role:</label>
-                                  <select
-                                    id="role"
-                                    name="role"
-                                    value={editUser.role}
-                                    onChange={handleEditChange}
-                                    className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                                  >
-                                    <option value="user">User</option>
-                                    <option value="clipteam">Clip Team</option>
-                                    <option value="editor">Editor</option>
-                                    <option value="uploader">Uploader</option>
-                                    <option value="admin">Admin</option>
-                                  </select>
-                                </div>
-                                <div className="flex justify-end">
-                                  <button
-                                    type="submit"
-                                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded-md transition duration-200"
-                                  >
-                                    Save
-                                  </button>
-                                </div>
-                              </form>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                )}
-              </div>
-            </div>
+            <UserList
+              users={users}
+              admins={admins}
+              clipTeam={clipTeam}
+              editors={editors}
+              uploader={uploader}
+              fetchUsers={fetchUsers}
+              disabledUsers={disabledUsers}
+              setDisabledUsers={setDisabledUsers}
+            />
 
             <div className="col-span-1 w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-500">
               <h2 className="text-3xl font-bold mb-4">Admin Config</h2>
@@ -865,9 +653,10 @@ function AdminDash() {
             <div className="col-span-1 w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-[600ms]">
               <h2 className="text-3xl font-bold mb-4">Download Clips</h2>
               {downloading && (
-                <div className="flex justify-center items-center space-x-2">
+                <div className="flex flex-col justify-center items-center space-y-2">
                   <BiLoaderCircle className="animate-spin h-5 w-5 text-white" />
                   <span>Downloading Clips...</span>
+                  <progress value={progress} max="100" className="w-full"></progress>
                 </div>
               )}
               <button
@@ -884,6 +673,36 @@ function AdminDash() {
                 Reset Database
               </button>
             </div>
+
+            <div className="col-span-1 w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-[700ms]">
+              <h2 className="text-3xl font-bold mb-4">Upload Zip</h2>
+              <form onSubmit={handleZipSubmit}>
+                <div className="mb-4">
+                  <label htmlFor="zip" className="block text-neutral-900 dark:text-gray-300">Zip File:</label>
+                  <input
+                    type="file"
+                    id="zip"
+                    name="zip"
+                    onChange={handleZipChange}
+                    className="w-full px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-200 dark:focus:bg-neutral-700"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
+                >
+                  Upload Zip
+                </button>
+              </form>
+            </div>
+
+            <DeniedClips
+              clips={clips}
+              ratings={ratings}
+              config={config}
+              location={location}
+            />
           </div>
         </div>
       )}

@@ -27,7 +27,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                 onClick={() => handlePageClick(page)}
                 className={`mx-1 px-3 py-1 rounded-md ${page === currentPage
                     ? 'bg-cc-red  text-white text-lg scale-110'
-                    : 'bg-white bg-opacity-20 text-white text-lg hover:bg-cc-red/80 hover:scale-105 transition duration-200'
+                    : 'bg-black/50 dark:bg-white/20 text-white text-lg hover:bg-cc-red/80 hover:scale-105 transition duration-200'
                     }`}
             >
                 {page}
@@ -42,7 +42,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                     onClick={() => currentPage > 1 && handlePageClick(1)}
                     className={`mx-1 px-3 py-2 rounded-md hidden md:flex ${currentPage === 1
                         ? 'bg-gray-500 cursor-not-allowed'
-                        : 'bg-white bg-opacity-20 text-white hover:bg-cc-blue hover:scale-105 transition duration-200'
+                        : 'bg-black/50 dark:bg-white/20 text-white hover:bg-cc-blue hover:scale-105 transition duration-200'
                         }`}
                     disabled={currentPage === 1}
                 >
@@ -53,7 +53,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                 onClick={() => currentPage > 1 && handlePageClick(currentPage - 1)}
                 className={`mx-1 px-2 py-2 rounded-md ${currentPage === 1
                     ? 'bg-gray-500 cursor-not-allowed'
-                    : 'bg-white bg-opacity-20 text-white hover:bg-cc-blue hover:scale-105 transition duration-200'
+                    : 'bg-black/50 dark:bg-white/20 text-white hover:bg-cc-blue hover:scale-105 transition duration-200'
                     }`}
                 disabled={currentPage === 1}
             >
@@ -64,7 +64,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                 onClick={() => currentPage < totalPages && handlePageClick(currentPage + 1)}
                 className={`mx-1 px-2 py-2 rounded-md ${currentPage === totalPages
                     ? 'bg-gray-500 cursor-not-allowed'
-                    : 'bg-white bg-opacity-20 text-white hover:bg-cc-blue hover:scale-105 transition duration-200'
+                    : 'bg-black/50 dark:bg-white/20 text-white hover:bg-cc-blue hover:scale-105 transition duration-200'
                     }`}
                 disabled={currentPage === totalPages}
             >
@@ -76,7 +76,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                     onClick={() => currentPage < totalPages && handlePageClick(totalPages)}
                     className={`mx-1 px-3 py-2 rounded-md hidden md:flex ${currentPage === totalPages
                         ? 'bg-gray-500 cursor-not-allowed'
-                        : 'bg-white bg-opacity-20 text-white hover:bg-cc-blue hover:scale-105 transition duration-200'
+                        : 'bg-black/50 dark:bg-white/20 text-white hover:bg-cc-blue hover:scale-105 transition duration-200'
                         }`}
                     disabled={currentPage === totalPages}
                 >

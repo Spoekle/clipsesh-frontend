@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaSearch, FaTimes } from 'react-icons/fa';
+import { MdLogin, MdLogout } from "react-icons/md";
 import LoginModal from '../LoginModal';
 
 function DesktopNavbar({
@@ -81,7 +82,7 @@ function DesktopNavbar({
                                 className="px-3 py-2 rounded-md bg-white dark:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
                             />
                             <FaSearch
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-600 cursor-pointer"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-500 transition duration-200 hover:rotate-90 cursor-pointer"
                                 onClick={handleSearch}
                             />
                         </div>
@@ -112,7 +113,7 @@ function DesktopNavbar({
                                                         setShowRecentSearched(false);
                                                         setSearchInput(search);
                                                         setShowRecentSearched(false);
-                                                        handleSearch({ target: { value: search }, preventDefault: () => {} });
+                                                        handleSearch({ target: { value: search }, preventDefault: () => { } });
                                                     }}
                                                     className="text-sm text-left flex-1"
                                                 >
@@ -142,21 +143,30 @@ function DesktopNavbar({
                             </button>
                             {isDropdownOpen && (
                                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-900 rounded-md shadow-lg py-2">
-                                    <NavLink
-                                        to="/profile"
-                                        className="flex px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20"
-                                        onClick={toggleDropdown}
-                                    >
-                                        <img
-                                            src={user.profilePicture}
-                                            alt={user.username}
-                                            className="h-8 w-8 rounded-full"
-                                        />
-                                        <div className="ml-4">
-                                            <p className="font-semibold">{user.username}</p>
-                                            <p className="text-sm text-neutral-500 dark:text-neutral-400">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
-                                        </div>
-                                    </NavLink>
+                                    <div className="flex items-center justify-between">
+                                        <NavLink
+                                            to="/profile"
+                                            className="flex px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20"
+                                            onClick={toggleDropdown}
+                                        >
+                                            <img
+                                                src={user.profilePicture}
+                                                alt={user.username}
+                                                className="h-8 w-8 rounded-full"
+                                            />
+                                            <div className="ml-4">
+                                                <p className="font-semibold">{user.username}</p>
+                                                <p className="text-sm text-neutral-500 dark:text-neutral-400">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                                            </div>
+
+                                        </NavLink>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="flex items-center justify-end p-4 pl-6 text-sm text-neutral-900 dark:text-white hover:bg-black/20"
+                                        >
+                                            <MdLogout size={16} className='mr-2' />
+                                        </button>
+                                    </div>
                                     {(user.role === 'clipteam' || user.role === 'admin') && (
                                         <NavLink
                                             to="/stats"
@@ -166,21 +176,15 @@ function DesktopNavbar({
                                             Stats
                                         </NavLink>
                                     )}
-                                    <button
-                                        onClick={handleLogout}
-                                        className="block w-full text-left px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20"
-                                    >
-                                        Logout
-                                    </button>
                                 </div>
                             )}
                         </div>
                     ) : (
                         <button
                             onClick={toggleLoginModal}
-                            className="font-semibold py-2 px-3 bg-transparent hover:bg-black/20 rounded-md transition duration-200 text-left"
+                            className="flex items-center font-semibold py-2 px-3 bg-transparent hover:bg-black/20 rounded-md transition duration-200 text-left"
                         >
-                            Login
+                            Login<MdLogin size={24} className='ml-1' />
                         </button>
                     )}
                 </div>

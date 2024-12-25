@@ -111,15 +111,14 @@ function Stats({ user }) {
   };
 
   const getSeason = () => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
+    const currentDate = new Date().toLocaleDateString();
     let season = '';
 
-    if (currentMonth >= 0 && currentMonth <= 2) {
+    if (currentDate >= '12-21' || currentDate <= '03-19') {
       season = 'Winter';
-    } else if (currentMonth >= 3 && currentMonth <= 5) {
+    } else if (currentDate >= '03-20' && currentDate <= '06-20') {
       season = 'Spring';
-    } else if (currentMonth >= 6 && currentMonth <= 8) {
+    } else if (currentDate >= '06-21' && currentDate <= '09-21') {
       season = 'Summer';
     } else {
       season = 'Fall';
