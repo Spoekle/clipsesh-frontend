@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import apiUrl from '../../../config/config';
 import axios from 'axios';
 import { FaClipboard } from "react-icons/fa";
 
@@ -15,7 +16,7 @@ const EditClipModal = ({ clip, setCurrentClip, setIsEditModalOpen, isEditModalOp
   const handleUpdate = async (id) => {
     try {
       const response = await axios.put(
-        `https://api.spoekle.com/api/clips/${id}`,
+        `${apiUrl}/api/clips/${id}`,
         { streamer, title, submitter },
         {
           headers: {

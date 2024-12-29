@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BiLoaderCircle } from 'react-icons/bi';
+import { apiUrl } from '../../../config/config';
 import { FaDiscord } from 'react-icons/fa';
 import axios from 'axios';
 
@@ -9,6 +9,7 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
   const [currentPage, setCurrentPage] = useState(1);
   const [editUser, setEditUser] = useState(null);
   const usersPerPage = 15;
+  const AVAILABLE_ROLES = ['user', 'admin', 'clipteam', 'editor', 'uploader'];
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -24,22 +25,35 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
     if (editUser && editUser._id === user._id) {
       setEditUser(null);
     } else {
-      setEditUser(user);
+      setEditUser({ ...user, roles: user.roles || ['user'] });
     }
   };
 
   const handleEditChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setEditUser({
-      ...editUser,
-      [name]: type === 'checkbox' ? checked : value
-    });
+    if (name === 'roles') {
+      let updatedRoles = [...editUser.roles];
+      if (checked) {
+        updatedRoles.push(value);
+      } else {
+        updatedRoles = updatedRoles.filter(role => role !== value);
+      }
+      setEditUser({
+        ...editUser,
+        roles: updatedRoles
+      });
+    } else {
+      setEditUser({
+        ...editUser,
+        [name]: type === 'checkbox' ? checked : value
+      });
+    }
   };
 
   const handleDisableUser = async (userId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('https://api.spoekle.com/api/users/disable', { userId }, {
+      await axios.post(`${apiUrl}/api/users/disable`, { userId }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDisabledUsers(disabledUsers.filter(user => user._id !== userId));
@@ -59,7 +73,7 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
         delete dataToSubmit.password;
       }
 
-      await axios.put(`https://api.spoekle.com/api/admin/users/${editUser._id}`, dataToSubmit, {
+      await axios.put(`${apiUrl}/api/admin/users/${editUser._id}`, dataToSubmit, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setEditUser(null);
@@ -71,10 +85,10 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
     }
   };
 
-  const combinedUsers = users.concat(admins, clipTeam, editors, uploader).filter(user => user);
+  const combinedUsers = Array.from(new Map(users.concat(admins, clipTeam, editors, uploader).map(user => [user._id, user])).values()).filter(user => user);
   
   const filteredUsers = combinedUsers.filter(user => {
-    if (filter !== 'all' && user.role !== filter) return false;
+    if (filter !== 'all' && !user.roles.includes(filter)) return false;
     if (search && !user.username.toLowerCase().includes(search)) return false;
     return true;
   });
@@ -104,11 +118,9 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
             className="px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-200 dark:focus:bg-neutral-700"
           >
             <option value="all">All Users</option>
-            <option value="user">Users</option>
-            <option value="admin">Admins</option>
-            <option value="clipteam">Clip Team</option>
-            <option value="editor">Editors</option>
-            <option value="uploader">Uploaders</option>
+            {AVAILABLE_ROLES.map(role => (
+              <option key={role} value={role}>{role.charAt(0).toUpperCase() + role.slice(1)}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -121,7 +133,7 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
           .map(user => (
             <div
               key={user._id}
-              className={`relative bg-neutral-900 p-4 w-full min-h-20 rounded-lg hover:bg-neutral-950 transition-all duration-300 overflow-hidden ${editUser && editUser._id === user._id ? 'max-h-screen' : 'max-h-20'}`}
+              className={`relative bg-neutral-900 p-4 w-full min-h-28 rounded-lg hover:bg-neutral-950 transition-all duration-300 overflow-hidden ${editUser && editUser._id === user._id ? 'max-h-screen' : 'max-h-28'}`}
               style={{ transition: 'max-height 0.3s ease-in-out' }}
             >
               <div
@@ -131,17 +143,17 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
                 }}
               ></div>
               <div className="absolute inset-0 bg-black opacity-50 rounded-lg"></div>
-              <div className="relative z-10 flex justify-between items-center">
-                <div className='flex-col justify-between items-center'>
-                  <p className="flex justify-between items-center text-white">{user.username}
+              <div className="relative z-10 justify-between flex items-center">
+                <div className='flex-col items-center'>
+                  <p className="flex items-center text-white">{user.username}
                     <FaDiscord className="ml-2" style={{ color: user.discordId ? '#7289da' : '#747f8d' }} />
                   </p>
-                  <p className="text-neutral-300">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                  <p className="text-neutral-300">{user.roles.map(role => role.charAt(0).toUpperCase() + role.slice(1)).join(', ')}</p>
                 </div>
-                <div>
+                <div className="flex flex-col justify-end items-end space-y-2">
                   <button
                     onClick={() => toggleEditUser(user)}
-                    className="bg-blue-500/50 hover:bg-blue-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md mr-2 transition duration-200"
+                    className="bg-blue-500/50 hover:bg-blue-600 backdrop-blur-2xl text-white font-bold py-1 px-2 rounded-md transition duration-200"
                   >
                     {editUser && editUser._id === user._id ? 'Cancel' : 'Edit'}
                   </button>
@@ -155,9 +167,7 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
               </div>
               <div className={`transition-transform duration-300 ${editUser && editUser._id === user._id ? 'scale-y-100' : 'scale-y-0'} origin-top`}>
                 {editUser && editUser._id === user._id && (
-                  <div className="max-w-md w-full bg-black/20 mt-4 p-4 rounded-md shadow-md backdrop-blur-xl">
-                    <h2 className="text-2xl font-bold text-white">Edit {editUser.username}</h2>
-                    <div className="w-full h-1 rounded-full my-2 bg-white" />
+                  <div className="max-w-md w-full bg-black/20 p-4 mt-2 rounded-md shadow-md backdrop-blur-xl">
                     <form onSubmit={handleEditSubmit}>
                       <div className="mb-4">
                         <label htmlFor="username" className="block text-gray-300">Username:</label>
@@ -183,20 +193,20 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
                         />
                       </div>
                       <div className="mb-4">
-                        <label htmlFor="role" className="block text-gray-300">Role:</label>
-                        <select
-                          id="role"
-                          name="role"
-                          value={editUser.role}
-                          onChange={handleEditChange}
-                          className="w-full px-3 py-2 bg-neutral-800 text-white rounded-md focus:outline-none focus:bg-neutral-900"
-                        >
-                          <option value="user">User</option>
-                          <option value="clipteam">Clip Team</option>
-                          <option value="editor">Editor</option>
-                          <option value="uploader">Uploader</option>
-                          <option value="admin">Admin</option>
-                        </select>
+                        <span className="block text-gray-300">Roles:</span>
+                        {AVAILABLE_ROLES.map(role => (
+                          <label key={role} className="inline-flex items-center">
+                            <input
+                              type="checkbox"
+                              name="roles"
+                              value={role}
+                              checked={editUser.roles.includes(role)}
+                              onChange={handleEditChange}
+                              className="form-checkbox h-5 w-5 text-blue-600 space-x-2"
+                            />
+                            <span className="ml-2 text-white">{role.charAt(0).toUpperCase() + role.slice(1)}</span>
+                          </label>
+                        ))}
                       </div>
                       <div className="flex justify-end">
                         <button

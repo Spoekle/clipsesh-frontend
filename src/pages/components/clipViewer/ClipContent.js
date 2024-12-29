@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
+import apiUrl from '../../../config/config';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaThumbsUp, FaThumbsDown, FaAngleDown } from 'react-icons/fa';
@@ -37,7 +38,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
   const rateOrDenyClip = async (id, rating = null, deny = false) => {
     try {
       const data = rating !== null ? { rating } : { deny };
-      await axios.post(`https://api.spoekle.com/api/ratings/${id}`, data, {
+      await axios.post(`${apiUrl}/api/ratings/${id}`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await fetchClipsAndRatings(user);
@@ -50,7 +51,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
     const token = localStorage.getItem('token');
     try {
       const response = await axios.post(
-        `https://api.spoekle.com/api/clips/${currentClip._id}/upvote`,
+        `${apiUrl}/api/clips/${currentClip._id}/upvote`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -64,7 +65,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
     const token = localStorage.getItem('token');
     try {
       const response = await axios.post(
-        `https://api.spoekle.com/api/clips/${currentClip._id}/downvote`,
+        `${apiUrl}/api/clips/${currentClip._id}/downvote`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -79,7 +80,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
     const token = localStorage.getItem('token');
     try {
       const response = await axios.post(
-        `https://api.spoekle.com/api/clips/${currentClip._id}/comment`,
+        `${apiUrl}/api/clips/${currentClip._id}/comment`,
         { comment: newComment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -95,7 +96,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
       const token = localStorage.getItem('token');
       try {
         const response = await axios.delete(
-          `https://api.spoekle.com/api/clips/${currentClip._id}/comment/${commentId}`,
+          `${apiUrl}/api/clips/${currentClip._id}/comment/${commentId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCurrentClip(response.data);
@@ -109,7 +110,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
     if (window.confirm('Are you sure you want to delete this clip?')) {
       const token = localStorage.getItem('token');
       try {
-        await axios.delete(`https://api.spoekle.com/api/clips/${currentClip._id}`, {
+        await axios.delete(`${apiUrl}/api/clips/${currentClip._id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         closeExpandedClip();
@@ -137,7 +138,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
         >
           Back
         </Link>
-        {user && user.role === 'admin' && (
+        {user && user.roles.includes('admin') && (
           <div className="flex items-center space-x-2">
             <button
               className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg"
@@ -199,7 +200,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
             <FaThumbsDown className="mr-1" /> {currentClip.downvotes}
           </button>
         </div>
-        {user && user.role && (user.role === 'clipteam' || user.role === 'admin') && (
+        {user && user.roles && (user.roles.includes('admin') || user.roles.includes('clipteam')) && (
           <div className="text-neutral-900 p-2 drop-shadow-md rounded-lg mb-2">
             <div className="grid grid-cols-2 md:grid-cols-4 justify-center w-full">
               {[1, 2, 3, 4].map((rate) => {
@@ -271,7 +272,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
                       on {new Date(comment.createdAt).toLocaleString()}
                     </span>
                   </div>
-                  {user && (user.username === comment.username || user.role === 'admin') && (
+                  {user && (user.username === comment.username || user.roles.includes('admin')) && (
                     <button
                       className="text-red-500 hover:text-red-700"
                       onClick={() => handleDeleteComment(comment._id)}
@@ -384,7 +385,7 @@ const ClipContent = ({ clip, setExpandedClip, isLoggedIn, user, token, fetchClip
           </div>
         </div>
       ) : (
-        user && user.role && (user.role === 'clipteam' || user.role === 'editor' || user.role === 'uploader' || user.role === 'admin') && (
+        user && user.roles && (user.roles.includes('admin') || user.roles.includes('clipteam') || user.roles.includes('editor') || user.roles.includes('uploader')) && (
           <div className="flex z-30 space-x-2 fixed bottom-0 right-4">
             <button
               className="bg-neutral-600 hover:bg-neutral-700 text-white px-4 py-2 rounded-t-xl"

@@ -5,6 +5,7 @@ import logo from '../../media/CC_Logo_250px.png';
 import MobileNavbar from './navbar/MobileNav';
 import DesktopNavbar from './navbar/DefaultNav';
 import useWindowWidth from '../../hooks/useWindowWidth';
+import apiUrl from '../../config/config';
 
 function Navbar({ setUser, user }) {
     const windowWidth = useWindowWidth();
@@ -30,7 +31,7 @@ function Navbar({ setUser, user }) {
         const token = localStorage.getItem('token');
         if (token) {
             try {
-                const response = await axios.get('https://api.spoekle.com/api/users/me', {
+                const response = await axios.get(`${apiUrl}/api/users/me`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setUser(response.data);

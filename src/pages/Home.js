@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
+import apiUrl from '../config/config';
 import axios from 'axios';
 import banner1 from '../media/banner1.png';
 import { FaYoutube } from 'react-icons/fa';
@@ -11,7 +12,7 @@ function HomePage() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await axios.get('https://api.spoekle.com/api/admin/config');
+        const response = await axios.get(`${apiUrl}/api/admin/config`);
         setConfig(response.data[0]);
         console.log('Config:', response.data[0]);
       } catch (error) {

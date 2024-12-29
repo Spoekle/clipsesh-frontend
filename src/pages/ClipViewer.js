@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet';
+import apiUrl from '../config/config';
 import { useParams, useSearchParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import LoadingBar from 'react-top-loading-bar';
@@ -47,12 +48,18 @@ function ClipViewer() {
   const fetchClipsAndRatings = useCallback(async (userData, filterRated) => {
     try {
       setIsLoading(true);
-      const clipResponse = await axios.get('https://api.spoekle.com/api/clips');
+      const clipResponse = await axios.get(`${apiUrl}/api/clips`);
       const clipsData = clipResponse.data;
 
-      if (userData && (userData.role === 'clipteam' || userData.role === 'admin')) {
+      const isUserAuthorized = userData && (
+        userData.roles.includes('admin') ||
+        userData.roles.includes('clipteam') ||
+        userData.roles.includes('uploader') ||
+        userData.roles.includes('editor')
+      );
+      if (userData && isUserAuthorized) {
         const ratingPromises = clipsData.map((clip) =>
-          axios.get(`https://api.spoekle.com/api/ratings/${clip._id}`, {
+          axios.get(`${apiUrl}/api/ratings/${clip._id}`, {
             headers: { Authorization: `Bearer ${token}` },
           })
         );
@@ -104,7 +111,7 @@ function ClipViewer() {
         setDeniedClips([]);
       }
     } catch (error) {
-      console.error('Error fetching clips and ratings:', error);
+      console.error('Error in fetchClipsAndRatings function while fetching clips and ratings:', error);
     } finally {
       setIsLoading(false);
     }
@@ -114,7 +121,7 @@ function ClipViewer() {
   const fetchUser = useCallback(async () => {
     if (token) {
       try {
-        const response = await axios.get('https://api.spoekle.com/api/users/me', {
+        const response = await axios.get(`${apiUrl}/api/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setIsLoggedIn(true);
@@ -157,7 +164,7 @@ function ClipViewer() {
     if (expandedClip && expandedClip !== 'new') {
       setIsClipLoading(true);
       axios
-        .get(`https://api.spoekle.com/api/clips/${expandedClip}`)
+        .get(`${apiUrl}/api/clips/${expandedClip}`)
         .then((response) => {
           setCurrentClip(response.data);
           setIsClipLoading(false);
@@ -198,7 +205,7 @@ function ClipViewer() {
 
   const fetchConfig = async () => {
     try {
-      const response = await axios.get('https://api.spoekle.com/api/admin/config', {
+      const response = await axios.get(`${apiUrl}/api/admin/config`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.data) {
@@ -392,7 +399,7 @@ function ClipViewer() {
                   <option value="highestDownvotes">Highest Downvotes</option>
                   <option value="highestRatio">Highest Upvote/Downvote Ratio</option>
                   <option value="lowestRatio">Lowest Upvote/Downvote Ratio</option>
-                  {user && (user.role === 'clipteam' || user.role === 'admin') && (
+                  {user && (user.roles.includes('admin') || user.roles.includes('clipteam')) && (
                     <>
                       <option value="highestScore">(Clip Team) Highest Rated</option>
                       <option value="lowestScore">(Clip Team) Lowest Rated</option>
@@ -400,7 +407,7 @@ function ClipViewer() {
                   )}
                 </select>
               </div>
-              {user && (user.role === 'clipteam' || user.role === 'admin') && (
+              {user && (user.roles.includes('admin') || user.roles.includes('clipteam')) && (
                 <div className="flex justify-center items-center">
                   <button
                     onClick={() => {
@@ -425,7 +432,7 @@ function ClipViewer() {
                     currentClips
                       .filter((clip) => {
                         if (filterRatedClips) {
-                          if (user && (user.role === 'clipteam' || user.role === 'admin')) {
+                          if (user && (user.roles.includes('admin') || user.roles.includes('clipteam'))) {
                             const ratingData = ratings[clip._id];
                             return (
                               ratingData &&

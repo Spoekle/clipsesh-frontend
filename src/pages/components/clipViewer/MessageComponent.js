@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../../../config/config';
 import { AiOutlineSend, AiOutlineDelete } from 'react-icons/ai';
 import axios from 'axios';
 
@@ -13,7 +14,7 @@ const MessageComponent = ({ clipId, setPopout }) => {
       if (token) {
         try {
           const response = await fetch(
-            `https://api.spoekle.com/api/messages?clipId=${clipId}`,
+            `${apiUrl}/api/messages?clipId=${clipId}`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -38,7 +39,7 @@ const MessageComponent = ({ clipId, setPopout }) => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('https://api.spoekle.com/api/users/me', {
+          const response = await axios.get(`${apiUrl}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(response.data);
@@ -53,7 +54,7 @@ const MessageComponent = ({ clipId, setPopout }) => {
   const handleSendMessage = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`https://api.spoekle.com/api/messages`, {
+      const response = await fetch(`${apiUrl}/api/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,13 +79,13 @@ const MessageComponent = ({ clipId, setPopout }) => {
   const handleDeleteMessage = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`https://api.spoekle.com/api/messages/${id}`, {
+      const response = await fetch(`${apiUrl}/api/messages/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ userId: user._id, role: user.role }),
+        body: JSON.stringify({ userId: user._id, roles: user.roles }),
       });
 
       if (!response.ok) {
@@ -154,7 +155,7 @@ const MessageComponent = ({ clipId, setPopout }) => {
                       {readableDate}
                     </p>
                   </div>
-                  {user && (user.role === 'admin' || user._id === msg.userId) && (
+                  {user && (user.roles.includes('admin') || user._id === msg.userId) && (
                     <button
                       onClick={() => handleDeleteMessage(msg._id)}
                       className={`mx-1 text-red-500`}
@@ -168,7 +169,7 @@ const MessageComponent = ({ clipId, setPopout }) => {
           );
         })}
       </div>
-      {user && user.role && (user.role === 'clipteam' || user.role === 'admin') && (
+      {user && user.roles && (user.roles.includes('admin') || user.roles.includes('clipteam')) && (
         <div className="send-message text-neutral-900 mt-4 flex">
           <input
             type="text"

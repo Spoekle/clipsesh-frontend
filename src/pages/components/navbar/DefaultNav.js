@@ -47,7 +47,7 @@ function DesktopNavbar({
                     >
                         Clips
                     </NavLink>
-                    {user && (user.role === 'editor' || user.role === 'admin') && (
+                    {user && (user.roles.includes('admin') || user.roles.includes('editor')) && (
                         <NavLink
                             to="/editor"
                             className={({ isActive }) =>
@@ -57,7 +57,7 @@ function DesktopNavbar({
                             Editor Dash
                         </NavLink>
                     )}
-                    {user && user.role === 'admin' && (
+                    {user && user.roles.includes('admin') && (
                         <>
                             <NavLink
                                 to="/admin"
@@ -156,7 +156,7 @@ function DesktopNavbar({
                                             />
                                             <div className="ml-4">
                                                 <p className="font-semibold">{user.username}</p>
-                                                <p className="text-sm text-neutral-500 dark:text-neutral-400">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                                                <p className="text-sm text-neutral-500 dark:text-neutral-400">{user.roles.map(role => role.charAt(0).toUpperCase() + role.slice(1)).join(', ')}</p>
                                             </div>
 
                                         </NavLink>
@@ -167,7 +167,7 @@ function DesktopNavbar({
                                             <MdLogout size={16} className='mr-2' />
                                         </button>
                                     </div>
-                                    {(user.role === 'clipteam' || user.role === 'admin') && (
+                                    {(user.roles.includes('admin') || user.roles.includes('clipteam')) && (
                                         <NavLink
                                             to="/stats"
                                             className="relative block px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20"

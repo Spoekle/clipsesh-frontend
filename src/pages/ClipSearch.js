@@ -1,6 +1,5 @@
-// src/pages/ClipSearch.js
-
 import React, { useEffect, useState } from 'react';
+import apiUrl from '../config/config';
 import { useLocation, Link } from 'react-router-dom';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import axios from 'axios';
@@ -39,7 +38,7 @@ const ClipSearch = () => {
                     sort: sortOption
                 };
 
-                const response = await axios.get(`https://api.spoekle.com/api/clips/search`, { params });
+                const response = await axios.get(`${apiUrl}/api/clips/search`, { params });
                 setClips(response.data.clips);
                 setTotalPages(response.data.totalPages);
             } catch (err) {

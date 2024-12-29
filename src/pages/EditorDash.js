@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
+import apiUrl from '../config/config';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
@@ -39,7 +40,7 @@ function EditorDash() {
 
   const fetchConfig = async () => {
     try {
-      const response = await axios.get('https://api.spoekle.com/api/admin/config',);
+      const response = await axios.get(`${apiUrl}/api/admin/config`,);
 
       if (response) {
         setConfig(response.data[0]);
@@ -52,7 +53,7 @@ function EditorDash() {
 
   const fetchClipsAndRatings = async () => {
     try {
-      const clipResponse = await axios.get('https://api.spoekle.com/api/clips');
+      const clipResponse = await axios.get(`${apiUrl}/api/clips`);
       setClips(clipResponse.data);
       setSeasonInfo(prevSeasonInfo => ({
         ...prevSeasonInfo,
@@ -61,7 +62,7 @@ function EditorDash() {
       const token = localStorage.getItem('token');
       if (token) {
         const ratingPromises = clipResponse.data.map(clip =>
-          axios.get(`https://api.spoekle.com/api/ratings/${clip._id}`, {
+          axios.get(`${apiUrl}/api/ratings/${clip._id}`, {
             headers: { Authorization: `Bearer ${token}` }
           })
         );
@@ -111,7 +112,7 @@ function EditorDash() {
     });
   
     try {
-      const response = await axios.post('https://api.spoekle.com/download-clips-zip', {
+      const response = await axios.post(`${apiUrl}/zips/download`, {
         clips: filteredClips.map((clip) => {
           const ratingData = ratings[clip._id];
           const mostChosenRating = ratingData.ratingCounts.reduce(

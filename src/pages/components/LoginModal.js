@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import apiUrl from '../../config/config';
 import { FaDiscord } from "react-icons/fa";
 
 const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
@@ -30,7 +31,7 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const url = isRegister ? 'https://api.spoekle.com/api/users/register' : 'https://api.spoekle.com/api/users/login';
+    const url = isRegister ? `${apiUrl}/api/users/register` : `${apiUrl}/api/users/login`;
     try {
       const response = await axios.post(url, formData);
       if (isRegister) {
@@ -70,7 +71,7 @@ const LoginModal = ({ setIsLoginModalOpen, isLoginModalOpen, fetchUser }) => {
   };
 
   const handleDiscordLogin = () => {
-    window.location.href = `https://api.spoekle.com/api/discord/auth`;
+    window.location.href = `${apiUrl}/api/discord/auth`;
   };
 
   return (

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import apiUrl from '../../../config/config';
 import placeholder from '../../../media/placeholder.png';
 import { useParams, useSearchParams, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -32,7 +33,7 @@ const RatedClips = ({ ratingsData, clipsData }) => {
         if (expandedClip && expandedClip !== 'new') {
             setIsClipLoading(true);
             axios
-                .get(`https://api.spoekle.com/api/clips/${expandedClip}`)
+                .get(`${apiUrl}/api/clips/${expandedClip}`)
                 .then((response) => {
                     setCurrentClip(response.data);
                     setIsClipLoading(false);
@@ -59,7 +60,7 @@ const RatedClips = ({ ratingsData, clipsData }) => {
     const fetchUser = async () => {
         if (token) {
             try {
-                const response = await axios.get('https://api.spoekle.com/api/users/me', {
+                const response = await axios.get(`${apiUrl}/api/users/me`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setIsLoggedIn(true);

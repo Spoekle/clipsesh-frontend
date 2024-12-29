@@ -86,13 +86,13 @@ function MobileNavbar({
                                     />
                                     <div className="ml-4">
                                         <p className="font-semibold">{user.username}</p>
-                                        <p className="text-sm text-neutral-500 dark:text-neutral-400">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                                        <p className="text-sm text-neutral-500 dark:text-neutral-400">{user.roles.map(role => role.charAt(0).toUpperCase() + role.slice(1)).join(', ')}</p>
                                     </div>
                                 </NavLink>
                                 {user && (
                                     <>
                                         <div className="border-t border-neutral-200 dark:border-neutral-800 my-2" />
-                                        {(user.role === 'editor' || user.role === 'admin') && (
+                                        {(user.roles.includes('admin') || user.roles.includes('editor')) && (
                                             <NavLink
                                                 to="/editor"
                                                 className="block px-4 py-2 text-sm font-semibold text-neutral-900 dark:text-white hover:bg-black/20"
@@ -101,7 +101,7 @@ function MobileNavbar({
                                                 Editor Dash
                                             </NavLink>
                                         )}
-                                        {user.role === 'admin' && (
+                                        {user.roles.includes('admin') && (
                                             <NavLink
                                                 to="/admin"
                                                 className="block px-4 py-2 text-sm font-semibold text-neutral-900 dark:text-white hover:bg-black/20"
@@ -110,7 +110,7 @@ function MobileNavbar({
                                                 Admin Dash
                                             </NavLink>
                                         )}
-                                        {(user.role === 'clipteam' || user.role === 'admin') && (
+                                        {(user.roles.includes('admin') || user.roles.includes('clipteam')) && (
                                             <NavLink
                                                 to="/stats"
                                                 className="relative block px-4 py-2 text-sm text-neutral-900 dark:text-white hover:bg-black/20"

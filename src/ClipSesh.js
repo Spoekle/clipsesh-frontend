@@ -12,6 +12,9 @@ import PrivacyStatement from './pages/PrivacyStatement';
 import ProfilePage from './pages/ProfilePage';
 import Stats from './pages/Stats';
 import background from './media/background.jpg';
+import apiUrl from './config/config';
+require('./config/config');
+
 
 function ClipSesh() {
   const [user, setUser] = useState(null);
@@ -31,7 +34,7 @@ function ClipSesh() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('https://api.spoekle.com/api/users/me', {
+          const response = await axios.get(`${apiUrl}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(response.data);
@@ -82,15 +85,15 @@ function ClipSesh() {
       return <Navigate to="/clips" replace state={{ alert: "You must be logged in to view this page." }} />;
     }
 
-    if (isAdminRequired && user.role !== 'admin') {
+    if (isAdminRequired && !user.roles.includes('admin')) {
       return <Navigate to="/clips" replace state={{ alert: "You must have admin rights to do this!" }} />;
     }
 
-    if (isEditorRequired && user.role !== 'admin' && user.role !== 'editor') {
-      return <Navigate to="/clips" replace state={{ alert: "You must have verified rights to do this!" }} />;
+    if (isEditorRequired && !(user.roles.includes('admin') || user.roles.includes('editor'))) {
+      return <Navigate to="/clips" replace state={{ alert: "You must have editor rights to do this!" }} />;
     }
 
-    if (isVerifiedRequired && user.role !== 'admin' && user.role !== 'clipteam') {
+    if (isVerifiedRequired && !(user.roles.includes('admin') || user.roles.includes('clipteam'))) {
       return <Navigate to="/clips" replace state={{ alert: "You must have verified rights to do this!" }} />;
     }
 

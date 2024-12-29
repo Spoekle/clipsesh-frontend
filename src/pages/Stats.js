@@ -4,6 +4,7 @@ import axios from 'axios';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import LoadingBar from 'react-top-loading-bar';
 import RatedClips from './components/clipViewer/RatedClips';
+import apiUrl from '../config/config';
 
 function Stats({ user }) {
   const [progress, setProgress] = useState(0);
@@ -29,12 +30,12 @@ function Stats({ user }) {
 
   const fetchClipsAndRatings = async () => {
     try {
-      const clipResponse = await axios.get('https://api.spoekle.com/api/clips');
+      const clipResponse = await axios.get(`${apiUrl}/api/clips`);
       setClips(clipResponse.data);
       const token = localStorage.getItem('token');
       if (token) {
         const ratingPromises = clipResponse.data.map(clip =>
-          axios.get(`https://api.spoekle.com/api/ratings/${clip._id}`, {
+          axios.get(`${apiUrl}/api/ratings/${clip._id}`, {
             headers: { Authorization: `Bearer ${token}` }
           })
         );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
+import apiUrl from '../config/config';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
@@ -61,7 +62,7 @@ function AdminDash() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('https://api.spoekle.com/api/users', {
+      const response = await axios.get(`${apiUrl}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const everyUser = response.data;
@@ -71,13 +72,13 @@ function AdminDash() {
       const activeUsers = everyUser.filter(user => user.status === 'active');
       setAllActiveUsers(activeUsers);
 
-      // Further filter users based on roles
-      setUsers(activeUsers.filter(user => user.role === 'user'));
-      setOtherRoles(activeUsers.filter(user => user.role !== 'user'));
-      setAdmins(activeUsers.filter(user => user.role === 'admin'));
-      setClipTeam(activeUsers.filter(user => user.role === 'clipteam'));
-      setEditors(activeUsers.filter(user => user.role === 'editor'));
-      setUploader(activeUsers.filter(user => user.role === 'uploader'));
+      // Further filter users based on roles array
+      setUsers(activeUsers.filter(user => user.roles.includes('user')));
+      setOtherRoles(activeUsers.filter(user => !user.roles.includes('user')));
+      setAdmins(activeUsers.filter(user => user.roles.includes('admin')));
+      setClipTeam(activeUsers.filter(user => user.roles.includes('clipteam')));
+      setEditors(activeUsers.filter(user => user.roles.includes('editor')));
+      setUploader(activeUsers.filter(user => user.roles.includes('uploader')));
       setDisabledUsers(everyUser.filter(user => user.status === 'disabled'));
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -91,7 +92,7 @@ function AdminDash() {
   const handleApproveUser = async (userId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('https://api.spoekle.com/api/users/approve', { userId }, {
+      await axios.post(`${apiUrl}/api/users/approve`, { userId }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDisabledUsers(disabledUsers.filter(user => user._id !== userId));
@@ -103,7 +104,7 @@ function AdminDash() {
 
   const fetchConfig = async () => {
     try {
-      const response = await axios.get('https://api.spoekle.com/api/admin/config',);
+      const response = await axios.get(`${apiUrl}/api/admin/config`,);
 
       if (response) {
         setConfig(response.data[0]);
@@ -116,13 +117,13 @@ function AdminDash() {
 
   const fetchClipsAndRatings = async () => {
     try {
-      const clipResponse = await axios.get('https://api.spoekle.com/api/clips');
+      const clipResponse = await axios.get(`${apiUrl}/api/clips`);
       setClips(clipResponse.data);
       setProgress(65);
       const token = localStorage.getItem('token');
       if (token) {
         const ratingPromises = clipResponse.data.map(clip =>
-          axios.get(`https://api.spoekle.com/api/ratings/${clip._id}`, {
+          axios.get(`${apiUrl}/api/ratings/${clip._id}`, {
             headers: { Authorization: `Bearer ${token}` }
           })
         );
@@ -156,7 +157,7 @@ function AdminDash() {
     const userRatingCount = {};
 
     [...clipTeam, ...admins]
-      .filter(user => user.username !== 'UploadBot' && !['editor', 'uploader'].includes(user.role))
+      .filter(user => user.username !== 'UploadBot' && !['editor', 'uploader'].includes(user.roles))
       .forEach(user => {
         userRatingCount[user.username] = { '1': 0, '2': 0, '3': 0, '4': 0, 'deny': 0, total: 0, percentageRated: 0 };
       });
@@ -217,7 +218,7 @@ function AdminDash() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post('https://api.spoekle.com/api/admin/create-user', { ...formData, status: 'active' }, {
+      await axios.post(`${apiUrl}/api/admin/create-user`, { ...formData, status: 'active' }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('User created successfully');
@@ -241,7 +242,7 @@ function AdminDash() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.put('https://api.spoekle.com/api/admin/config', config, {
+      await axios.put(`${apiUrl}/api/admin/config`, config, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Config updated successfully');
@@ -258,7 +259,7 @@ function AdminDash() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`https://api.spoekle.com/api/users/${id}`, {
+      await axios.delete(`${apiUrl}/api/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(allUsers.filter(user => user._id !== id));
@@ -296,7 +297,7 @@ function AdminDash() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('https://api.spoekle.com/api/upload-clips-zip', formData, {
+      await axios.post(`${apiUrl}/api/zips/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`
@@ -328,7 +329,7 @@ function AdminDash() {
     });
 
     try {
-      const response = await axios.post('https://api.spoekle.com/download-clips-zip', {
+      const response = await axios.post(`${apiUrl}/zips/download`, {
         clips: filteredClips.map(clip => {
           const ratingData = ratings[clip._id];
           const mostChosenRating = ratingData.ratingCounts.reduce((max, rateData) =>
@@ -362,7 +363,7 @@ function AdminDash() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete('https://api.spoekle.com/api/clips', {
+      await axios.delete(`${apiUrl}/api/clips`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchClipsAndRatings();
@@ -479,13 +480,13 @@ function AdminDash() {
             <div className="">
               <h3 className="text-2xl font-bold mb-4">User Stats</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {userRatings && [...clipTeam, ...admins]
+                {userRatings && [...clipTeam]
                   .map(user => {
                     const userRating = userRatings.find(rating => rating.username === user.username) || { '1': 0, '2': 0, '3': 0, '4': 0, 'deny': 0, total: 0 };
                     const percentageRated = ((userRating.total / seasonInfo.clipAmount) * 100).toFixed(2);
                     return { ...user, ...userRating, percentageRated, total: Number(userRating.total) };
                   })
-                  .filter(user => !['editor', 'uploader'].includes(user.role))
+                  .filter(user => !['editor', 'uploader'].includes(user.roles))
                   .sort((a, b) => b.total - a.total)
                   .map(user => (
                     <div key={user.username} className="p-4 bg-neutral-400 dark:bg-neutral-700 text-neutral-900 dark:text-white transition duration-200 rounded-md">

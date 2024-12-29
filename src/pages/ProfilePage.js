@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
+import apiUrl from '../config/config';
 import axios from 'axios';
 
 function ProfilePage({ user, setUser }) {
@@ -18,7 +19,7 @@ function ProfilePage({ user, setUser }) {
     formData.append('profilePicture', profilePicture);
 
     try {
-      const response = await axios.post('https://api.spoekle.com/api/users/uploadProfilePicture', formData, {
+      const response = await axios.post(`${apiUrl}/api/users/uploadProfilePicture`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -41,7 +42,7 @@ function ProfilePage({ user, setUser }) {
     if (password) updateData.password = password;
 
     try {
-      const response = await axios.put(`https://api.spoekle.com/api/users/${user._id}`, updateData, {
+      const response = await axios.put(`${apiUrl}/api/users/${user._id}`, updateData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -58,11 +59,11 @@ function ProfilePage({ user, setUser }) {
   };
 
   const linkDiscordAccount = () => {
-    window.location.href = `https://api.spoekle.com/api/discord/auth?siteUserId=${user._id}`;
+    window.location.href = `${apiUrl}/api/discord/auth?siteUserId=${user._id}`;
   };
 
   const unlinkDiscordAccount = () => {
-    const response = axios.put(`https://api.spoekle.com/api/users/${user._id}`, { discordId: "", discordUsername: "" }, {
+    const response = axios.put(`${apiUrl}/api/users/${user._id}`, { discordId: "", discordUsername: "" }, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
