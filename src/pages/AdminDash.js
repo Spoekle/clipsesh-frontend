@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import apiUrl from '../config/config';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 import { BiLoaderCircle } from 'react-icons/bi';
 import LoadingBar from 'react-top-loading-bar';
 import background from '../media/admin.jpg';
-import { FaDiscord, FaCheck, FaTimes, FaArrowUp, FaArrowDown } from "react-icons/fa";
-import { Link, useLocation } from 'react-router-dom';
+import { FaDiscord } from "react-icons/fa";
+import { useLocation } from 'react-router-dom';
 import DeniedClips from './components/adminDash/DeniedClips';
 import UserList from './components/adminDash/UserList';
+import Statistics from './components/adminDash/Statistics';
+import CreateUser from './components/adminDash/CreateUser';
 
 function AdminDash() {
   const [allUsers, setAllUsers] = useState([]);
@@ -22,11 +23,6 @@ function AdminDash() {
   const [editors, setEditors] = useState([]);
   const [uploader, setUploader] = useState([]);
   const [editUser, setEditUser] = useState(null);
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    role: 'user'
-  });
   const [disabledUsers, setDisabledUsers] = useState([]);
   const [config, setConfig] = useState({ denyThreshold: 5, latestVideoLink: '' });
   const [clips, setClips] = useState([]);
@@ -36,6 +32,7 @@ function AdminDash() {
   const [progress, setProgress] = useState(0);
   const [userRatings, setUserRatings] = useState([]);
   const [seasonInfo, setSeasonInfo] = useState({});
+  const AVAILABLE_ROLES = ['user', 'admin', 'clipteam', 'editor', 'uploader'];
 
   const location = useLocation();
 
@@ -141,7 +138,6 @@ function AdminDash() {
     }
   };
 
-  //get the count of denied clips
   const deniedClips = clips.filter(clip => {
     const ratingData = ratings[clip._id];
     return ratingData && ratingData.ratingCounts.some(rateData => rateData.rating === 'deny' && rateData.count >= config.denyThreshold);
@@ -171,16 +167,13 @@ function AdminDash() {
     Object.keys(ratings).forEach(clipId => {
       const clipRatingCounts = ratings[clipId].ratingCounts;
 
-      // Check if clipRatingCounts is an array
       if (!Array.isArray(clipRatingCounts)) {
         console.error(`clipRatingCounts for Clip ID ${clipId} is not an array:`, clipRatingCounts);
         return;
       }
 
-      // Loop through each rating count entry in the array
       clipRatingCounts.forEach(ratingData => {
         if (ratingData.users && ratingData.users.length > 0) {
-          // Iterate over the users who rated this clip
           ratingData.users.forEach(user => {
             if (userRatingCount[user.username]) {
               if (userRatingCount[user.username][ratingData.rating] !== undefined) {
@@ -194,40 +187,14 @@ function AdminDash() {
       });
     });
 
-    // Convert userRatingCount object into an array of objects with username and rating counts
     const userRatingCounts = Object.keys(userRatingCount).map(username => ({
       username,
       ...userRatingCount[username]
     }));
 
-    // Sort userRatingCounts by total count in descending order
     userRatingCounts.sort((a, b) => b.total - a.total);
 
     setUserRatings(userRatingCounts);
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post(`${apiUrl}/api/admin/create-user`, { ...formData, status: 'active' }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('User created successfully');
-      setFormData({ username: '', password: '', role: 'user' });
-      fetchUsers();
-    } catch (error) {
-      console.error('Error creating user:', error);
-      alert('Failed to create user. Please try again.');
-    }
   };
 
   const handleConfigChange = (e) => {
@@ -270,7 +237,6 @@ function AdminDash() {
       alert('Failed to delete user. Please try again.');
     }
   };
-
 
   const getCurrentDate = () => {
     const date = new Date();
@@ -373,14 +339,6 @@ function AdminDash() {
     }
   };
 
-  const toggleEditUser = (user) => {
-    if (editUser && editUser._id === user._id) {
-      setEditUser(null);
-    } else {
-      setEditUser(user);
-    }
-  };
-
   const getSeason = () => {
     const currentDate = new Date().toLocaleDateString();
     let season = '';
@@ -399,27 +357,6 @@ function AdminDash() {
       ...prevSeasonInfo,
       season
     }));
-  };
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="custom-tooltip bg-neutral-700 p-4 rounded-md drop-shadow-lg">
-          <p className="text-lg font-bold">{`${payload[0].payload.username}`}</p>
-          <p className="text-sm">{`Clips Rated: ${payload[0].value}`}</p>
-          <p className="text-sm">{`Percentage Rated: ${((payload[0].value / seasonInfo.clipAmount) * 100).toFixed(2)}%`}</p>
-          <div className="grid grid-cols-2 w-full rounded-md p-2 mt-2 bg-black/20 justify-center">
-            <p className="text-sm text-center">{`Rated 1: ${payload[1].value}`}</p>
-            <p className="text-sm text-center">{`Rated 2: ${payload[2].value}`}</p>
-            <p className="text-sm text-center">{`Rated 3: ${payload[3].value}`}</p>
-            <p className="text-sm text-center">{`Rated 4: ${payload[4].value}`}</p>
-            <p className="col-span-2 text-sm text-center text-red-600">{`Denied: ${payload[5].value}`}</p>
-          </div>
-        </div>
-      );
-    }
-
-    return null;
   };
 
   return (
@@ -460,101 +397,19 @@ function AdminDash() {
             </div>
           </div>
 
-          <div className="w-full p-8 mt-8 bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 rounded-md shadow-md animate-fade animate-delay-100">
-            <h2 className="text-3xl font-bold mb-4">User Performance</h2>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={userRatings} margin={{ top: 20, right: 10, left: 10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="username" />
-                <YAxis />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Bar name="Total Rated" dataKey="total" fill="#237aeb" />
-                <Bar name="Rated 1" dataKey="1" fill="#32d14d" />
-                <Bar name="Rated 2" dataKey="2" fill="#e6db10" />
-                <Bar name="Rated 3" dataKey="3" fill="#e6a910" />
-                <Bar name="Rated 4" dataKey="4" fill="#eb8723" />
-                <Bar name="Denied" dataKey="deny" fill="#e64040" />
-              </BarChart>
-            </ResponsiveContainer>
-            <div className="">
-              <h3 className="text-2xl font-bold mb-4">User Stats</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {userRatings && [...clipTeam]
-                  .map(user => {
-                    const userRating = userRatings.find(rating => rating.username === user.username) || { '1': 0, '2': 0, '3': 0, '4': 0, 'deny': 0, total: 0 };
-                    const percentageRated = ((userRating.total / seasonInfo.clipAmount) * 100).toFixed(2);
-                    return { ...user, ...userRating, percentageRated, total: Number(userRating.total) };
-                  })
-                  .filter(user => !['editor', 'uploader'].includes(user.roles))
-                  .sort((a, b) => b.total - a.total)
-                  .map(user => (
-                    <div key={user.username} className="p-4 bg-neutral-400 dark:bg-neutral-700 text-neutral-900 dark:text-white transition duration-200 rounded-md">
-                      <div className="flex justify-between items-center">
-                        <h4 className="text-lg font-semibold mb-2">{user.username}</h4>
-                        <p className={`text-md px-2 py-1 rounded-lg ${user.percentageRated > 20 ? 'bg-green-600' : 'bg-red-600'} origin-top`}>{user.percentageRated > 20 ? <FaCheck /> : <FaTimes />}</p>
-                      </div>
-                      <p className="text-sm">Clips Rated: {user.total}</p>
-                      <p className="text-sm">Percentage Rated: {user.percentageRated}%</p>
-                      <p className="text-sm">Denied: {user.deny}</p>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
+          <Statistics
+            clipTeam={clipTeam}
+            userRatings={userRatings}
+            seasonInfo={seasonInfo}
+          />
 
           <div className="grid mt-8 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 w-full">
-            <div className="col-span-1 min-w-full w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-200">
-              <h2 className="text-3xl font-bold mb-4">Create User</h2>
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label htmlFor="username" className="block text-neutral-900 dark:text-gray-300">Username:</label>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-200 dark:focus:bg-neutral-700"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="password" className="block text-neutral-900 dark:text-gray-300">Password:</label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-200 dark:focus:bg-neutral-700"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="role" className="block text-neutral-900 dark:text-gray-300">Role:</label>
-                  <select
-                    id="role"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-200 dark:focus:bg-neutral-700"
-                  >
-                    <option value="user">User</option>
-                    <option value="clipteam">Clip Team</option>
-                    <option value="editor">Editor</option>
-                    <option value="uploader">Uploader</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md focus:outline-none focus:bg-blue-600"
-                >
-                  Create User
-                </button>
-              </form>
-            </div>
+
+            <CreateUser
+              fetchUsers={fetchUsers}
+              AVAILABLE_ROLES={AVAILABLE_ROLES}
+              apiUrl={apiUrl}
+            />
 
             <div className="col-span-1 min-w-full w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-300">
               <h2 className="text-3xl font-bold mb-4">Disabled users</h2>
@@ -609,6 +464,7 @@ function AdminDash() {
               fetchUsers={fetchUsers}
               disabledUsers={disabledUsers}
               setDisabledUsers={setDisabledUsers}
+              AVAILABLE_ROLES={AVAILABLE_ROLES}
             />
 
             <div className="col-span-1 w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-900 dark:text-white transition duration-200 p-8 rounded-md shadow-md animate-fade animate-delay-500">

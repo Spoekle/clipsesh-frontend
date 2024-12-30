@@ -13,7 +13,6 @@ import ProfilePage from './pages/ProfilePage';
 import Stats from './pages/Stats';
 import background from './media/background.jpg';
 import apiUrl from './config/config';
-require('./config/config');
 
 
 function ClipSesh() {
@@ -42,7 +41,7 @@ function ClipSesh() {
           console.error('Error fetching user:', error);
         }
       }
-      setLoading(false); // Set loading to false after fetching user data
+      setLoading(false);
     };
 
     extractTokenFromURL();
@@ -55,15 +54,15 @@ function ClipSesh() {
 
     useEffect(() => {
       const timer = setTimeout(() => {
-        setShowLoadingScreen(false); // Hide loading screen after 1 second
+        setShowLoadingScreen(false);
       }, 500);
 
-      return () => clearTimeout(timer); // Cleanup timeout on unmount
+      return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {
       if (!loading) {
-        setLoading(false); // Set loading to false after checking authentication
+        setLoading(false);
       }
     }, [loading]);
 

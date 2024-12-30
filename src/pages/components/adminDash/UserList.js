@@ -3,13 +3,13 @@ import { apiUrl } from '../../../config/config';
 import { FaDiscord } from 'react-icons/fa';
 import axios from 'axios';
 
-const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disabledUsers, setDisabledUsers }) => {
+const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disabledUsers, setDisabledUsers, AVAILABLE_ROLES }) => {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [editUser, setEditUser] = useState(null);
   const usersPerPage = 15;
-  const AVAILABLE_ROLES = ['user', 'admin', 'clipteam', 'editor', 'uploader'];
+  
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -28,6 +28,7 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
       setEditUser({ ...user, roles: user.roles || ['user'] });
     }
   };
+
 
   const handleEditChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -118,7 +119,7 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
             className="px-3 py-2 bg-white dark:bg-neutral-900 dark:text-white text-neutral-900 rounded-md focus:outline-none focus:bg-neutral-200 dark:focus:bg-neutral-700"
           >
             <option value="all">All Users</option>
-            {AVAILABLE_ROLES.map(role => (
+            {[...AVAILABLE_ROLES].sort().map(role => (
               <option key={role} value={role}>{role.charAt(0).toUpperCase() + role.slice(1)}</option>
             ))}
           </select>
@@ -148,7 +149,7 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
                   <p className="flex items-center text-white">{user.username}
                     <FaDiscord className="ml-2" style={{ color: user.discordId ? '#7289da' : '#747f8d' }} />
                   </p>
-                  <p className="text-neutral-300">{user.roles.map(role => role.charAt(0).toUpperCase() + role.slice(1)).join(', ')}</p>
+                  <p className="text-neutral-300">{[...user.roles].sort().map(role => role.charAt(0).toUpperCase() + role.slice(1)).join(', ')}</p>
                 </div>
                 <div className="flex flex-col justify-end items-end space-y-2">
                   <button
@@ -194,7 +195,7 @@ const UserList = ({ users, admins, clipTeam, editors, uploader, fetchUsers, disa
                       </div>
                       <div className="mb-4">
                         <span className="block text-gray-300">Roles:</span>
-                        {AVAILABLE_ROLES.map(role => (
+                        {[...AVAILABLE_ROLES].sort().map(role => (
                           <label key={role} className="inline-flex items-center">
                             <input
                               type="checkbox"
